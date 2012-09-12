@@ -7,6 +7,7 @@ import javax.servlet.ServletResponse
 import javax.servlet.ServletRequest
 import javax.servlet.Filter
 import javax.servlet.FilterChain
+import java.util.regex.Matcher
 
 import org.microsauce.gravy.app.*
 import org.microsauce.gravy.server.util.ServerUtils
@@ -14,31 +15,34 @@ import groovy.transform.CompileStatic
 
 class RouteChain implements FilterChain {
 
-	def routes
-	def currentPosition = 0
-	def serverChain
+	List<Route> routes
+	Integer currentPosition = 0
+	FilterChain serverChain
 
 	RouteChain(serverChain, routes) {
 		this.serverChain = serverChain
 		this.routes = routes
 	}
 
+	@CompileStatic
 	void doFilter(ServletRequest req, ServletResponse res) {
 		if (currentPosition >= routes.size())
 			// finish up with the 'native' filter 
-			serverChain.doFilter(req, res) // TODO not entirely sure this will work
+			serverChain.doFilter(req, res) 
 		else {
-			def route = routes[currentPosition++]
+			Route route = routes[currentPosition++]
 			bindAndRouteRequest(route, req, res)
 		}
 	}
 
-	def bindAndRouteRequest(route, req, res) {
-		def requestUri = req.requestURI
+	private void bindAndRouteRequest(Route route, ServletRequest req, ServletResponse res) {
+		HttpServletRequest request = (HttpServletRequest)req		
+		String requestUri = request.requestURI
+		String method = request.method.toLowerCase()
 
-		def matches =  requestUri =~ route.uriPattern
-		def binding = [:]
-		def ndx = 1
+		Matcher matches =  requestUri =~ route.uriPattern
+		Map binding = [:]
+		Integer ndx = 1
 		route.params.each { param ->
 			binding[param] = matches[0][ndx++]
 		}
@@ -46,12 +50,10 @@ class RouteChain implements FilterChain {
 		binding.route = route.uriPattern.toString()
 		binding.controller = null
 		binding.chain = this
-		binding << ServerUtils.buildContext(req, res, route.binding)
+		binding << ServerUtils.buildContext(request, (HttpServletResponse)res, route.binding)
 
-		def action = route.action
-//		action.delegate = binding as Binding
-//		action.resolveStrategy = Closure.DELEGATE_FIRST
-		ActionUtils.call(action, binding) //action.call()
+		Closure action = route.getAction(method)
+		ActionUtils.call(action, binding) 
 		res.writer.flush()
 	}
 }

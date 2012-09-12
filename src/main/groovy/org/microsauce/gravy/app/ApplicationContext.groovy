@@ -104,6 +104,26 @@ class ApplicationContext extends ConfigObject {
 		this
 	}
 
+	def route(String route) {
+		def routeData = parseRoute(route)
+		
+		def dipatches = EnumSet.of(DispatcherType.REQUEST) 
+		def thisRoute = new Route([uriPattern: routeData.uriPattern, params: routeData.params, action: null, binding: null, dispatch: dipatches])
+		routes << thisRoute
+
+		thisRoute
+	}
+
+	def route(String route, List dispatch) {
+		def routeData = parseRoute(route)
+		
+		def dipatches = EnumSet.copyOf(dispatch) 
+		def thisRoute = new Route([uriPattern: routeData.uriPattern, params: routeData.params, action: null, binding: null, dispatch: dipatches])
+		routes << thisRoute
+
+		thisRoute
+	}
+
 	def route(String route, Class binding, Closure action) {
 		def routeData = parseRoute(route)
 		def dipatches = EnumSet.of(DispatcherType.REQUEST)
