@@ -17,14 +17,14 @@ class Lifecycle {
 		System.setProperty('includeantruntime', 'false')
 
 		basedir = System.getProperty('user.dir')
+
 		def sysEnv = System.getenv()
 		gravyHome = sysEnv['GRAVY_HOME']
 		if (!gravyHome) {
 			println 'BUILD FAILED: please set your GRAVY_HOME environment variable.'
 			System.exit(1)
 		}
-		def tokenizedPath = basedir.split(String.valueOf(File.separatorChar))
-		appName = tokenizedPath[tokenizedPath.length-1]
+		appName = new File(basedir).name
 
 		ant = new AntBuilder()
 	}
