@@ -1,0 +1,31 @@
+package org.microsauce.gravy.server.runtime
+
+import com.caucho.resin.*
+
+class ResinWrapper extends ServerWrapper {
+
+	def server
+
+	ResinWrapper(config) {
+		super(config)
+	}
+
+	void initialize(String host, int port) {
+
+    	ResinEmbed server = new ResinEmbed()
+    	server.rootDirectory = System.getProperty("java.io.tmpdir")
+		HttpEmbed http = new HttpEmbed(config.resin.port)
+		server.addPort(http)
+		WebAppEmbed webApp = new WebAppEmbed(config.contextPath, config.resin.webroot)
+		server.addWebApp(webApp)
+	}
+
+	void start() {
+		server.start()
+		server.join()
+	}
+
+	void stop() {
+		server.destroy()
+	}
+}

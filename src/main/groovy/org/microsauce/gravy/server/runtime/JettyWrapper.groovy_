@@ -1,0 +1,82 @@
+package org.microsauce.gravy.server.runtime
+
+import org.eclipse.jetty.server.Server
+import org.eclipse.jetty.server.Connector
+import org.eclipse.jetty.server.nio.SelectChannelConnector
+import org.eclipse.jetty.server.ssl.SslSelectChannelConnector
+import org.eclipse.jetty.webapp.WebAppContext
+import org.eclipse.jetty.servlet.FilterHolder
+import org.eclipse.jetty.server.Handler
+import org.eclipse.jetty.server.handler.HandlerList
+import org.eclipse.jetty.servlet.ServletContextHandler
+import org.eclipse.jetty.servlet.ServletHolder
+import groovy.util.logging.Log4j
+
+@Log4j
+class JettyWrapper extends ServerWrapper {
+
+	def private server
+
+	JettyWrapper(Map config) {
+		super(config)
+	}
+
+	void initialize(String host, int port) {
+		log.info 'initializing embedded jetty'
+		server = new Server()
+
+        def connector0 = new SelectChannelConnector()
+        connector0.host = host
+		connector0.port = port
+        connector0.maxIdleTime = 30000   		// TODO ?? expose in env ??
+        connector0.requestHeaderSize = 8192 	// TODO ?? expose in env ??
+        server.addConnector(connector0)
+        if ( config.jetty.ssl.keyStorePassword && config.jetty.ssl.keyManagerPassword )
+			server.addConnector( sslConnector() )
+
+		// configure servlets
+		def handler = new ServletContextHandler(ServletContextHandler.SESSIONS)
+		handler.contextPath = config.jetty.contextPath ?: '/'
+		handler.resourceBase = config.appRoot+config.jetty.webroot 
+	
+		servlets.each { sWrapper ->
+			handler.addServlet( new ServletHolder(sWrapper.servlet), sWrapper.mapping )
+		}
+		filters.each { fWrapper ->
+			handler.addFilter(new FilterHolder(fWrapper.filter), 
+				fWrapper.mapping, fWrapper.dispatch == null ? ServerWrapper.DEFAULT : fWrapper.dispatch)
+		}
+
+		handler.addServlet(org.eclipse.jetty.servlet.DefaultServlet, '/')
+
+		WebAppContext webApp = new WebAppContext()
+		webApp.setContextPath(config.jetty.contextPath ?: '/')
+		webApp.setWar(config.appRoot+config.jetty.webroot)
+
+		def handlers = new HandlerList()
+		handlers.setHandlers([handler, webApp] as Handler[])
+		server.setHandler(handlers)
+	}
+
+	void start() {
+		server.start()
+		server.join()
+	}
+
+	void stop() {
+		server.stop()
+	}
+
+	def private sslConnector() {
+		log.info "adding ssl connector on port ${config.jetty.ssl.port}"
+	    def sslConnector = new SslSelectChannelConnector();
+	    sslConnector.port = config.jetty.ssl.port
+	    def cf = sslConnector.sslContextFactory
+	    cf.setKeyStore(config.jetty.ssl.keystore)
+	    cf.setKeyStorePassword(config.jetty.ssl.keyStorePassword)
+	    cf.setKeyManagerPassword(config.jetty.ssl.keyManagerPassword)
+
+	    sslConnector
+	}
+
+}

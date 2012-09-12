@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project default="jar" name="gravy" basedir=".">
+	<property name="env" value="local"/>
+	<property environment='env' />
+	<property file="${conf.env.dir}/application.properties"/>
+
+	<!-- classpath needed to compile and build the application -->
+	<path id="build.classpath">
+		<fileset dir="lib">
+			<include name="**/*.jar"/>
+		</fileset>
+		<fileset dir="${env.GROOVY_HOME}/lib">
+			<include name="**/*.jar"/>
+		</fileset>
+		<pathelement path="${basedir}/target/classes" />
+	</path>
+
+	<target name="init" depends="clean">
+		<mkdir dir="${basedir}/target/classes" />
+	</target>
+
+	<target name="compileGroovy" depends="init,compileJava"
+			description="Compile Groovy sources">
+
+		<taskdef name="groovyc" classname="org.codehaus.groovy.ant.Groovyc">
+			<classpath refid="build.classpath"/>
+		</taskdef>
+
+		<groovyc destdir="${basedir}/target/classes" srcdir="${basedir}/src/main/groovy" listfiles="true">
+			<classpath refid="build.classpath"/>
+		</groovyc>
+	</target>
+
+	<target name="compileJava" depends="init"
+			description="Compile ava sources">
+		<javac destdir="${basedir}/target/classes"
+				classpathref="build.classpath" deprecation="off" >
+			<src path="${basedir}/src/main/java"/>
+		</javac>
+	</target>
+
+	<target name="jar" depends="compileGroovy,compileJava"> 
+		<jar destfile="${basedir}/lib/gravy.jar"
+			basedir="${basedir}/target/classes" />
+	</target>
+
+	<target name="clean" description="Deletes all build artifacts.">
+		<delete dir="${basedir}/target/classes" failonerror="false"/>
+		<delete file="${basedir}/lib/gravy.jar" failonerror="false"/>
+	</target>
+</project>
