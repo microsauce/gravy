@@ -10,9 +10,6 @@
 		<fileset dir="lib">
 			<include name="**/*.jar"/>
 		</fileset>
-		<fileset dir="${env.GROOVY_HOME}/lib">
-			<include name="**/*.jar"/>
-		</fileset>
 		<pathelement path="${basedir}/target/classes" />
 	</path>
 
