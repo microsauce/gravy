@@ -1,6 +1,15 @@
 
 @echo off
 
+IF "%GRAVY_HOME%"==""  (
+	echo GRAVY_HOME is not defined
+	goto:eof
+)
+IF "%JAVA_HOME%"==""  (
+	echo GRAVY_HOME is not defined
+	goto:eof
+)
+
 setLocal EnableDelayedExpansion
 set cp=
 for /R %GRAVY_HOME%/lib/groovy %%a in (*.jar) do (
