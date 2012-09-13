@@ -32,7 +32,7 @@ class ScriptUtils {
 			if (script.classPathUris)
 				addCpResources(gse.groovyClassLoader, script.classPathUris)
 
-			Object result = gse.run(script.sourceUri, script.binding as Binding)
+			Object result = gse.run(script.source, script.binding as Binding)
 
 			return result
 		}

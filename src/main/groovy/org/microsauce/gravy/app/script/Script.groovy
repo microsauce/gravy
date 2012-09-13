@@ -6,4 +6,8 @@ class Script {
 	List<String> roots = []
 	List<String> classPathUris = []
 	Map binding = [:]
+
+	String getSource() {
+		new File(sourceUri).name
+	}
 }
