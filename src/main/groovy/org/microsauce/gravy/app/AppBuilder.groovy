@@ -7,6 +7,7 @@ import org.codehaus.groovy.control.customizers.ASTTransformationCustomizer
 import groovy.json.JsonBuilder
 import groovy.util.logging.Log4j
 import org.microsauce.gravy.*
+import static com.microsauce.util.PathUtil.*
 
 @Log4j
 class AppBuilder {
@@ -33,8 +34,8 @@ class AppBuilder {
 		//
 		// prepare and execute application.groovy
 		//
-		if (new File("${config.appRoot}/application.groovy").exists()) {
-			Script appScript = new Script([sourceUri:"${config.appRoot}/application.groovy"])
+		if (new File("${config.appRoot}${SLASH}application.groovy").exists()) {
+			Script appScript = new Script([sourceUri:"${config.appRoot}${SLASH}application.groovy"])
 			new ApplicationScriptDecorator(config, applicationContext).decorate(appScript)
 			ScriptUtils.run(appScript, getClassLoader())
 		}
@@ -67,7 +68,7 @@ class AppBuilder {
 	def private getClassLoader() {
 		if ( !classLoader ) {
 			if ( config.gravy.refresh ) 
-				classLoader = new GravyDevModeClassLoader(config.appRoot+'/target/classes')
+				classLoader = new GravyDevModeClassLoader("${config.appRoot}${SLASH}target${SLASH}classes")
 			else
 				classLoader = this.getClass().getClassLoader()
 		}
