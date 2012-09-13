@@ -1,6 +1,7 @@
 package org.microsauce.gravy.app.script
 
 import org.microsauce.gravy.app.*
+import static com.microsauce.util.PathUtil.*
 
 class ModuleScriptDecorator extends ScriptDecorator {
 
@@ -14,12 +15,12 @@ class ModuleScriptDecorator extends ScriptDecorator {
 		extractModule script.name
 
 		def (moduleFolder, moduleUri) = getModuleFolder(script.name, config.appRoot)
-		script.sourceUri = moduleUri+'/module.groovy'
+		script.sourceUri = moduleUri+"${SLASH}module.groovy"
 		if (moduleFolder.exists()) {
 			script.roots << moduleUri
-			script.roots << moduleUri+'/scripts'
+			script.roots << moduleUri+"${SLASH}scripts"
 
-			def libFolderUri = moduleUri+'/lib'
+			def libFolderUri = moduleUri+"${SLASH}lib"
 			def libFolder = new File(libFolderUri)
 
 			if (libFolder.exists()) {
@@ -27,7 +28,7 @@ class ModuleScriptDecorator extends ScriptDecorator {
 					script.classPathUris << file.absolutePath
 				}
 			}
-			def classesFolderUri = moduleUri+'/classes'
+			def classesFolderUri = moduleUri+"${SLASH}classes"
 			def classesFolder = new File(classesFolderUri)
 			if (classesFolder.exists()) {
 				script.classPathUris << classesFolder.absolutePath
@@ -45,7 +46,7 @@ class ModuleScriptDecorator extends ScriptDecorator {
 	}
 
 	def private extractModule(modName) {
-		def modPath = "${config.appRoot}/modules/${modName}"
+		def modPath = "${config.appRoot}${SLASH}modules${SLASH}${modName}"
 		def modFile = new File(modPath)
 		def modJarPath = modPath+'.jar'
 		def modJar = new File(modJarPath)
@@ -62,11 +63,11 @@ class ModuleScriptDecorator extends ScriptDecorator {
 	}
 
 	def getModuleFolder(moduleName, appRoot) {
-		def moduleUri = appRoot+'/modules/'+moduleName
+		def moduleUri = "${appRoot}${SLASH}modules${SLASH}$moduleName"
 		def moduleFolder = new File(moduleUri)
 		if (moduleFolder.exists()) return [moduleFolder, moduleUri]
 		else {
-			moduleUri = System.getenv()['GRAVY_HOME']+'/modules/'+moduleName 
+			moduleUri = "${System.getenv()['GRAVY_HOME']}${SLASH}modules${SLASH}$moduleName" 
 			return [new File(moduleUri), moduleUri]
 		}
 	}

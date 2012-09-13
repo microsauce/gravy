@@ -1,6 +1,7 @@
 package org.microsauce.gravy.app.script
 
 import org.microsauce.gravy.app.*
+import static com.microsauce.util.PathUtil.*
 
 class ApplicationScriptDecorator extends ScriptDecorator {
 
@@ -8,7 +9,7 @@ class ApplicationScriptDecorator extends ScriptDecorator {
 
 	ApplicationScriptDecorator(ConfigObject config, ApplicationContext app) {
 		super(config, app)
-		roots = ["${config.appRoot}/.","${config.appRoot}/scripts","${config.appRoot}/conf"]
+		roots = ["${config.appRoot}${SLASH}.","${config.appRoot}${SLASH}scripts","${config.appRoot}${SLASH}conf"]
 	}
 
 	void decorate(Script script) {
