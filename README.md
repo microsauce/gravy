@@ -54,16 +54,19 @@ For your infrastructure it's just meat-and-potatoes, but for the developer it's 
 
 2. Set GRAVY_HOME environment variable
 
-3. Set JAVA_HOME environment variable (it must reference a Java 7 JDK)
+3. Add $GRAVY_HOME/bin to your PATH
+
+4. Set JAVA_HOME environment variable (it must reference a Java 7 JDK)
+
 
 ## Quick Start
 ***
 
-Create your app:
+Create an example app:
 
-	$ gravy create-app <app-name>
+	$ gravy create <app-name> example
 
-### App Layout
+This command creates an example application in a folder named <app-name>.  The example application demonstrates many Gravy features.  The application folder layout is as follows:
 
 	<app-name>                   - root application folder
 	    |- application.groovy    - main application script
@@ -73,19 +76,29 @@ Create your app:
 	    |   |   |- groovy
 	    |   |   |_ resources     - additional resources to add to the application 
 	    |   |                      classpath
-	    |   |_ test              - test scripts
+	    |   |_ test 
+	    |       |_ groovy        - test scripts
 	    |- view                  - view templates
-	    |- conf
+	    |- conf                  - configuration (config.groovy)
 	    |- webroot               - static resources and JSPs
-	    |     |_ WEB-INF         
-	    |     |     |_ web.xml   - the application deployment descriptor, for most
-	    |     |                    Gravy apps this file can be ignored
-	    |     |- img
-	    |     |- css
-	    |     |_ js 
-	    |- scripts               - subscripts called by application.groovy              
+	    |   |_ WEB-INF         
+	    |   |     |_ web.xml     - the application deployment descriptor, for most
+	    |   |                      Gravy apps there is no need to edit this file
+	    |   |- img
+	    |   |- css
+	    |   |_ js 
+	    |
+	    |- scripts               - subscripts called by application.groovy
 	    |- modules               - application modules 
 	    |_ lib                   - application jar files
+
+To run your new Gravy app execute the gravy command:
+
+	$ gravy
+
+Point your browser to:
+
+	http://localhost:8080
 
 ### Sample Code
 
@@ -121,20 +134,60 @@ Create your app:
 
 ## The Fundementals
 
+### Building Blocks
+
+#### application.groovy
+
+#### modules
+
+
+
 ### ApplicationContext
 
-The ApplicationContext class is the center piece of the framework.
+The ApplicationContext class is the center-piece of the framework.  Every script, module, java class, and groovy class work together to build a complete service context . . .
+
+app.route(uriPattern)
+
+
 
 ### Script Bindings
 
-In scope in application.groovy, subscripts (the script folder), and module scripts:
+The following objects are bound to application.groovy, subscripts (the script folder), and module scripts:
 
-	app - the appliction context
-	config - the groovy ConfigObject 
-	log - the logger
-	REQUEST -
-	FORWARD -
-	ERROR - 
+	Bound to all scripts:
+	app                     - the appliction context
+	config                  - the groovy ConfigObject 
+	log                     - the logger
+	REQUEST                 - DispatcherType.REQUEST
+	FORWARD                 - DispatcherType.FORWARD
+	ERROR                   - DispatcherType.ERROR
+	run('<script-name>', [optional parameterList])    
+	                        - execute a subscript - scripts folder
+
+	Exclusive to application.groovy:
+	module('mod-name')      - load a module
+ 
+
+For example:
+
+	def orderService = module('orderService')
+	app.route('/order/:id', [REQUEST, FORWARD]).with {
+		get = {
+			log.info "retrieve order id $id"
+			def model = orderService.findOrderById(id)
+			render('/order/edit.html', model)
+		}
+		post = {
+			log.info "update order id $id"
+			def order = req.toObject(Order)
+			orderService.update(order)
+			render('/order/view/html', [order: order])
+		}
+		delete = {
+			log.warn "unsupported operation"
+			forwardMethod('GET')
+		}
+	}
 
 ### Closure (action) Bindings
 
@@ -144,7 +197,7 @@ Routes:
 
 	req - the HttpServletRequest
 	res - the HttpServletResponse
-	out - the HttpServletResponse.printWriter
+	out - HttpServletResponse.writer (PrintWriter)
 	chain - the FilterChain
 
 Controllers:

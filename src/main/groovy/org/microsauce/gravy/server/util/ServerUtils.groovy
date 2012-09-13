@@ -20,9 +20,7 @@ class ServerUtils {
 			def contextName = className.substring(0,1).toLowerCase() + className.substring(1)
 			def classBindingInstance = Mapper.getInstance().bindRequest( classBinding, req )
 
-//			classBindingInstance.metaClass.errors = errors
 			binding[contextName] = classBindingInstance
-//			binding['errors'] = errors
 		}
 
 		binding.req = req

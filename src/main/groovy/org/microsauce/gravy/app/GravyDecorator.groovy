@@ -15,13 +15,19 @@ class GravyDecorator {
 		//
 		// TODO the following Binding.metaClass assignments are a workaround
 		// for GROOVY-5367 (still open as of Groovy 2.0.1/scheduled for 3.0).
-		// When resolved I will add render and forward to the closure binding 
-		// rather than the Binding metaClass.
+		// When resolved I will add render and forward to the closure delagate 
+		// binding rather than the Binding metaClass.
 		//
 		Binding.metaClass.forward = { String uri ->
 			def rd = req.getRequestDispatcher(uri)
 			rd.forward(req, res)
 		}
+		Binding.metaClass.redirect = { String uri ->
+			res.sendRedirect(uri)
+		}
+//		Binding.metaClass.forwardMethod = { String method ->
+//			res.sendRedirect(uri)
+//		}
 		Binding.metaClass.include = { String uri ->
 			def rd = req.getRequestDispatcher(uri)
 			rd.include(req, res)

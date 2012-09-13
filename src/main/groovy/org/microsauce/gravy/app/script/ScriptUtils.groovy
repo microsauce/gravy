@@ -20,10 +20,13 @@ class ScriptUtils {
 			log.info "executing script ${script.sourceUri}"
 			def compConf = compilerConfiguration()
 			GroovyScriptEngine gse
+		
 			if (classloader)
-				gse = new GroovyScriptEngine(script.roots as String[], classloader)
+				gse = new GroovyScriptEngine(
+					standardizeRoots(script.roots) as URL[], classloader)
 			else				
-				gse = new GroovyScriptEngine(script.roots as String[])
+				gse = new GroovyScriptEngine(
+					standardizeRoots(script.roots) as URL[])
 			gse.config = compConf
 
 			if (script.classPathUris)
@@ -38,6 +41,14 @@ class ScriptUtils {
 			all.printStackTrace()
 			return 'error'
 		}
+	}
+
+	private static standardizeRoots(roots) {
+		def standardizeRoots = [] as ArrayList<URL>
+		roots.each { thisFolder ->
+			standardizeRoots << new File(thisFolder).toURI().toURL()
+		}
+		standardizeRoots 
 	}
 
 	def static private addCpResources(classLoader, urls) {
