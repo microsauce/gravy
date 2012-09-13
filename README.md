@@ -32,6 +32,7 @@ For your infrastructure it's just meat-and-potatoes, but for the developer it's 
 		* scaml
 	* JSP/JSTL - the old stand-bye
 * Environment based configuration
+* Integrated build system
 
 ## System Requirements
 ***
@@ -86,34 +87,6 @@ Create your app:
 	    |- modules               - application modules 
 	    |_ lib                   - application jar files
 
-### Script Bindings
-
-In scope in application.groovy, subscripts (the script folder), and module scripts:
-
-	app - the appliction context
-	config - the groovy ConfigObject 
-	log - the logger
-	REQUEST -
-	FORWARD -
-	ERROR - 
-
-### Closure (action) Bindings
-
-All route and controller actions are defined as zero argument closures.  The Gravy runtime binds the following objects to the closure delegate prior to its execution.
-
-Routes:
-
-	req - the HttpServletRequest
-	res - the HttpServletResponse
-	out - the HttpServletResponse.printWriter
-	chain - the FilterChain
-
-Controllers:
-
-	req - the HttpServletRequest
-	res - the HttpServletResponse
-	out - the HttpServletResponse.printWriter
-
 ### Sample Code
 
 #### Define Routes
@@ -144,6 +117,42 @@ Controllers:
 			out << 'Good-bye :('
 		} 
 	}
+
+
+## The Fundementals
+
+### ApplicationContext
+
+The ApplicationContext class is the center piece of the framework.
+
+### Script Bindings
+
+In scope in application.groovy, subscripts (the script folder), and module scripts:
+
+	app - the appliction context
+	config - the groovy ConfigObject 
+	log - the logger
+	REQUEST -
+	FORWARD -
+	ERROR - 
+
+### Closure (action) Bindings
+
+All route and controller actions are defined as zero argument closures.  The Gravy runtime binds the following objects to the closure delegate prior to its execution.
+
+Routes:
+
+	req - the HttpServletRequest
+	res - the HttpServletResponse
+	out - the HttpServletResponse.printWriter
+	chain - the FilterChain
+
+Controllers:
+
+	req - the HttpServletRequest
+	res - the HttpServletResponse
+	out - the HttpServletResponse.printWriter
+
 
 ## Credits:
 * [Groovy](http://groovy.codehaus.org/) - Groovy 2.0.1 script engine
