@@ -274,14 +274,14 @@ class Lifecycle {
 		}
 	}
 
-	void createApp(appName, empty = false) {
+	void createApp(appName, example = false) {
 		if ( appName == null ) {
 			println 'please specify an application name'
 			return
 		}
 
-		def sourceFolder = empty ? 
-			"${gravyHome}/bin/scripts/emptyApp" : "${gravyHome}/bin/scripts/sampleApp"
+		def sourceFolder = example ? 
+			"${gravyHome}/bin/scripts/exampleApp" : "${gravyHome}/bin/scripts/emptyApp"
 
 		// copy app folder to ./${appName}
 		ant.sequential {

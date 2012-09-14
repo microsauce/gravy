@@ -43,9 +43,23 @@ class RouteChain implements FilterChain {
 		Matcher matches =  requestUri =~ route.uriPattern
 		Map binding = [:]
 		Integer ndx = 1
-		route.params.each { param ->
-			binding[param] = matches[0][ndx++]
+		List<String> splat = []
+		if ( route.params.size() > 0 ) {
+			route.params.each { param ->
+				if ( param == '*' )
+					splat << matches[0][ndx++]
+				else
+					binding[param] = matches[0][ndx++]
+			}
+		} else if (matches.groupCount() > 0) {
+			Integer groupCount = matches.groupCount()
+			while (matches.find()) {
+				for (;ndx <= groupCount; ndx++ ) {
+					splat << matches.group(ndx)
+				}
+			}
 		}
+		binding['splat'] = splat
 
 		binding.route = route.uriPattern.toString()
 		binding.controller = null
@@ -53,7 +67,11 @@ class RouteChain implements FilterChain {
 		binding << ServerUtils.buildContext(request, (HttpServletResponse)res, route.binding)
 
 		Closure action = route.getAction(method)
-		ActionUtils.call(action, binding) 
+		List<String> paramList = []
+		if ( action.maximumNumberOfParameters == splat.size() ) 
+			paramList = splat
+
+		ActionUtils.call(action, binding, paramList) 
 		res.writer.flush()
 	}
 }

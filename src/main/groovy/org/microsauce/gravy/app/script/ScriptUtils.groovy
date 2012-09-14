@@ -70,6 +70,7 @@ class ScriptUtils {
 			importCustomizer.addStarImports('javax.servlet')
 			importCustomizer.addStaticStar('groovy.util.logging.Log4j')
 			importCustomizer.addStaticStar('javax.servlet.DispatcherType')
+			importCustomizer.addStaticStar('org.microsauce.gravy.app.ApplicationContext')
 
 			compilerConfiguration = new CompilerConfiguration(CompilerConfiguration.DEFAULT)
 			compilerConfiguration.addCompilationCustomizers(importCustomizer)

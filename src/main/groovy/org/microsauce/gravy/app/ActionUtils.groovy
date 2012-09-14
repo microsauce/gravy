@@ -2,7 +2,10 @@ package org.microsauce.gravy.app
 
 class ActionUtils {
 	static void call(Closure action, Map binding) {
-		cloneAndBind(action, binding).call()
+		call action, binding, []
+	}
+	static void call(Closure action, Map binding, List args) {
+		cloneAndBind(action, binding).call(args)
 	}
 
 	static Closure cloneAndBind(Closure action, Map binding) {

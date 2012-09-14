@@ -48,7 +48,7 @@ if (commandLine.hasOption('create')) {
 		System.exit(0)
 	}
 	def builder = new Lifecycle()
-	builder.createApp(name, commandLine.hasOption('empty'))
+	builder.createApp(name, commandLine.hasOption('example'))
 	System.exit(0)
 }
 if (commandLine.hasOption('jar-mod')) {

@@ -33,15 +33,20 @@ app.route('/hello/:name') { // http://<your-host>/hello/Steve
 
 def orderData = run('orderData')
 
-app.route('/order/:id').with { // http://<your-host>/order/1
-	get = {                    // http GET method
-		def order = order[id]
-		render('/order/view.html', [order: order])
+app.route('/order/:id').with { // http://localhost:8080/order/1
+	get = { 	// http GET method
+		def order = orderData[id]
+		render('/order/edit.html', [order: order])
 	}
-	delete = {                 // http DELETE method
+	delete = { 	// http DELETE method
 		// delete an order
+		orderData[id] = null
+		render('/order/listing.html', [orders : orderData.keySet()])
 	}
-	post = {                   // http POST method
+	post = { 	// http POST method
+		def order = req.toObject(Order)
+		orderDate[order.id] = order
+		render('/order/listing.html', [orders : orderData.keySet()])
 		// save or update an order
 	}
 }

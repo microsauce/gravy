@@ -6,16 +6,12 @@ import groovy.transform.CompileStatic
 
 class Route {
 
-	//
-	// dispatch types
-	//
 	Pattern uriPattern
 	Class binding
-	Set<String> params
-	EnumSet<DispatcherType> dispatch
-	Closure action // TODO rename default
-//	Closure defaultAction = 
+	List<String> params
+	List<DispatcherType> dispatch
 
+	Closure action 
 	Closure get = null
 	Closure head = null 
 	Closure put = null 
@@ -23,7 +19,11 @@ class Route {
 	Closure delete = null 
 	Closure options = null 
 
-//	@CompileStatic
+
+	EnumSet<DispatcherType> getDispatches() {
+		EnumSet.copyOf(dispatch)
+	}
+
 	Closure getAction(String method) {
 		Closure thisAction = (Closure)this[method]
 		if ( !thisAction )

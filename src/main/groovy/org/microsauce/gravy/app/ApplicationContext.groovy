@@ -15,6 +15,9 @@ import org.microsauce.gravy.server.runtime.FilterWrapper
 import org.microsauce.gravy.server.runtime.ServletWrapper
 import org.microsauce.gravy.server.util.*
 import javax.servlet.DispatcherType
+import java.util.regex.Pattern
+import java.util.regex.Matcher
+import static org.microsauce.gravy.app.RegExUtils.*
 
 
 /**
@@ -54,6 +57,22 @@ class ApplicationContext extends ConfigObject {
 	def modCache = [:]
 
 
+	static Route route(String uri) {
+		getInstance()._route(uri)
+	}
+
+	static Route route(String uri, Closure action) {
+		getInstance()._route(uri, action)
+	}
+
+	static Route route(Pattern uri) {
+		getInstance()._routeByPattern(uri)
+	}
+
+	static Route route(Pattern uri, Closure action) {
+		getInstance()._routeByPattern(uri, action)
+	}
+
 	private ApplicationContext(config) {
 		this.config=config
 		initialize()
@@ -86,58 +105,34 @@ class ApplicationContext extends ConfigObject {
 		this
 	}
 
-	def route(String route, Closure action, Set<DispatcherType> dispatch ) {
-		def routeData = parseRoute(route)
-
-		def dipatches = EnumSet.copyOf(dispatch)
-		routes << new Route([uriPattern: routeData.uriPattern, params: routeData.params, action: action, binding: null, dispatch: dipatches])
-
-		this
-	}
-
-	def route(String route, Closure action) {
+	def _route(String route) {
 		def routeData = parseRoute(route)
 		
-		def dipatches = EnumSet.of(DispatcherType.REQUEST) 
-		routes << new Route([uriPattern: routeData.uriPattern, params: routeData.params, action: action, binding: null, dispatch: dipatches])
-
-		this
-	}
-
-	def route(String route) {
-		def routeData = parseRoute(route)
-		
-		def dipatches = EnumSet.of(DispatcherType.REQUEST) 
-		def thisRoute = new Route([uriPattern: routeData.uriPattern, params: routeData.params, action: null, binding: null, dispatch: dipatches])
+		def thisRoute = new Route([uriPattern: routeData.uriPattern, params: routeData.params, action: null, binding: null, dispatch: [DispatcherType.REQUEST]])
 		routes << thisRoute
 
 		thisRoute
 	}
 
-	def route(String route, List dispatch) {
+	Route _route(String route, Closure action) {
 		def routeData = parseRoute(route)
-		
-		def dipatches = EnumSet.copyOf(dispatch) 
-		def thisRoute = new Route([uriPattern: routeData.uriPattern, params: routeData.params, action: null, binding: null, dispatch: dipatches])
+		def thisRoute = new Route([uriPattern: routeData.uriPattern, params: routeData.params, action: action, binding: null, dispatch: [DispatcherType.REQUEST]])
+		routes << thisRoute
+
+		thisRoute
+	}
+	def _routeByPattern(Pattern route) {
+		def thisRoute = new Route([uriPattern: route, params: [], action: null, binding: null, dispatch: [DispatcherType.REQUEST]])
 		routes << thisRoute
 
 		thisRoute
 	}
 
-	def route(String route, Class binding, Closure action) {
-		def routeData = parseRoute(route)
-		def dipatches = EnumSet.of(DispatcherType.REQUEST)
-		routes << new Route([uriPattern: routeData.uriPattern, params: routeData.params, action: action, binding: binding, dispatch: dipatches])
+	Route _routeByPattern(Pattern route, Closure action) {
+		def thisRoute = new Route([uriPattern: route, params: [], action: action, binding: null, dispatch: [DispatcherType.REQUEST]])
+		routes << thisRoute
 
-		this
-	}
-
-	def route(String route, Class binding, Closure action, List dispatch) {
-		def routeData = parseRoute(route)
-		def dipatches = EnumSet.copyOf(dispatch)
-		routes << new Route([uriPattern: routeData.uriPattern, params: routeData.params, action: action, binding: binding, dispatch: dipatches])
-
-		this
+		thisRoute
 	}
 
 	def servlet(String mapping, HttpServlet servlet) { 
@@ -165,28 +160,6 @@ class ApplicationContext extends ConfigObject {
 		this
 	}
 
-	def private parseRoute(String pattern) {
-		def paramPattern = /\/:([a-zA-Z]+)/
-		def pathPattern = '\\/([_a-zA-Z0-9\\.]+)'
-
-		def matches = pattern =~ paramPattern
-		def params = [] as Set // return
-		matches.each { group ->
-			params << group[1]
-		}
-		def buffer = new StringBuffer()
-		matches = pattern =~ paramPattern
-		while (matches.find()) {
-			def count = matches.groupCount()
-			for (def i = 1; i <= count; i++) 
-				matches.appendReplacement(buffer, pathPattern)
-		}
-		matches.appendTail(buffer)
-		def newPattern = buffer.toString()
-		def uriPattern = ~ newPattern
-
-		[uriPattern: uriPattern, params: params]
-	}
 //
 // runtime API
 //
