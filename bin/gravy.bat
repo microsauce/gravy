@@ -6,7 +6,7 @@ IF "%GRAVY_HOME%"==""  (
 	goto:eof
 )
 IF "%JAVA_HOME%"==""  (
-	echo GRAVY_HOME is not defined
+	echo JAVA_HOME is not defined
 	goto:eof
 )
 
