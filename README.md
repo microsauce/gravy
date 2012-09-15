@@ -104,11 +104,11 @@ Point your browser to:
 
 #### Define Routes
 
-	app.route('/hello/:name') { // http://<your-host>/hello/Steve
+	route('/hello/:name') { // http://<your-host>/hello/Steve
 		out << "Hello $name!"
 	}
 
-	app.route('/order/:id').with { // http://<your-host>/order/1
+	route('/order/:id').with { // http://<your-host>/order/1
 		get = {                    // http GET method
 			// get an order
 		}
@@ -120,14 +120,23 @@ Point your browser to:
 		}
 	}
 
-#### Controller Notation
+#### Tree Notation
 
-	app.friendly.controller.with {
+	root.friendly.controller.with {
 		greeting = {  // http://<your-host>/friendly/controller/greeting
 			out << 'Hello!'
 		}
 		farewell = {  // http://<your-host>/friendly/controller/farewell
 			out << 'Good-bye :('
+		}
+
+		Spanish.with { // http://<your-host>/friendly/controller/Spanish/greeting
+			greeting = {
+				out << 'Hola!'
+			}
+			greeting = { // http://<your-host>/friendly/controller/Spanish/farewell
+				out << 'Adios!'
+			}
 		} 
 	}
 
@@ -146,7 +155,7 @@ Point your browser to:
 
 The ApplicationContext class is the center-piece of the framework.  Every script, module, java class, and groovy class work together to build a complete service context . . .
 
-app.route(uriPattern)
+route(uriPattern)
 
 
 
@@ -155,7 +164,7 @@ app.route(uriPattern)
 The following objects are bound to application.groovy, subscripts (the script folder), and module scripts:
 
 	Bound to all scripts:
-	app                     - the appliction context
+	root                    - denotes the root node of the uri hierarchy (aka '/')
 	config                  - the groovy ConfigObject 
 	log                     - the logger
 	REQUEST                 - DispatcherType.REQUEST
@@ -171,7 +180,8 @@ The following objects are bound to application.groovy, subscripts (the script fo
 For example:
 
 	def orderService = module('orderService')
-	app.route('/order/:id', [REQUEST, FORWARD]).with {
+	route('/order/:id').with {
+		dispatch = [REQUEST, FORWARD]
 		get = {
 			log.info "retrieve order id $id"
 			def model = orderService.findOrderById(id)
