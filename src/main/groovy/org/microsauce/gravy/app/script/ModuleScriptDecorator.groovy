@@ -11,6 +11,7 @@ class ModuleScriptDecorator extends ScriptDecorator {
 
 	void decorate(Script script) {
 		super.decorate(script)
+//script.binding << app.modCache
 
 		extractModule script.name
 

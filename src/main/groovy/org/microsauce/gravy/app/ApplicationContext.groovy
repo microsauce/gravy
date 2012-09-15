@@ -31,11 +31,11 @@ class ApplicationContext extends ConfigObject {
 	private static instance
 
 	static ApplicationContext getInstance(ConfigObject config) {
-		if ( !instance ) instance = new ApplicationContext(config)
+		if ( instance == null ) instance = new ApplicationContext(config)
 		instance
 	}
 	static ApplicationContext getInstance() {
-		if ( !instance ) throw new Exception('Application context not properly initialized')
+		if ( instance == null ) throw new Exception('Application context not properly initialized')
 		instance
 	}
 
@@ -73,6 +73,30 @@ class ApplicationContext extends ConfigObject {
 		getInstance()._routeByPattern(uri, action)
 	}
 
+	static Controller controller(String name) {
+		getInstance()._controller(name)
+	}
+
+	static Controller controller(String name, Map<String, Closure> actions) {
+		getInstance()._controller(name, actions)
+	}
+
+	static void servlet(String mapping, HttpServlet servlet) { 
+		getInstance()._servlet(mapping, servlet)
+	}
+
+	static void schedule(String cronString, Closure action) {
+		getInstance()._schedule(cronString, action)
+	}
+
+	static void filter(String route, Filter filter) {
+		getInstance()._filter(route, filter)
+	}
+
+	static void filter(String route, Filter filter, List dispatch) {
+		getInstance()._filter(route, filter, dispatch)
+	}
+
 	private ApplicationContext(config) {
 		this.config=config
 		initialize()
@@ -89,23 +113,25 @@ class ApplicationContext extends ConfigObject {
 		filters
 	}
 
-//
-// script time API
-//
+	//
+	// script time API
+	//
 
-	/**
-	* Add a new controller to this instance of Gravy.
-	*
-	* @param name the controller name
-	* @param actions a map of named actions (closures)
-	*/
-	def controller(String name, Map<String, Closure> actions) {
-		addController(new Controller([name: name, actions: actions]))
+	private Controller _controller(String name) {
+		def controller = new Controller([name: name, actions: null])
+		addController(controller)
 
-		this
+		controller
 	}
 
-	def _route(String route) {
+	private Controller _controller(String name, Map<String, Closure> actions) {
+		def controller = new Controller([name: name, actions: actions])
+		addController(controller)
+
+		controller
+	}
+
+	private Route _route(String route) {
 		def routeData = parseRoute(route)
 		
 		def thisRoute = new Route([uriPattern: routeData.uriPattern, params: routeData.params, action: null, binding: null, dispatch: [DispatcherType.REQUEST]])
@@ -114,50 +140,44 @@ class ApplicationContext extends ConfigObject {
 		thisRoute
 	}
 
-	Route _route(String route, Closure action) {
+	private Route  _route(String route, Closure action) {
 		def routeData = parseRoute(route)
 		def thisRoute = new Route([uriPattern: routeData.uriPattern, params: routeData.params, action: action, binding: null, dispatch: [DispatcherType.REQUEST]])
 		routes << thisRoute
 
 		thisRoute
 	}
-	def _routeByPattern(Pattern route) {
+	private Route  _routeByPattern(Pattern route) {
 		def thisRoute = new Route([uriPattern: route, params: [], action: null, binding: null, dispatch: [DispatcherType.REQUEST]])
 		routes << thisRoute
 
 		thisRoute
 	}
 
-	Route _routeByPattern(Pattern route, Closure action) {
+	private Route  _routeByPattern(Pattern route, Closure action) {
 		def thisRoute = new Route([uriPattern: route, params: [], action: action, binding: null, dispatch: [DispatcherType.REQUEST]])
 		routes << thisRoute
 
 		thisRoute
 	}
 
-	def servlet(String mapping, HttpServlet servlet) { 
+	private void _servlet(String mapping, HttpServlet servlet) { 
 		servlets << new ServletWrapper([servlet: servlet, mapping: mapping])
-		this	
 	}
 
-	def schedule(String cronString, Closure action) {
+	private void _schedule(String cronString, Closure action) {
 		addTask(new ScheduledTask([cronString: cronString, action: action]))
-
-		this
 	}
 
-	def filter(String route, Filter filter) {
+	private void _filter(String route, Filter filter) {
 		def dipatches = EnumSet.of(DispactherType.REQUEST)
 		filters << new FilterWrapper([filter: filter, mapping : route, dispatch: dipatches])
 
-		this
 	}
 
-	def filter(String route, Filter filter, List dispatch ) {
+	private void _filter(String route, Filter filter, List dispatch ) {
 		def dipatches = EnumSet.copyOf(dispatch)
 		filters << new FilterWrapper([filter: filter, mapping : route, dispatch: dipatches])
-
-		this
 	}
 
 //
@@ -193,7 +213,7 @@ class ApplicationContext extends ConfigObject {
 		if (!scheduler) scheduler = new Scheduler()
 		scheduler.schedule(task.cronString, task.action as Runnable)
 	}
-
+/*
 	void addServlet(servlet) {
 		servlets << servlet
 	}
@@ -201,7 +221,7 @@ class ApplicationContext extends ConfigObject {
 	void addFilter(filter) {
 		filters << filter
 	}
-
+*/
 	void complete() {
 		log.info 'completing application context'
 		makeControllers(this.entrySet(), new StringBuilder())

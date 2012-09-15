@@ -35,6 +35,7 @@ class RouteChain implements FilterChain {
 		}
 	}
 
+	@CompileStatic
 	private void bindAndRouteRequest(Route route, ServletRequest req, ServletResponse res) {
 		HttpServletRequest request = (HttpServletRequest)req		
 		String requestUri = request.requestURI
@@ -45,11 +46,21 @@ class RouteChain implements FilterChain {
 		Integer ndx = 1
 		List<String> splat = []
 		if ( route.params.size() > 0 ) {
-			route.params.each { param ->
-				if ( param == '*' )
-					splat << matches[0][ndx++]
-				else
-					binding[param] = matches[0][ndx++]
+//			route.params.each { param ->
+//				if ( param == '*' )
+//					splat << matches[0][ndx++]
+//				else
+//					binding[param] = matches[0][ndx++]
+//			}
+			while (matches.find()) {
+				Integer groupCount = matches.groupCount()
+				for (;ndx<=groupCount;ndx++) {
+					String param = route.params[ndx-1]
+					if ( param == '*' )
+						splat << matches.group(ndx)
+					else
+						binding[param] = matches.group(ndx)
+				}
 			}
 		} else if (matches.groupCount() > 0) {
 			Integer groupCount = matches.groupCount()

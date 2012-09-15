@@ -7,5 +7,5 @@ def documentRoot =  appRoot+(config.freemarker.documentRoot ?: '/view')
 def viewUri = config.gravy.viewUri ?: '/view/renderer'
 
 def viewServlet = new FreemarkerServlet(documentRoot, runMode)
-app.servlet(viewUri, viewServlet)
+servlet(viewUri, viewServlet)
 

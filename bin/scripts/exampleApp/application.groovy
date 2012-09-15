@@ -1,5 +1,4 @@
 
-def counter = 0
 
 /*
 	controller notation
