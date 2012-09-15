@@ -67,33 +67,39 @@ class ControllerFilter implements Filter {
 	@CompileStatic
 	private Closure parseAndBind(HttpServletRequest req, HttpServletResponse res) {
 		String uri = ServerUtils.getUri(req)
-
-		List<String> parts = []
-		for (String it in uri.split('/')) {
-			if (it != '')
-				parts.add(it)
-		}
-
-		if (parts.size() == 0) return null
-	
+		
 		String controllerName = null
 		String actionName = null
-		if (parts.size() == 1) {
+		if (uri == '/') {
 			controllerName = ''
-			actionName = parts[0]
-		}
-		else {
+			actionName = '/'
+		} else {
 
-			StringBuilder buffer = new StringBuilder()
-			boolean first = true
-			parts[0..<(parts.size()-1)].each {
-				if (first) {
-					buffer << it
-					first = false
-				} else buffer << '/'+it
+			List<String> parts = []
+			for (String it in uri.split('/')) {
+				if (it != '')
+					parts.add(it)
 			}
-			controllerName = buffer.toString()
-			actionName = parts[parts.size()-1]
+
+			if (parts.size() == 0) return null
+		
+			if (parts.size() == 1) {
+				controllerName = ''
+				actionName = parts[0]
+			}
+			else {
+
+				StringBuilder buffer = new StringBuilder()
+				boolean first = true
+				parts[0..<(parts.size()-1)].each {
+					if (first) {
+						buffer << it
+						first = false
+					} else buffer << '/'+it
+				}
+				controllerName = buffer.toString()
+				actionName = parts[parts.size()-1]
+			}
 		}
 
 		Controller controller = ApplicationContext.getInstance().findController(controllerName)
