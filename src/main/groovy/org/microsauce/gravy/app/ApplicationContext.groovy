@@ -26,7 +26,7 @@ import static org.microsauce.gravy.app.RegExUtils.*
 */
 
 @Log4j
-class ApplicationContext extends ConfigObject {
+class ApplicationContext {
 
 	private static instance
 
@@ -39,9 +39,9 @@ class ApplicationContext extends ConfigObject {
 		instance
 	}
 
-	def mapper = Mapper.getInstance()
-
 	def private config
+	def mapper = Mapper.getInstance()
+	def root = new ConfigObject()
 
 	//
 	//
@@ -213,20 +213,13 @@ class ApplicationContext extends ConfigObject {
 		if (!scheduler) scheduler = new Scheduler()
 		scheduler.schedule(task.cronString, task.action as Runnable)
 	}
-/*
-	void addServlet(servlet) {
-		servlets << servlet
-	}
 
-	void addFilter(filter) {
-		filters << filter
-	}
-*/
 	void complete() {
 		log.info 'completing application context'
-		makeControllers(this.entrySet(), new StringBuilder())
+		makeControllers(root.entrySet(), new StringBuilder())
 
 		if (scheduler) scheduler.start()
+		log.info 'application context is complete'
 	}
 
 

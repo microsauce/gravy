@@ -134,7 +134,7 @@ Point your browser to:
 			greeting = {
 				out << 'Hola!'
 			}
-			greeting = { // http://<your-host>/friendly/controller/Spanish/farewell
+			farewell = { // http://<your-host>/friendly/controller/Spanish/farewell
 				out << 'Adios!'
 			}
 		} 

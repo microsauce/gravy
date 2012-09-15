@@ -15,7 +15,7 @@ class ScriptDecorator {
 	void decorate(Script script) {
 		script.binding << [
 			config : config,
-			root : app
+			root : app.root
 		]
 	}
 }
