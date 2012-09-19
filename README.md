@@ -112,12 +112,14 @@ To create a Route use one of the following methods in your application and/or mo
 #### Route route(String, Closure)
 Create a route with a catch-all handler
 Example:
+
 	route('/order/*') { id ->
 		out << "order $id"
 	}
 
 #### Route route(String)
 Example:
+
 	route('/hello/:name').with {
 		get = {
 			out << "Hellow $name!"
@@ -126,12 +128,14 @@ Example:
 	
 #### Route route(Pattern, Closure)
 Example:
+
 	route(~/\/hello\/(.*)/) { name ->
 		out << "Hello $name!"
 	}
 
 #### Route route(Pattern)
 Example:
+
 	route(~/\/hello\/(.*)/).with {
 		get = {
 			out << "Hello ${splat[0]}!"
@@ -150,6 +154,7 @@ To define a controller use one of the following methods:
 
 #### Controller controller(String, Map<String, Closure>)
 Example:
+
 	controller('/friendly/controller', [
 		greeting: {
 			out << 'hello'
@@ -162,6 +167,7 @@ Example:
 #### Map controller(String)
 This signature returns the map of controller actions.
 Example:
+
 	conroller('/friendly/controller').with {
 		greeting = {
 			out << 'hello'
