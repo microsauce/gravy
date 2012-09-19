@@ -144,7 +144,7 @@ Example:
 
 ### Controllers
 
-Controllers are very similar to routes but there are a few notable differences.  First, controllers handle specific URI's rather than patterns.  Second, controllers are ignorant of http method.  Rather than defining handlers for http methods we define actions.  Finally, because we are handling specific URI's we by convention presume that any view rendered by your actions are located in a folder by the same name as the controller.  For example, for the given URI:
+Controllers are very similar to routes but there are a few notable differences.  First, controllers handle specific URI's rather than patterns.  Second, controllers are ignorant of http method.  Rather than defining handlers for http methods we define actions.  Finally, because we are handling specific URI's we, by convention, presume that any views rendered by your action are located in a folder by the same name as the controller.  For example, for the given URI:
 
 	/friendly/controller/greeting
 	
@@ -199,6 +199,7 @@ You may also define controllers using a tree-like syntax.  In the following exam
 
 ### Handler Bindings
 The following objects are bound to every route and controller Closure in your application:
+
 	* render(String template, Map model)
 		 * render a view
 	* renderJson(Map model)
