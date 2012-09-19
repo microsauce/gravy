@@ -5,7 +5,7 @@ class ActionUtils {
 		call action, binding, []
 	}
 	static void call(Closure action, Map binding, List args) {
-		cloneAndBind(action, binding).call(args)
+		cloneAndBind(action, binding).call(args.size == 1 ? args[0] : args)
 	}
 
 	static Closure cloneAndBind(Closure action, Map binding) {

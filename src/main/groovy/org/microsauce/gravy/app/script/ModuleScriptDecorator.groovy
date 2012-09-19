@@ -11,9 +11,9 @@ class ModuleScriptDecorator extends ScriptDecorator {
 
 	void decorate(Script script) {
 		super.decorate(script)
-//script.binding << app.modCache
 
 		extractModule script.name
+		script.classLoader = getClassLoader()
 
 		def (moduleFolder, moduleUri) = getModuleFolder(script.name, config.appRoot)
 		script.sourceUri = moduleUri+"${SLASH}module.groovy"
@@ -38,7 +38,8 @@ class ModuleScriptDecorator extends ScriptDecorator {
 
 		script.binding << [
 			run : { name, scriptBinding = null ->
-				def subScript = new Script([sourceUri: name+'.groovy', binding: [config:config, app:app], roots: script.roots])
+				def subScript = new Script(
+					[sourceUri: name+'.groovy', binding: [config:config, app:app], roots: script.roots, classLoader: script.classLoader])
 				new ScriptDecorator(config, app).decorate(subScript)
 				ScriptUtils.run(subScript)
 			}

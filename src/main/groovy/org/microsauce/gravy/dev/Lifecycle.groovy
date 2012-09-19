@@ -294,6 +294,25 @@ class Lifecycle {
 		}
 	}
 
+	void createMod(modName) {
+		if ( modName == null ) {
+			println 'please specify a module name'
+			return
+		}
+
+		def sourceFolder = "${gravyHome}/bin/scripts/emptyMod"
+
+		// copy module folder to ./${modName}
+		ant.sequential {
+		    mkdir(dir:"./modules/${modName}")
+		    copy(todir:"./modules/${modName}") {
+		    	fileset(dir:"${sourceFolder}") {
+		    		include(name:'*/**')
+		    	}
+		    }
+		}
+	}
+
 	private boolean exists(String path) {
 		new File(path).exists()
 	}

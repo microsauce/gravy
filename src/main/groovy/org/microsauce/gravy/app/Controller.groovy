@@ -5,5 +5,5 @@ package org.microsauce.gravy.app
 */
 class Controller {
 	String name
-	Map<String,Closure> actions
+	Map<String,Closure> actions = [:]
 }

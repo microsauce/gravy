@@ -6,6 +6,8 @@ import groovy.transform.CompileStatic
 
 class RegExUtils {
 
+	static String[] escapeCharacters = ['\\.','\\+','\\?','\\[','\\]','\\^','\\$']
+
 	@CompileStatic
 	static List<String> parametersInOrder(String uriPattern) {
 		LinkedHashMap<Integer,String> parameters = new LinkedHashMap<Integer,String>() 
@@ -29,7 +31,16 @@ class RegExUtils {
 	}
 
 	@CompileStatic
-	private static Map<String,Object> parseRoute(String uriExpression) {
+	private static String escapedUriPattern(String uriPattern) {
+		escapeCharacters.each { String character ->
+			uriPattern = uriPattern.replaceAll(character, '\\'+character)
+		}
+		uriPattern
+	}
+
+	@CompileStatic
+	static Map<String,Object> parseRoute(String uriExpression) {
+		uriExpression = escapedUriPattern uriExpression
 		String optionalNamedParamPattern = '(.\\?:([a-zA-Z]+)\\?)'
 		String optionalReplacementPattern = '.{0,1}(.*)'
 		String namedParmPattern = ':([a-zA-Z]+)'

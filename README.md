@@ -1,38 +1,33 @@
 
 Servlet 3.0 (the meat and potatoes) & Groovy (the Gravy)
 ===
-***
+
+	route('/hello/:name') { 
+		out << "Hello $name!"
+	}
 
 This README is a work in progress, more to come . . .
 
-Gravy is a framework for developing web applications on Servlet 3.0 compliant web containers.  Taking inspiration from Sinatra and Express.js, Gravy is an attempt to bring dynamic server scripting into the Java space, in particular, war deployments to Servlet 3.0 compliant web containers.
-
-For your infrastructure it's just meat-and-potatoes, but for the developer it's all Gravy.
-
+Gravy is a framework for rapid development of web applications on Servlet 3.0 compliant web containers.  Taking inspiration from Sinatra and Express.js, Gravy is an effort to bring dynamic server scripting into the Java space, in particular, the Java enterprise web container.
 
 ## Features
 ***
 * Rapid application development
-	* Groovy
-	* Auto hot code-swapping
-* Powerful Sinatra style routing 
+* Sinatra style routing 
 	* Regular expressions
-	* Embedded uri parameters
+	* named, wildcard, and optional uri parameters
 * Elegant controller syntax
-* Modular design
-* Multiple templating options (four and counting):
-	* gstring module- an enhanced GStringTemplateEngine
+* Modules
+* Templates (three template modules and counting):
+	* gstring module - an enhanced GStringTemplateEngine
 		* layouts
 		* internationalization
 		* XSS sanitizing
 	* freemarker module
 	* scalate module 
-		* jade
-		* mustache
-		* scaml
-	* JSP/JSTL - the old stand-bye
 * Environment based configuration
-* Integrated build system
+* Integrated development lifecycle tools
+	* clean, compile, test, war
 
 ## System Requirements
 ***
@@ -66,7 +61,7 @@ Create an example app:
 
 	$ gravy create <app-name> example
 
-This command creates an example application in a folder named <app-name>.  The example application demonstrates many Gravy features.  The application folder layout is as follows:
+This command creates an example application in a folder named <app-name>.  The example application demonstrates many of Gravy features.  The application folder layout is as follows:
 
 	<app-name>                   - root application folder
 	    |- application.groovy    - main application script
@@ -94,69 +89,110 @@ This command creates an example application in a folder named <app-name>.  The e
 
 To run your new Gravy app execute the gravy command:
 
+	$ cd <app-name>
 	$ gravy
 
-Point your browser to:
+Point your browser at:
 
 	http://localhost:8080
 
-### Sample Code
+## The Code
 
-#### Define Routes
+### Routes
 
-	route('/hello/:name') { // http://<your-host>/hello/Steve
-		out << "Hello $name!"
+Routes can be defined as regular expressions (Pattern objects) or as strings with wildcards (*) and/or named parameters (:parameterName).  You may also define a single optional parameter.
+
+Examples:
+
+	// route with wildcards bound to closure parameters
+	route('/fileshare/*.*') { fileName, extension ->
+		out << "you have requested $fileName with extension $extension"
 	}
 
-	route('/order/:id').with { // http://<your-host>/order/1
-		get = {                    // http GET method
-			// get an order
+	// Pattern route with named grouping
+	route(~/\/hello\/(.*)/) { name ->
+		out << "Hello $name"
+	}
+
+	// route with optional named parameter
+	route('/order/?:id?').with {
+		get = {
+			render('/order/view.html' [order : orderService.findById(id)])
 		}
-		delete = {                 // http DELETE method
-			// delete an order
-		}
-		post = {                   // http POST method
-			// save or update an order
+		post = {
+			def order = req.toObject(Order)
+			orderService.save(order)
+			render('/order/listing.html', [listing: orderService.listing(sess['customerNumber'])])
 		}
 	}
 
-#### Tree Notation
+### Controllers
 
-	root.friendly.controller.with {
-		greeting = {  // http://<your-host>/friendly/controller/greeting
-			out << 'Hello!'
-		}
-		farewell = {  // http://<your-host>/friendly/controller/farewell
-			out << 'Good-bye :('
+Controllers are static URI mappings
+
+	// Tree Syntax
+
+	def cartService = module('cartService')
+	root.my.shopingcart.with {
+		listItems = {
+			def cart = sess.attr['cart']
+			render('list.html', [cart : cart])
 		}
 
-		Spanish.with { // http://<your-host>/friendly/controller/Spanish/greeting
-			greeting = {
-				out << 'Hola!'
+		item.with {
+
+			add = {
+				def newCartItem = req.toObject(CartItem)
+				sess.attr['cart'].addCartItem(newCartItem)
+				forward('/my/shoppingcart/listItems')
 			}
-			farewell = { // http://<your-host>/friendly/controller/Spanish/farewell
-				out << 'Adios!'
+			delete = {
+				def cartItem = req.toObject(CartItem)
+				sess.attr['cart'].removeCartItem(cartItem)
+				forward('/my/shoppingcart/listItems')
 			}
-		} 
+		}
 	}
 
+### Scheduled Tasks
 
-## The Fundementals
+Gravy also provides a way to define scheduled tasks as follows:
+
+	def batchMailer = module('batchMailer')
+	schedule('*/5 * * * *') {
+		log.info "sending batch id ${batchMailer.batchId}"
+		batchMailer.sendBatch()
+	}
+
+### Script Environment
+
+The Gravy runtime 
+
+### Closure Bindings
+
+
+
+### Rendering a View
 
 ### Building Blocks
 
 #### application.groovy
 
-#### modules
+For most gravy applications this file is the .. 
 
+#### Modules
 
+Modules . . .
 
-### ApplicationContext
+#### Sub-scripts
 
-The ApplicationContext class is the center-piece of the framework.  Every script, module, java class, and groovy class work together to build a complete service context . . .
+Both applications and modules may invoke sub-scripts.  Sub-scripts are located in the 'scripts' folder and can be invoked by name, as follows:
 
-route(uriPattern)
+	run('myScript')
+	// or
+	run('myScript', [arg1:val1, arg2:val2 . . .])
 
+The run command is overloaded allowing the calling script to pass in an optional map of values which are bound to the sub-script by key name.
 
 
 ### Script Bindings
@@ -180,6 +216,7 @@ The following objects are bound to application.groovy, subscripts (the script fo
 For example:
 
 	def orderService = module('orderService')
+	. . .
 	route('/order/:id').with {
 		dispatch = [REQUEST, FORWARD]
 		get = {
@@ -191,17 +228,17 @@ For example:
 			log.info "update order id $id"
 			def order = req.toObject(Order)
 			orderService.update(order)
-			render('/order/view/html', [order: order])
+			render('/order/view.html', [order: order])
 		}
 		delete = {
 			log.warn "unsupported operation"
-			forwardMethod('GET')
+			out << "DELETE is FORBIDDEN"
 		}
 	}
 
 ### Closure (action) Bindings
 
-All route and controller actions are defined as zero argument closures.  The Gravy runtime binds the following objects to the closure delegate prior to its execution.
+The Gravy runtime binds the following objects to the closure delegate prior to its execution.
 
 Routes:
 
@@ -215,7 +252,11 @@ Controllers:
 	req - the HttpServletRequest
 	res - the HttpServletResponse
 	out - the HttpServletResponse.printWriter
+	render
+	forward
 
+
+For your infrastructure it's still meat-and-potatoes, but for the developer it's all Gravy.
 
 ## Credits:
 * [Groovy](http://groovy.codehaus.org/) - Groovy 2.0.1 script engine

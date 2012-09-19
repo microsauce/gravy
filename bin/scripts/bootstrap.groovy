@@ -29,12 +29,12 @@ addFolder("$gravyHome/lib/jetty8/jsp")
 addFolder("$gravyHome/lib/groovy")
 addFolder("$javaHome/lib")
 
-println '\n\tApplication jars:'
-def projectLib = new File('./lib')
-if ( projectLib.exists() ) {
-	addFolder('./lib')
-}
-else println '\tnone'
+//println '\n\tApplication jars:'
+//def projectLib = new File('./lib')
+//if ( projectLib.exists() ) {
+//	addFolder('./lib')
+//}
+//else println '\tnone'
 println ''
 
 //
@@ -49,6 +49,16 @@ if (commandLine.hasOption('create')) {
 	}
 	def builder = new Lifecycle()
 	builder.createApp(name, commandLine.hasOption('example'))
+	System.exit(0)
+}
+if (commandLine.hasOption('create-mod')) {
+	def name = commandLine.optionValue('create-mod')
+	if ( name == null ) {
+		println 'please provide a module name'
+		System.exit(0)
+	}
+	def builder = new Lifecycle()
+	builder.createMod(name)
 	System.exit(0)
 }
 if (commandLine.hasOption('jar-mod')) {

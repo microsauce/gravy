@@ -35,7 +35,7 @@ class ControllerFilter implements Filter {
 	
 		HttpServletRequest req = (HttpServletRequest) request
 		HttpServletResponse res = (HttpServletResponse) response
-		log.debug "handling request uri ${req.requestURI}"			
+		log.debug "handling request uri ${req.requestURI}"
 
 		// identify controller action
 		Closure action = parseAndBind req, res
@@ -67,7 +67,7 @@ class ControllerFilter implements Filter {
 	@CompileStatic
 	private Closure parseAndBind(HttpServletRequest req, HttpServletResponse res) {
 		String uri = ServerUtils.getUri(req)
-		
+
 		String controllerName = null
 		String actionName = null
 		if (uri == '/') {
@@ -80,7 +80,7 @@ class ControllerFilter implements Filter {
 				if (it != '')
 					parts.add(it)
 			}
-
+println "parts : $parts"
 			if (parts.size() == 0) return null
 		
 			if (parts.size() == 1) {
@@ -90,18 +90,19 @@ class ControllerFilter implements Filter {
 			else {
 
 				StringBuilder buffer = new StringBuilder()
-				boolean first = true
+//				boolean first = true
 				parts[0..<(parts.size()-1)].each {
-					if (first) {
-						buffer << it
-						first = false
-					} else buffer << '/'+it
+//					if (first) {
+//						buffer << it
+//						first = false
+//					} else 
+						buffer << '/'+it
 				}
 				controllerName = buffer.toString()
 				actionName = parts[parts.size()-1]
 			}
 		}
-
+println "controllerName $controllerName"
 		Controller controller = ApplicationContext.getInstance().findController(controllerName)
 		if ( !controller ) return null
 		Closure action = controller.actions[actionName]
@@ -118,13 +119,13 @@ class ControllerFilter implements Filter {
 		def action = null
 		def matches = req.requestURI =~ controllerUriPattern
 		def size = matches.size() > 0 ? matches[0].size() : 0
-		def binding = [:]; binding.id = null
+		def binding = [:] //; binding.id = null
 		def controllerName
 		def actionName
 
 		switch ( size ) {
-			case 4:
-				binding.id = matches[0][ENTITY_ID]
+//			case 4:
+//				binding.id = matches[0][ENTITY_ID]
 			case 3:
 				controllerName = matches[0][CONTROLLER_NAME]
 				actionName = matches[0][ACTION_NAME]

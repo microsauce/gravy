@@ -18,7 +18,7 @@ class RedeploySourceModHandler implements SourceModHandler {
 			app.reset()
 			Script script = new Script([sourceUri:"${config.appRoot}${SLASH}application.groovy"])
 			new ApplicationScriptDecorator(config, app).decorate(script)
-			ScriptUtils.run(script, new GravyDevModeClassLoader("${config.appRoot}${SLASH}target${SLASH}classes"))
+			ScriptUtils.run(script) 
 			app.complete()
 		}
 		catch(all) {

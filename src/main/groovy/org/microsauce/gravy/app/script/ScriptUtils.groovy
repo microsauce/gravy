@@ -12,18 +12,14 @@ class ScriptUtils {
 	private static CompilerConfiguration compilerConfiguration
 
 	static Object run(Script script) {
-		return run(script, null)
-	}
-
-	static Object run(Script script, ClassLoader classloader) {
 		try {
 			log.info "executing script ${script.sourceUri}"
 			def compConf = compilerConfiguration()
 			GroovyScriptEngine gse
 		
-			if (classloader)
+			if (script.classLoader)
 				gse = new GroovyScriptEngine(
-					standardizeRoots(script.roots) as URL[], classloader)
+					standardizeRoots(script.roots) as URL[], script.classLoader)
 			else				
 				gse = new GroovyScriptEngine(
 					standardizeRoots(script.roots) as URL[])

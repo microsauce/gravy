@@ -15,18 +15,29 @@ class ApplicationScriptDecorator extends ScriptDecorator {
 	void decorate(Script script) {
 		super.decorate(script)
 
+		def libFolderUri = "${config.appRoot}${SLASH}lib"
+		def libFolder = new File(libFolderUri)
+
+		if (libFolder.exists()) {
+			libFolder.eachFile { file ->
+				script.classPathUris << file.absolutePath
+			}
+		}
+
+		script.classLoader = getClassLoader()
 		script.roots = this.roots
 		script.binding << app.modCache
 		script.binding << [
 			module : { name -> 
-				def modScript = new Script([name:name])
+				def modScript = new Script([name:name, classLoader:getClassLoader()])
 				new ModuleScriptDecorator(config, app).decorate(modScript)
 				ScriptUtils.run(modScript)
 			},
 			run : { name, scriptBinding = null ->
 				if (!scriptBinding) {
 					if (!app.loadCache[name]) { 
-						def subScript = new Script([sourceUri: name+'.groovy', binding: [config:config, app:app], roots: roots])
+						def subScript = new Script(
+							[sourceUri: name+'.groovy', binding: [config:config, app:app], roots: roots, classLoader: script.classLoader])
 						new ScriptDecorator(config, app).decorate(subScript)
 						def result = ScriptUtils.run(subScript)
 						if ( result == app ) result = null
@@ -35,7 +46,8 @@ class ApplicationScriptDecorator extends ScriptDecorator {
 					return app.loadCache[name]
 				} else {
 					scriptBinding << [config:config, app:app]
-					def subScript = new Script([sourceUri: name+'.groovy', binding: scriptBinding, roots: roots])
+					def subScript = new Script(
+						[sourceUri: name+'.groovy', binding: scriptBinding, roots: roots, classLoader: script.classLoader])
 					new ScriptDecorator(config, app).decorate(subScript)
 					def result = ScriptUtils.run(subScript)
 					if ( result == app ) result = null

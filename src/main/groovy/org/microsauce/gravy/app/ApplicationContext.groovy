@@ -118,7 +118,7 @@ class ApplicationContext {
 	//
 
 	private Controller _controller(String name) {
-		def controller = new Controller([name: name, actions: null])
+		def controller = new Controller([name: name, actions: [:]])
 		addController(controller)
 
 		controller
@@ -245,12 +245,7 @@ class ApplicationContext {
 
 			def thisValue = thisEntry.value
 			if (thisValue instanceof Map) {
-				if (controllerName.length() == 0) {
-					controllerName += thisEntry.key
-				}
-				else {
-					controllerName += '/'+thisEntry.key
-				}
+				controllerName += '/'+thisEntry.key
 
 				makeControllers(thisValue.entrySet(), controllerName) 
 				controllerName = new String(thisControllerName)

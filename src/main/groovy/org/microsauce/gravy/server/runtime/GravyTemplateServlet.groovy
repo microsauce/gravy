@@ -49,6 +49,7 @@ abstract class GravyTemplateServlet extends HttpServlet {
 	protected String getViewUri(HttpServletRequest req) {
 		String viewName = req.getAttribute('_view')
 		String controller = (String)req.getAttribute('_controller')
+println "viewName: $viewName - controller : $controller"		
 		viewName.contains('/') ? viewName : '/'+controller+'/'+viewName
 	}
 

@@ -37,7 +37,7 @@ class AppBuilder {
 		if (new File("${config.appRoot}${SLASH}application.groovy").exists()) {
 			Script appScript = new Script([sourceUri:"${config.appRoot}${SLASH}application.groovy"])
 			new ApplicationScriptDecorator(config, applicationContext).decorate(appScript)
-			ScriptUtils.run(appScript, getClassLoader())
+			ScriptUtils.run(appScript)
 		}
 
 		//
@@ -55,7 +55,7 @@ class AppBuilder {
 				log.info "loading module $modName"
 				def module = new Script([name:modName])
 				moduleDecorator.decorate(module)
-				results[modName] = ScriptUtils.run(module, getClassLoader())
+				results[modName] = ScriptUtils.run(module) //, getClassLoader())
 				if ( results[modName] == applicationContext ) results[modName] = null
 
 				applicationContext.modCache[modName] = results[modName]
@@ -63,17 +63,6 @@ class AppBuilder {
 		}
 
 		results
-	}
-
-	def private getClassLoader() {
-		if ( !classLoader ) {
-			if ( config.gravy.refresh ) 
-				classLoader = new GravyDevModeClassLoader("${config.appRoot}${SLASH}target${SLASH}classes")
-			else
-				classLoader = this.getClass().getClassLoader()
-		}
-
-		classLoader
 	}
 
 }

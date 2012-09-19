@@ -37,6 +37,9 @@ class GravyDecorator {
 			req.setAttribute('_view', viewName)
 			req.setAttribute('_model', model)
 			req.setAttribute('_controller', controller)
+println "view: $viewName"
+println "model: $model"
+println "controller $controller"
 			def rd = req.getRequestDispatcher(conf.gravy.viewUri)
 			rd.forward(req, res)
 		}
