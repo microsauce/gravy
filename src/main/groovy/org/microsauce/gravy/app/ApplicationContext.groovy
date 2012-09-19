@@ -61,24 +61,25 @@ class ApplicationContext {
 		getInstance()._route(uri)
 	}
 
-	static Route route(String uri, Closure action) {
-		getInstance()._route(uri, action)
+	static Route route(String uri, Closure handler) {
+		getInstance()._route(uri, handler)
 	}
 
 	static Route route(Pattern uri) {
 		getInstance()._routeByPattern(uri)
 	}
 
-	static Route route(Pattern uri, Closure action) {
-		getInstance()._routeByPattern(uri, action)
-	}
-
-	static Controller controller(String name) {
-		getInstance()._controller(name)
+	static Route route(Pattern uri, Closure handler) {
+		getInstance()._routeByPattern(uri, handler)
 	}
 
 	static Controller controller(String name, Map<String, Closure> actions) {
 		getInstance()._controller(name, actions)
+	}
+
+	static Map controller(String name) {
+		def controller = getInstance()._controller(name, [:])
+		controller.actions
 	}
 
 	static void servlet(String mapping, HttpServlet servlet) { 
@@ -102,9 +103,9 @@ class ApplicationContext {
 		initialize()
 	}
 
-//
-// bootstrap API
-//
+	//
+	// bootstrap API
+	//
 	def getServlets() {
 		servlets
 	}
@@ -134,28 +135,48 @@ class ApplicationContext {
 	private Route _route(String route) {
 		def routeData = parseRoute(route)
 		
-		def thisRoute = new Route([uriPattern: routeData.uriPattern, params: routeData.params, action: null, binding: null, dispatch: [DispatcherType.REQUEST]])
+		def thisRoute = new Route([
+			uriPattern: routeData.uriPattern, 
+			params: routeData.params, 
+			handler: null, 
+			binding: null, 
+			dispatch: [DispatcherType.REQUEST]])
 		routes << thisRoute
 
 		thisRoute
 	}
 
-	private Route  _route(String route, Closure action) {
+	private Route  _route(String route, Closure handler) {
 		def routeData = parseRoute(route)
-		def thisRoute = new Route([uriPattern: routeData.uriPattern, params: routeData.params, action: action, binding: null, dispatch: [DispatcherType.REQUEST]])
+		def thisRoute = new Route([
+			uriPattern: routeData.uriPattern, 
+			params: routeData.params, 
+			handler: handler, 
+			binding: null, 
+			dispatch: [DispatcherType.REQUEST]])
 		routes << thisRoute
 
 		thisRoute
 	}
 	private Route  _routeByPattern(Pattern route) {
-		def thisRoute = new Route([uriPattern: route, params: [], action: null, binding: null, dispatch: [DispatcherType.REQUEST]])
+		def thisRoute = new Route([
+			uriPattern: route, 
+			params: [], 
+			handler: null, 
+			binding: null, 
+			dispatch: [DispatcherType.REQUEST]])
 		routes << thisRoute
 
 		thisRoute
 	}
 
-	private Route  _routeByPattern(Pattern route, Closure action) {
-		def thisRoute = new Route([uriPattern: route, params: [], action: action, binding: null, dispatch: [DispatcherType.REQUEST]])
+	private Route  _routeByPattern(Pattern route, Closure handler) {
+		def thisRoute = new Route([
+			uriPattern: route, 
+			params: [], 
+			handler: handler, 
+			binding: null, 
+			dispatch: [DispatcherType.REQUEST]])
 		routes << thisRoute
 
 		thisRoute
@@ -180,10 +201,9 @@ class ApplicationContext {
 		filters << new FilterWrapper([filter: filter, mapping : route, dispatch: dipatches])
 	}
 
-//
-// runtime API
-//
-//
+	//
+	// runtime API
+	//
 
 	@CompileStatic
 	List<Route> findRoutes(String uri, DispatcherType dispatcherType) {

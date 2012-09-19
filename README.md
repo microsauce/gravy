@@ -19,15 +19,17 @@ Gravy is a framework for rapid development of web applications on Servlet 3.0 co
 * Elegant controller syntax
 * Modules
 * Templates (three template modules and counting):
-	* gstring module - an enhanced GStringTemplateEngine
+	* gstring module - an enhanced GStringTemplateEngine supporting:
 		* layouts
 		* internationalization
 		* XSS sanitizing
 	* freemarker module
 	* scalate module 
 * Environment based configuration
-* Integrated development lifecycle tools
-	* clean, compile, test, war
+* Integrated development lifecycle tools for:
+	* building
+	* testing
+	* packaging
 
 ## System Requirements
 ***
@@ -37,7 +39,7 @@ Gravy is a framework for rapid development of web applications on Servlet 3.0 co
 	* JAVA_HOME must refer to your Java 7 JDK
 
 * Deployment Environment Requirements
-	* Java 7 JDK
+	* Java 7 JRE
 	* a Servlet 3.0 compliant web container
 
 ## Building/Installing the Gravy Development Environment
@@ -59,11 +61,11 @@ Gravy is a framework for rapid development of web applications on Servlet 3.0 co
 
 Create an example app:
 
-	$ gravy create <app-name> example
+	$ gravy create [app-name] example
 
-This command creates an example application in a folder named <app-name>.  The example application demonstrates many of Gravy features.  The application folder layout is as follows:
+This command creates an example application in a folder named [app-name].  The example application demonstrates many of Gravy features.  The application folder layout is as follows:
 
-	<app-name>                   - root application folder
+	[app-name]                   - root application folder
 	    |- application.groovy    - main application script
 	    |_ src                   - java and groovy sources   
 	    |   |_ main
@@ -87,6 +89,7 @@ This command creates an example application in a folder named <app-name>.  The e
 	    |- modules               - application modules 
 	    |_ lib                   - application jar files
 
+
 To run your new Gravy app execute the gravy command:
 
 	$ cd <app-name>
@@ -98,61 +101,122 @@ Point your browser at:
 
 ## The Code
 
+## URI Handlers
+
 ### Routes
 
-Routes can be defined as regular expressions (Pattern objects) or as strings with wildcards (*) and/or named parameters (:parameterName).  You may also define a single optional parameter.
+A route is mapping between a URI pattern and one or more handlers (Closure objects).  You can define a handler for each supported http method (get, head, delete, put, post, and options), you may also define a general purpose handler (Route.handler) to service any and all request methods.
 
-Examples:
+To create a Route use one of the following methods in your application and/or module scripts:
 
-	// route with wildcards bound to closure parameters
-	route('/fileshare/*.*') { fileName, extension ->
-		out << "you have requested $fileName with extension $extension"
+#### Route route(String, Closure)
+Create a route with a catch-all handler
+Example:
+	route('/order/*') { id ->
+		out << "order $id"
 	}
 
-	// Pattern route with named grouping
-	route(~/\/hello\/(.*)/) { name ->
-		out << "Hello $name"
-	}
-
-	// route with optional named parameter
-	route('/order/?:id?').with {
+#### Route route(String)
+Example:
+	route('/hello/:name').with {
 		get = {
-			render('/order/view.html' [order : orderService.findById(id)])
+			out << "Hellow $name!"
 		}
-		post = {
-			def order = req.toObject(Order)
-			orderService.save(order)
-			render('/order/listing.html', [listing: orderService.listing(sess['customerNumber'])])
+	}
+	
+#### Route route(Pattern, Closure)
+Example:
+	route(~/\/hello\/(.*)/) { name ->
+		out << "Hello $name!"
+	}
+
+#### Route route(Pattern)
+Example:
+	route(~/\/hello\/(.*)/).with {
+		get = {
+			out << "Hello ${splat[0]}!"
 		}
 	}
 
 ### Controllers
 
-Controllers are static URI mappings
+Controllers are very similar to routes but there are a few notable differences.  First, controllers handle specific URI's rather than patterns.  Second, controllers are ignorant of http method.  Rather than defining handlers for http methods we define actions.  Finally, because we are handling specific URI's we by convention presume that any view rendered by your actions are located in a folder by the same name as the controller.  For example, for the given URI:
 
-	// Tree Syntax
+	/friendly/controller/greeting
+	
+The gravy runtime understands '/fiendly/controller' to be the controller name and 'greeting' to be the action name.
 
-	def cartService = module('cartService')
-	root.my.shopingcart.with {
-		listItems = {
-			def cart = sess.attr['cart']
-			render('list.html', [cart : cart])
+To define a controller use one of the following methods:
+
+#### Controller controller(String, Map<String, Closure>)
+Example:
+	controller('/friendly/controller', [
+		greeting: {
+			out << 'hello'
+		},
+		farewell: {
+			out << 'good-bye'
 		}
+	])
 
-		item.with {
+#### Map controller(String)
+This signature returns the map of controller actions.
+Example:
+	conroller('/friendly/controller').with {
+		greeting = {
+			out << 'hello'
+		}
+		farewell = {
+			out << 'good-bye'
+		}
+	}
 
-			add = {
-				def newCartItem = req.toObject(CartItem)
-				sess.attr['cart'].addCartItem(newCartItem)
-				forward('/my/shoppingcart/listItems')
+#### Tree-Notation
+You may also define controllers using a tree-like syntax.  In the following example 'root' denotes the root node of your server URI hierarchy (a.k.a '/').
+
+	root.friendly.controller.with {
+		greeting = {  		// http://my-host/friendly/controller/greeting
+			out << 'hello'
+		}
+		farewell = {
+			out << 'good-bye'
+		}
+		in.Spanish.with { 
+			greeting = { 	// http://my-host/friendly/controller/in/Spanish/greeting
+				out << 'hola'
 			}
-			delete = {
-				def cartItem = req.toObject(CartItem)
-				sess.attr['cart'].removeCartItem(cartItem)
-				forward('/my/shoppingcart/listItems')
+			farewell = {
+				out << 'adios'
 			}
 		}
 	}
+
+### Handler Bindings
+The following objects are bound to every route and controller Closure in your application:
+	* render(String template, Map model)
+		 * render a view
+	* renderJson(Map model)
+		* render a JSON response to the client (contentType='application/json')
+	* forward(String uri)
+		* forward request to the given uri
+	* redirect(String uri)
+		redirect the request to the given uri
+	* req - HttpServletRequest
+		* Object attr(String attributeName)
+			* get the attribute with the given name
+		* Object attr(String attributeName, Object attributeValue)
+			* set the attribute of the given name and value
+		* String parm(String parameterName)
+			* get the parameter with the given name
+		* toObject(Class)
+			* instantiate an object graph for the given class based on the parameters in this request
+	* res - HttpServletResponse
+	* sess - HttpSession
+		* Object attr(String attributeName)
+		* Object attr(String attributeName, Object attributeValue)
+	* out - PrintWriter
+		* this is the HttpServletResponse.getWriter()
+	* chain - FilterChain (routes only)
 
 ### Scheduled Tasks
 
@@ -255,8 +319,36 @@ Controllers:
 	render
 	forward
 
+## Development Mode
 
-For your infrastructure it's still meat-and-potatoes, but for the developer it's all Gravy.
+When running your application in development mode (via the gravy command) 
+
+## War Mode
+
+To bundle your Gravy app for deployment to your web container run the following command:
+
+	$ gravy war
+
+The war-ed application is organized as follows:
+
+	[app-name].war                     - webroot
+        |
+	    |- WEB-INF         
+	    |     |- application.groovy    - main application script
+	    |     |- view                  - view templates
+	    |     |- conf                  - configuration (config.groovy)
+	    |     |- scripts               - subscripts called by application.groovy
+	    |     |- modules               - application modules 
+	    |     |- lib                   - application jar files
+	    |     |_ web.xml     
+	    |                    
+	    |- img
+	    |- css
+	    |_ js 
+
+
+
+For your infrastructure it's still meat-and-potatoes, but for your developers it's all Gravy.
 
 ## Credits:
 * [Groovy](http://groovy.codehaus.org/) - Groovy 2.0.1 script engine

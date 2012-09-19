@@ -4,6 +4,7 @@ import java.util.regex.Pattern
 import javax.servlet.DispatcherType
 import groovy.transform.CompileStatic
 
+
 class Route {
 
 	Pattern uriPattern
@@ -11,7 +12,7 @@ class Route {
 	List<String> params
 	List<DispatcherType> dispatch
 
-	Closure action 
+	Closure handler 
 	Closure get = null
 	Closure head = null 
 	Closure put = null 
@@ -27,9 +28,9 @@ class Route {
 	Closure getAction(String method) {
 		Closure thisAction = (Closure)this[method]
 		if ( !thisAction )
-			thisAction = action
+			thisAction = handler
 		if ( !thisAction ) thisAction = {
-			out << "no action defined for uri $uriPattern method $method"
+			out << "no handler defined for uri $uriPattern method $method"
 		}
 
 		thisAction

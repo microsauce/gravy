@@ -25,9 +25,6 @@ class GravyDecorator {
 		Binding.metaClass.redirect = { String uri ->
 			res.sendRedirect(uri)
 		}
-//		Binding.metaClass.forwardMethod = { String method ->
-//			res.sendRedirect(uri)
-//		}
 		Binding.metaClass.include = { String uri ->
 			def rd = req.getRequestDispatcher(uri)
 			rd.include(req, res)
@@ -37,9 +34,6 @@ class GravyDecorator {
 			req.setAttribute('_view', viewName)
 			req.setAttribute('_model', model)
 			req.setAttribute('_controller', controller)
-println "view: $viewName"
-println "model: $model"
-println "controller $controller"
 			def rd = req.getRequestDispatcher(conf.gravy.viewUri)
 			rd.forward(req, res)
 		}
@@ -54,7 +48,7 @@ println "controller $controller"
 		HttpServletRequest.metaClass.toObject = { clazz ->
 			Mapper.getInstance().bindRequest( clazz, delegate )
 		}
-		HttpServletRequest.metaClass.attr = { key, value = null ->
+		def attr = { key, value = null ->
 			if ( value == null )
 				return delegate.getAttribute(key)
 			else
@@ -62,6 +56,8 @@ println "controller $controller"
 
 			value
 		}
+		HttpServletRequest.metaClass.attr = attr
+		HttpSession.metaClass.attr = attr
 		HttpServletRequest.metaClass.parm = { key ->
 			delegate.getParameter(key)
 		}

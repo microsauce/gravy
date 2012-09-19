@@ -2,10 +2,28 @@ package org.microsauce.gravy.server.util
 
 import java.text.SimpleDateFormat
 import groovy.util.logging.Log4j
+import groovy.transform.CompileStatic
 
 /**
-* Mapper is a utility for binding http request parameters to a Groovy/Java
-* data bean.  
+* Mapper is a utility for generating a Groovy/Java object graph based on the given request's parameters.
+*
+* Given the following:
+*	class Address {
+*		String streetAddress
+*		String city
+*	}
+* 	class Contact {
+*		Address[] addresses
+*		Name name
+*	}
+*
+* Request parameter names 
+* - mapper.bindRequest(Contact, req):
+* 	- addresses[0].streetAddress
+* 	- addresses[0].city
+* 	- addresses[1].streetAddress
+* 	- addresses[1].city
+* 	- name.firstName
 */
 @Log4j
 public class Mapper {
