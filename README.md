@@ -30,11 +30,11 @@ Servlet 3.0 (the meat-and-potatoes) and Groovy (the Gravy).
 
 ### Your First Application
 
-Create the example app:
+A Gravy application can be as simple as a single script (application.groovy), but most Gravy applications will also employ modules, views (templates), static content (images, css, js), and custom configuration.  To create an example application which demonstrates each of these additional conponents run the following command:
 
 	$ gravy create [app-name] example
 
-This command creates the example application in a folder named [app-name].  The example application demonstrates many Gravy features.  The application folder layout is as follows:
+This command creates the example application in a folder named [app-name].  The application folder layout is as follows:
 
 	[app-name]                   - root application folder
 	    |- application.groovy    - main application script
@@ -56,12 +56,12 @@ This command creates the example application in a folder named [app-name].  The 
 	    |   |- css
 	    |   |_ js 
 	    |
-	    |- scripts               - subscripts called by application.groovy
+	    |- scripts               - sub-scripts called by application.groovy
 	    |- modules               - application modules 
 	    |_ lib                   - application jar files
 
 
-To run your new Gravy app execute the gravy command:
+To run your new Gravy app execute the gravy commands:
 
 	$ cd <app-name>
 	$ gravy
@@ -71,9 +71,13 @@ Point your browser at:
 	http://localhost:8080
 
 
-## Routes
+## The Code
 
-A route is a mapping between a URI pattern and one or more handlers (Closure objects).  You can define a handler for each supported http method (get, head, delete, put, post, and options) or you may define a general purpose handler (Route.handler) to service any and all request methods.  In Java enterprise terms routes are (basically) filters.  They are matched in the order they are defined.  They may issue a response or hand control to the next route in the chain (via chain.doFilter()).
+### Routes
+
+A route is a mapping between a URI pattern and one or more handlers (Closure objects).  URI patterns can be defined as strings with wildcards and named parameters (:parmName).  You can define a handler for each supported http method (get, head, delete, put, post, and options) or you may define a general purpose handler (Route.handler) to service any and all request methods.  In Java enterprise terms routes are (basically) filters.  They are matched in the order they are defined.  They may issue a response or hand control to the next Route in the chain (via chain.doFilter()).
+
+Examples:
 
 	// http:/hostname/Steve/is/Cool
 	// yields: 'Steve is Cool'
@@ -105,7 +109,11 @@ A route is a mapping between a URI pattern and one or more handlers (Closure obj
 
 ### Controllers
 
-Controllers are very similar to routes but there are a few notable differences.  First, controllers handle specific URI's rather than patterns.  Secondly, controllers are ignorant of http method, rather than defining handlers for http methods we define named actions.  A controller URI two parts, the controller name and the action name 
+Controllers are very similar to routes but there are a few notable differences.  First, controllers handle specific URI's rather than patterns.  Secondly, controllers are ignorant of http method, rather than defining handlers for http methods we define named actions.  
+
+A controller URI has two parts, the controller name and the action name. 
+
+Examples:
 
 	controller('/friendly/controller', [
 		greeting: {
@@ -145,40 +153,154 @@ Controllers are very similar to routes but there are a few notable differences. 
 ### Handler Bindings
 The Gravy runtime binds the following objects to every route handler and controller action in your application:
 
-	render(String template, Map model)
-		 render a view
+<table>
+	<tr>
+		<td><pre>render         -</pre></td>
+		<td>void render(String template, Map model)</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>Render a view</td>
+	</tr>
+	<tr>
+		<td colspan='2'>Example:<br/><pre>
+	render('/order/edit.html', [order: myOrder])
+		</pre></td>
+	</tr>
+	<tr><td colspan='2'><hr/></td></tr>
+	<tr>
+		<td><pre>renderJson     -</pre></td>
+		<td>void renderJson(Map model)</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>Reender a JSON response</td>
+	</tr>
+	<tr>
+		<td colspan='2'>Example:<br/><pre>
+	renderJson([order: myOrder])
+		</pre></td>
+	</tr>
+	<tr><td colspan='2'><hr/></td></tr>
+	<tr>
+		<td><pre>forward        -</pre></td>
+		<td>void forward(String uri)</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>Forward request to the given uri</td>
+	</tr>
+	<tr>
+		<td colspan='2'>Example:<br/><pre>
+	forward('/order/listing')
+		</pre></td>
+	</tr>
+	<tr><td colspan='2'><hr/></td></tr>
+	<tr>
+		<td><pre>redirect        -</pre></td>
+		<td>void redirect(String uri)</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>Redirect the request to the given uri</td>
+	</tr>
+	<tr>
+		<td colspan='2'>Example:<br/><pre>
+	redirect('http://anotherUrl')
+		</pre></td>
+	</tr>
+	<tr><td colspan='2'><hr/></td></tr>	
+	<tr>
+		<td><pre>req             -</pre></td>
+		<td><a href='http://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpServletRequest.html'>HttpServletRequest</a></td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>
+			The request object.  The Gravy runtime adds a few convenience methods to the class:<br/>
+	<pre>
+	Object attr(String attributeName)
+		Get the attribute with the given name
+	Object attr(String attributeName, Object attributeValue)
+		Set the attribute of the given name and value
+	String parm(String parameterName)
+		Get the parameter with the given name
+	T toObject(Class<T>)
+		Instantiate an object graph for the given class based on the parameters in this request
+	</pre>
+		</td>
+	</tr>
+	<tr>
+		<td colspan='2'>Example:<br/><pre>
+	req.attr('userId')
+		</pre></td>
+	</tr>
+	<tr><td colspan='2'><hr/></td></tr>
+	<tr>
+		<td><pre>res             -</pre></td>
+		<td><a href='http://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpServletResponse.html'>HttpServletResponse</a></td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>The response object</td>
+	</tr>
+	<tr>
+		<td colspan='2'>Example:<br/><pre>
+	res.contentType = 'text/plain'
+		</pre></td>
+	</tr>
+	<tr><td colspan='2'><hr/></td></tr>
+	<tr>
+		<td><pre>sess             -</pre></td>
+		<td><a href='http://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpSession.html'>HttpSession</a></td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>
+			The session object.  The Gravy runtime adds two convenience methods to the class:<br/>
+	<pre>
+	Object attr(String attributeName)
+		Get the attribute with the given name
+	Object attr(String attributeName, Object attributeValue)
+		Set the attribute of the given name and value
+	</pre>
+		</td>
+	</tr>
+	<tr>
+		<td colspan='2'>Example:<br/><pre>
+	sess.attr('userId', 17)
+		</pre></td>
+	</tr>
+	<tr><td colspan='2'><hr/></td></tr>	
+	<tr>
+		<td><pre>out             -</pre></td>
+		<td><a href='http://docs.oracle.com/javase/6/docs/api/java/io/PrintWriter.html'>PrintWriter</a></td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>The response writer</td>
+	</tr>
+	<tr>
+		<td colspan='2'>Example:<br/><pre>
+	out << 'Hello World!'
+		</pre></td>
+	</tr>
+	<tr><td colspan='2'><hr/></td></tr>	
+	<tr>
+		<td><pre>chain           -</pre></td>
+		<td><a href='http://docs.oracle.com/javaee/6/api/javax/servlet/FilterChain.html'>FilterChain</a></td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>The requests filter chain.  <b>Available in route handlers only.</b></td>
+	</tr>
+	<tr>
+		<td colspan='2'>Example:<br/><pre>
+	chain.doFilter()
+		</pre></td>
+	</tr>		
+</table>
 
-	renderJson(Map model)
-		render a JSON response 
-
-	forward(String uri)
-		forward request to the given uri
-
-	redirect(String uri)
-		redirect the request to the given uri
-
-	req - [HttpServletRequest](http://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpServletRequest.html) - with additional convenience methods:
-		Object attr(String attributeName)
-			get the attribute with the given name
-		Object attr(String attributeName, Object attributeValue)
-			set the attribute of the given name and value
-		String parm(String parameterName)
-			get the parameter with the given name
-		toObject(Class)
-			instantiate an object graph for the given class based on the parameters in this request
-
-	res - [HttpServletResponse](http://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpServletResponse.html)
-
-	sess - [HttpSession](http://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpSession.html) - with addtional convenience methods:
-		Object attr(String attributeName)
-			get the attribute with the given name
-		Object attr(String attributeName, Object attributeValue)
-			set the attribute of the given name and value
-
-	out - [PrintWriter](http://docs.oracle.com/javase/6/docs/api/java/io/PrintWriter.html)
-		this is the HttpServletResponse.getWriter()
-
-	chain - [FilterChain](http://docs.oracle.com/javaee/6/api/javax/servlet/FilterChain.html) (routes only)
 
 ### Rendering a View
 
