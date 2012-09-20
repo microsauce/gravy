@@ -80,7 +80,7 @@ class ControllerFilter implements Filter {
 				if (it != '')
 					parts.add(it)
 			}
-println "parts : $parts"
+
 			if (parts.size() == 0) return null
 		
 			if (parts.size() == 1) {
@@ -90,19 +90,15 @@ println "parts : $parts"
 			else {
 
 				StringBuilder buffer = new StringBuilder()
-//				boolean first = true
+
 				parts[0..<(parts.size()-1)].each {
-//					if (first) {
-//						buffer << it
-//						first = false
-//					} else 
-						buffer << '/'+it
+					buffer << '/'+it
 				}
 				controllerName = buffer.toString()
 				actionName = parts[parts.size()-1]
 			}
 		}
-println "controllerName $controllerName"
+
 		Controller controller = ApplicationContext.getInstance().findController(controllerName)
 		if ( !controller ) return null
 		Closure action = controller.actions[actionName]
@@ -119,13 +115,11 @@ println "controllerName $controllerName"
 		def action = null
 		def matches = req.requestURI =~ controllerUriPattern
 		def size = matches.size() > 0 ? matches[0].size() : 0
-		def binding = [:] //; binding.id = null
+		def binding = [:] 
 		def controllerName
 		def actionName
 
 		switch ( size ) {
-//			case 4:
-//				binding.id = matches[0][ENTITY_ID]
 			case 3:
 				controllerName = matches[0][CONTROLLER_NAME]
 				actionName = matches[0][ACTION_NAME]

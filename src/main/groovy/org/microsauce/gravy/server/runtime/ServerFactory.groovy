@@ -6,8 +6,8 @@ import groovy.util.logging.Log4j
 class ServerFactory {
 
 	def static private wrappers = [
+		jetty : JettyWrapper
 //		tomcat : TomcatWrapper,
-		jetty : JettyWrapper2
 //		resin : ResinWrapper
 	]
 

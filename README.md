@@ -34,7 +34,7 @@ Create an example app:
 
 	$ gravy create [app-name] example
 
-This command creates an example application in a folder named [app-name].  The example application demonstrates many of Gravy features.  The application folder layout is as follows:
+This command creates an example application in a folder named [app-name].  The example application demonstrates many Gravy features.  The application folder layout is as follows:
 
 	[app-name]                   - root application folder
 	    |- application.groovy    - main application script
@@ -73,7 +73,7 @@ Point your browser at:
 
 ## Routes
 
-A route is mapping between a URI pattern and one or more handlers (Closure objects).  You can define a handler for each supported http method (get, head, delete, put, post, and options) or you may define a general purpose handler (Route.handler) to service any and all request methods.
+A route is mapping between a URI pattern and one or more handlers (Closure objects).  You can define a handler for each supported http method (get, head, delete, put, post, and options) or you may define a general purpose handler (Route.handler) to service any and all request methods.  In Java enterprise terms routes are (basically) filters.  They are matched in the order they are defined.  They may issue a response or hand control to the next route in the chain.
 
 	// http:/hostname/Steve/is/Cool
 	// yields: 'Steve is Cool'
@@ -81,7 +81,7 @@ A route is mapping between a URI pattern and one or more handlers (Closure objec
 		out << "$name is $adjective"
 	}
 
-	// GET http:/hostname/hello/Steve
+	// GET /hello/Steve
 	// yields: 'Hello Steve!'
 	route('/hello/:name').with {
 		get = {
@@ -89,7 +89,7 @@ A route is mapping between a URI pattern and one or more handlers (Closure objec
 		}
 	}
 	
-	// GET http:/hostname/hello/Jimmy
+	// GET /hello/Jimmy
 	// yields: 'Hello Jimmy!'
 	route(~/\/hello\/(.*)/).with {
 		get = {
@@ -105,7 +105,7 @@ A route is mapping between a URI pattern and one or more handlers (Closure objec
 
 ### Controllers
 
-Controllers are very similar to routes but there are a few notable differences.  First, controllers handle specific URI's rather than patterns.  Secondly, controllers are ignorant of http method, rather than defining handlers for http methods we define named actions.  
+Controllers are very similar to routes but there are a few notable differences.  First, controllers handle specific URI's rather than patterns.  Secondly, controllers are ignorant of http method, rather than defining handlers for http methods we define named actions.  A controller URI two parts, the controller name and the action name 
 
 	controller('/friendly/controller', [
 		greeting: {

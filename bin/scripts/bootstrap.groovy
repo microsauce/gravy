@@ -23,18 +23,12 @@ println 'Building classpath . . .\n'
 println '\tgravy jars:'
 addFolder("$gravyHome/lib")
 addFolder("$gravyHome/lib/jnotify")
-addFolder("$gravyHome/lib/freemarker")
+//addFolder("$gravyHome/lib/freemarker")
 addFolder("$gravyHome/lib/jetty8")
 addFolder("$gravyHome/lib/jetty8/jsp")
 addFolder("$gravyHome/lib/groovy")
 addFolder("$javaHome/lib")
 
-//println '\n\tApplication jars:'
-//def projectLib = new File('./lib')
-//if ( projectLib.exists() ) {
-//	addFolder('./lib')
-//}
-//else println '\tnone'
 println ''
 
 //

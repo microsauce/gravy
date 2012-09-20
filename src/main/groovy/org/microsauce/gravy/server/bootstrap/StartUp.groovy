@@ -47,6 +47,7 @@ class StartUp {
 		}
 		config.jetty.port = clConfig['jetty.port'] ? Integer.parseInt(clConfig['jetty.port']) : (config.jetty.port ?: 8080 )
 		config.jetty.host = clConfig['jetty.host'] ?: config.jetty.host
+		config.gravy.refresh = config.gravy.refresh ?: true
 
 		//
 		// start the application server
@@ -69,6 +70,7 @@ class StartUp {
 	}
 
 	def static startApplicationServer(ConfigObject config) {
+
 		//
 		// instantiate the server
 		//

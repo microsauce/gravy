@@ -103,15 +103,20 @@ class Lifecycle {
 		compile()
 
 		def allTests = new GroovyTestSuite()
-		def testScripts = getTestScripts("${basedir}/src/test/groovy")
-		testScripts.each { thisScript ->
-			allTests.addTest(new
-				ScriptTestAdapter(allTests.compile(thisScript), [] as String[]))
+		if ( exists("${basedir}/src/test/groovy") ) {
+			def testScripts = getTestScripts("${basedir}/src/test/groovy")
+			testScripts.each { thisScript ->
+				allTests.addTest(new
+					ScriptTestAdapter(allTests.compile(thisScript), [] as String[]))
+			}
+
+			if (allTests.countTestCases() < 1) return 0
+
+			TestRunner.run(allTests).wasSuccessful()
+		} else {
+			ant.echo "there are no unit test scripts defined for application $appName"
+			return true
 		}
-
-		if (allTests.countTestCases() < 1) return 0
-
-		TestRunner.run(allTests).wasSuccessful()
 	}
 
 	def private getTestScripts(testFolder) {
@@ -142,11 +147,22 @@ class Lifecycle {
 			if (exists("${tempWar}.war")) delete(dir:"${tempWar}.war")
 
 			mkdir(dir:"${tempWar}")
-		    copy(todir:"${tempWar}") {
-		    	fileset(dir:"${basedir}/webroot") {
-		    		include(name:'*/**')
+			if (exists("${basedir}/webroot")) {
+			    copy(todir:"${tempWar}") {
+			    	fileset(dir:"${basedir}/webroot") {
+			    		include(name:'*/**')
+			    	}
+			    }
+			}
+
+		    if ( !exists("${basedir}/webroot/WEB-INF/web.xml") ) {
+		    	copy(todir:"${tempWar}") {
+		    		fileset(dir:"${gravyHome}/bin/scripts/essentials/webroot") {
+		    			include(name:'WEB-INF/**')
+		    		}
 		    	}
 		    }
+
 		    copy(todir:"${tempWar}/WEB-INF") {
 		    	fileset(dir:"${basedir}") {
 		    		include(name:'scripts/**')
@@ -154,7 +170,6 @@ class Lifecycle {
 		    		include(name:'conf/**')
 		    		include(name:'modules/**')
 		    		include(name:'application.groovy')
-
 		    	}
 		    }
 		    copy(file:"${basedir}/application.groovy", todir:"${tempWar}/WEB-INF")
@@ -180,6 +195,8 @@ class Lifecycle {
 			copy(todir:"${tempWar}/WEB-INF/lib", flatten:'true') {
 		    	fileset(dir:"${gravyHome}/lib") {
 		    		include(name:'*/**')
+		    		exclude(name:'jetty8/**')
+		    		exclude(name:'jnotify/**')
 		    	}
 		    }
 

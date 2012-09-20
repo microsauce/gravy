@@ -13,11 +13,11 @@ import org.eclipse.jetty.servlet.ServletHolder
 import groovy.util.logging.Log4j
 
 @Log4j
-class JettyWrapper2 extends ServerWrapper {
+class JettyWrapper extends ServerWrapper {
 
 	def private server
 
-	JettyWrapper2(config) {
+	JettyWrapper(config) {
 		super(config)
 	}
 
@@ -26,7 +26,7 @@ class JettyWrapper2 extends ServerWrapper {
 		server = new Server(config.jetty.port)
 
         WebAppContext context = new WebAppContext()
-        context.setDescriptor(config.jetty.webroot+"/WEB-INF/web.xml")
+        context.setDescriptor(getDescriptorURI())
         context.setResourceBase(config.jetty.webroot)
         context.setContextPath(config.jetty.contextPath)
         context.setParentLoaderPriority(true)
@@ -41,6 +41,14 @@ class JettyWrapper2 extends ServerWrapper {
 
 	void stop() {
 		server.stop()
+	}
+
+	private String getDescriptorURI() {
+		def webXmlURI = config.jetty.webroot+'/WEB-INF/web.xml'
+		if ( !new File(webXmlURI).exists() )
+			webXmlURI = System.getenv()['GRAVY_HOME']+'/bin/scripts/essentials/webroot/WEB-INF/web.xml'
+			
+		webXmlURI
 	}
 
 
