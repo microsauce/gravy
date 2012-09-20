@@ -40,14 +40,10 @@ class StartUp {
 		def clConfig = commandLineEnv(commandLine)
 
 		System.setProperty('gravy.appRoot', System.getProperty('user.dir'))
-		def config = config.getInstance(environment).get()
-
 		clConfig.each {key, value ->
 			System.setProperty(key, value)
 		}
-		config.jetty.port = clConfig['jetty.port'] ? Integer.parseInt(clConfig['jetty.port']) : (config.jetty.port ?: 8080 )
-		config.jetty.host = clConfig['jetty.host'] ?: config.jetty.host
-		config.gravy.refresh = config.gravy.refresh ?: true
+		def config = config.getInstance(environment).get()
 
 		//
 		// start the application server

@@ -30,11 +30,11 @@ Servlet 3.0 (the meat-and-potatoes) and Groovy (the Gravy).
 
 ### Your First Application
 
-Create an example app:
+Create the example app:
 
 	$ gravy create [app-name] example
 
-This command creates an example application in a folder named [app-name].  The example application demonstrates many Gravy features.  The application folder layout is as follows:
+This command creates the example application in a folder named [app-name].  The example application demonstrates many Gravy features.  The application folder layout is as follows:
 
 	[app-name]                   - root application folder
 	    |- application.groovy    - main application script
@@ -73,7 +73,7 @@ Point your browser at:
 
 ## Routes
 
-A route is mapping between a URI pattern and one or more handlers (Closure objects).  You can define a handler for each supported http method (get, head, delete, put, post, and options) or you may define a general purpose handler (Route.handler) to service any and all request methods.  In Java enterprise terms routes are (basically) filters.  They are matched in the order they are defined.  They may issue a response or hand control to the next route in the chain.
+A route is a mapping between a URI pattern and one or more handlers (Closure objects).  You can define a handler for each supported http method (get, head, delete, put, post, and options) or you may define a general purpose handler (Route.handler) to service any and all request methods.  In Java enterprise terms routes are (basically) filters.  They are matched in the order they are defined.  They may issue a response or hand control to the next route in the chain (via chain.doFilter()).
 
 	// http:/hostname/Steve/is/Cool
 	// yields: 'Steve is Cool'
@@ -143,17 +143,21 @@ Controllers are very similar to routes but there are a few notable differences. 
 	}
 
 ### Handler Bindings
-The following objects are bound to every route and controller Closure in your application:
+The Gravy runtime binds the following objects to every route handler and controller action in your application:
 
 	render(String template, Map model)
 		 render a view
+
 	renderJson(Map model)
-		render a JSON response to the client (contentType='application/json')
+		render a JSON response 
+
 	forward(String uri)
 		forward request to the given uri
+
 	redirect(String uri)
 		redirect the request to the given uri
-	req - HttpServletRequest - with additional convenience methods:
+
+	req - [HttpServletRequest](http://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpServletRequest.html) - with additional convenience methods:
 		Object attr(String attributeName)
 			get the attribute with the given name
 		Object attr(String attributeName, Object attributeValue)
@@ -162,20 +166,30 @@ The following objects are bound to every route and controller Closure in your ap
 			get the parameter with the given name
 		toObject(Class)
 			instantiate an object graph for the given class based on the parameters in this request
-	res - HttpServletResponse
-	sess - HttpSession - with addtional convenience methods:
+
+	res - [HttpServletResponse](http://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpServletResponse.html)
+
+	sess - [HttpSession](http://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpSession.html) - with addtional convenience methods:
 		Object attr(String attributeName)
+			get the attribute with the given name
 		Object attr(String attributeName, Object attributeValue)
-	out - PrintWriter
+			set the attribute of the given name and value
+
+	out - [PrintWriter](http://docs.oracle.com/javase/6/docs/api/java/io/PrintWriter.html)
 		this is the HttpServletResponse.getWriter()
-	chain - FilterChain (routes only)
+
+	chain - [FilterChain](http://docs.oracle.com/javaee/6/api/javax/servlet/FilterChain.html) (routes only)
+
+### Rendering a View
+
+
 
 ### Scheduled Tasks
 
 Gravy also provides a way to define scheduled tasks as follows:
 
 	def batchMailer = module('batchMailer')
-	schedule('*/5 * * * *') {
+	schedule('*/5 * * * *') { // cron string
 		log.info "sending batch id ${batchMailer.batchId}"
 		batchMailer.sendBatch()
 	}
@@ -186,14 +200,18 @@ Gravy also provides a way to define scheduled tasks as follows:
 The following objects are bound to application.groovy, subscripts (the script folder), and module scripts:
 
 	Bound to all scripts:
+	route
+	controller
 	root                    - denotes the root node of the uri hierarchy (aka '/')
 	config                  - the groovy ConfigObject 
 	log                     - the logger
+	run('<script-name>', [optional parameterList])    
+	                        - execute a subscript - scripts folder
 	REQUEST                 - DispatcherType.REQUEST
 	FORWARD                 - DispatcherType.FORWARD
 	ERROR                   - DispatcherType.ERROR
-	run('<script-name>', [optional parameterList])    
-	                        - execute a subscript - scripts folder
+	ASYNC					- DispatcherType.ASYNC
+	INCLUDE					- DispatcherType.INCLUDE
 
 	Exclusive to application.groovy:
 	module('mod-name')      - load a module

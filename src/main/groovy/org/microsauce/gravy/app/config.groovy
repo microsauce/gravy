@@ -55,7 +55,7 @@ class config {
 		config.jetty.port 			= System.getProperty('jetty.port') ?: config.tomcat.port ?: 8080
 		config.jetty.host 			= System.getProperty('jetty.host') ?: config.tomcat.host ?: 'localhost'
 
-		config.refresh				= System.getProperty('gravy.refresh') ?: config.gravy.refresh ?: true
+		config.gravy.refresh		= System.getProperty('gravy.refresh') ?: config.gravy.refresh ?: true
 		config.gravy.viewUri		= System.getProperty('gravy.viewUri') ?: config.gravy.viewUri ?: '/view/renderer'
 		config.gravy.errorUri		= System.getProperty('gravy.errorUri') ?: config.gravy.errorUri ?: '/error'
 
