@@ -76,13 +76,13 @@ Point your browser at:
 A route is mapping between a URI pattern and one or more handlers (Closure objects).  You can define a handler for each supported http method (get, head, delete, put, post, and options) or you may define a general purpose handler (Route.handler) to service any and all request methods.
 
 	// http:/hostname/Steve/is/Cool
-	// yeilds: 'Steve is Cool'
+	// yields: 'Steve is Cool'
 	route '/:name/is/*', { adjective ->
 		out << "$name is $adjective"
 	}
 
 	// GET http:/hostname/hello/Steve
-	// yeilds: 'Hello Steve!'
+	// yields: 'Hello Steve!'
 	route('/hello/:name').with {
 		get = {
 			out << "Hello $name!"
@@ -90,7 +90,7 @@ A route is mapping between a URI pattern and one or more handlers (Closure objec
 	}
 	
 	// GET http:/hostname/hello/Jimmy
-	// yeilds: 'Hello Jimmy!'
+	// yields: 'Hello Jimmy!'
 	route(~/\/hello\/(.*)/).with {
 		get = {
 			out << "Hello ${splat[0]}!"
@@ -98,7 +98,7 @@ A route is mapping between a URI pattern and one or more handlers (Closure objec
 	}
 
 	// http:/hostname/hello/Suzie
-	// yeilds: 'Hello Suzie!'
+	// yields: 'Hello Suzie!'
 	route ~/\/hello\/(.*)/, { name ->
 		out << "Hello $name!"
 	}
