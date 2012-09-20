@@ -1,63 +1,34 @@
 
-Servlet 3.0 (the meat and potatoes) & Groovy (the Gravy)
+Gravy
 ===
+
+This README is a work in progress, more to come . . .
+
+Gravy is a dynamic server scripting framework for the Groovy language on the Java enterprise.  Its design focuses on modularity and rapid development.
+
+Servlet 3.0 (the meat-and-potatoes) and Groovy (the Gravy).
 
 	route('/hello/:name') { 
 		out << "Hello $name!"
 	}
 
-This README is a work in progress, more to come . . .
+## Getting Started
 
-Gravy is a framework for rapid development of web applications on Servlet 3.0 compliant web containers.  Taking inspiration from Sinatra and Express.js, Gravy is an effort to bring dynamic server scripting into the Java space, in particular, the Java enterprise web container.
+### Prerequisites
 
-## Features
-***
-* Rapid application development
-* Sinatra style routing 
-	* Regular expressions
-	* named, wildcard, and optional uri parameters
-* Elegant controller syntax
-* Modules
-* Templates (three template modules and counting):
-	* gstring module - an enhanced GStringTemplateEngine supporting:
-		* layouts
-		* internationalization
-		* XSS sanitizing
-	* freemarker module
-	* scalate module 
-* Environment based configuration
-* Integrated development lifecycle tools for:
-	* building
-	* testing
-	* packaging
-
-## System Requirements
-***
-* Development Environment Requirements
-	* ant or gradle
 	* Java 7 JDK
 	* JAVA_HOME must refer to your Java 7 JDK
+	* ant or gradle
 
-* Deployment Environment Requirements
-	* Java 7 JRE
-	* a Servlet 3.0 compliant web container
+### Installation
 
-## Building/Installing the Gravy Development Environment
-***
+	$ git clone https://github.com/microsauce/gravy.git
+	$ cd gravy
+	$ ant
+	$ export GRAVY_HOME=$PWD
+	$ PATH=$PATH:$GRAVY_HOME/bin
 
-1.	Build Gravy:
-
-	$ ant jar - or - $ gradle jar
-
-2. Set GRAVY_HOME environment variable
-
-3. Add $GRAVY_HOME/bin to your PATH
-
-4. Set JAVA_HOME environment variable (it must reference a Java 7 JDK)
-
-
-## Quick Start
-***
+### Your First Application
 
 Create an example app:
 
@@ -99,61 +70,42 @@ Point your browser at:
 
 	http://localhost:8080
 
-## The Code
 
-## URI Handlers
+## Routes
 
-### Routes
+A route is mapping between a URI pattern and one or more handlers (Closure objects).  You can define a handler for each supported http method (get, head, delete, put, post, and options) or you may define a general purpose handler (Route.handler) to service any and all request methods.
 
-A route is mapping between a URI pattern and one or more handlers (Closure objects).  You can define a handler for each supported http method (get, head, delete, put, post, and options), you may also define a general purpose handler (Route.handler) to service any and all request methods.
-
-To create a Route use one of the following methods in your application and/or module scripts:
-
-#### Route route(String, Closure)
-Create a route with a catch-all handler
-Example:
-
-	route('/order/*') { id ->
-		out << "order $id"
+	// http:/hostname/Steve/is/Cool
+	// yeilds: 'Steve is Cool'
+	route '/:name/is/*', { adjective ->
+		out << "$name is $adjective"
 	}
 
-#### Route route(String)
-Example:
-
+	// GET http:/hostname/hello/Steve
+	// yeilds: 'Hello Steve!'
 	route('/hello/:name').with {
 		get = {
-			out << "Hellow $name!"
+			out << "Hello $name!"
 		}
 	}
 	
-#### Route route(Pattern, Closure)
-Example:
-
-	route(~/\/hello\/(.*)/) { name ->
-		out << "Hello $name!"
-	}
-
-#### Route route(Pattern)
-Example:
-
+	// GET http:/hostname/hello/Jimmy
+	// yeilds: 'Hello Jimmy!'
 	route(~/\/hello\/(.*)/).with {
 		get = {
 			out << "Hello ${splat[0]}!"
 		}
 	}
 
+	// http:/hostname/hello/Suzie
+	// yeilds: 'Hello Suzie!'
+	route ~/\/hello\/(.*)/, { name ->
+		out << "Hello $name!"
+	}
+
 ### Controllers
 
-Controllers are very similar to routes but there are a few notable differences.  First, controllers handle specific URI's rather than patterns.  Second, controllers are ignorant of http method.  Rather than defining handlers for http methods we define actions.  Finally, because we are handling specific URI's we, by convention, presume that any views rendered by your action are located in a folder by the same name as the controller.  For example, for the given URI:
-
-	/friendly/controller/greeting
-	
-The gravy runtime understands '/fiendly/controller' to be the controller name and 'greeting' to be the action name.
-
-To define a controller use one of the following methods:
-
-#### Controller controller(String, Map<String, Closure>)
-Example:
+Controllers are very similar to routes but there are a few notable differences.  First, controllers handle specific URI's rather than patterns.  Secondly, controllers are ignorant of http method, rather than defining handlers for http methods we define named actions.  
 
 	controller('/friendly/controller', [
 		greeting: {
@@ -164,10 +116,6 @@ Example:
 		}
 	])
 
-#### Map controller(String)
-This signature returns the map of controller actions.
-Example:
-
 	conroller('/friendly/controller').with {
 		greeting = {
 			out << 'hello'
@@ -176,9 +124,6 @@ Example:
 			out << 'good-bye'
 		}
 	}
-
-#### Tree-Notation
-You may also define controllers using a tree-like syntax.  In the following example 'root' denotes the root node of your server URI hierarchy (a.k.a '/').
 
 	root.friendly.controller.with {
 		greeting = {  		// http://my-host/friendly/controller/greeting
@@ -200,30 +145,30 @@ You may also define controllers using a tree-like syntax.  In the following exam
 ### Handler Bindings
 The following objects are bound to every route and controller Closure in your application:
 
-	* render(String template, Map model)
-		 * render a view
-	* renderJson(Map model)
-		* render a JSON response to the client (contentType='application/json')
-	* forward(String uri)
-		* forward request to the given uri
-	* redirect(String uri)
+	render(String template, Map model)
+		 render a view
+	renderJson(Map model)
+		render a JSON response to the client (contentType='application/json')
+	forward(String uri)
+		forward request to the given uri
+	redirect(String uri)
 		redirect the request to the given uri
-	* req - HttpServletRequest
-		* Object attr(String attributeName)
-			* get the attribute with the given name
-		* Object attr(String attributeName, Object attributeValue)
-			* set the attribute of the given name and value
-		* String parm(String parameterName)
-			* get the parameter with the given name
-		* toObject(Class)
-			* instantiate an object graph for the given class based on the parameters in this request
-	* res - HttpServletResponse
-	* sess - HttpSession
-		* Object attr(String attributeName)
-		* Object attr(String attributeName, Object attributeValue)
-	* out - PrintWriter
-		* this is the HttpServletResponse.getWriter()
-	* chain - FilterChain (routes only)
+	req - HttpServletRequest - with additional convenience methods:
+		Object attr(String attributeName)
+			get the attribute with the given name
+		Object attr(String attributeName, Object attributeValue)
+			set the attribute of the given name and value
+		String parm(String parameterName)
+			get the parameter with the given name
+		toObject(Class)
+			instantiate an object graph for the given class based on the parameters in this request
+	res - HttpServletResponse
+	sess - HttpSession - with addtional convenience methods:
+		Object attr(String attributeName)
+		Object attr(String attributeName, Object attributeValue)
+	out - PrintWriter
+		this is the HttpServletResponse.getWriter()
+	chain - FilterChain (routes only)
 
 ### Scheduled Tasks
 
@@ -234,36 +179,6 @@ Gravy also provides a way to define scheduled tasks as follows:
 		log.info "sending batch id ${batchMailer.batchId}"
 		batchMailer.sendBatch()
 	}
-
-### Script Environment
-
-The Gravy runtime 
-
-### Closure Bindings
-
-
-
-### Rendering a View
-
-### Building Blocks
-
-#### application.groovy
-
-For most gravy applications this file is the .. 
-
-#### Modules
-
-Modules . . .
-
-#### Sub-scripts
-
-Both applications and modules may invoke sub-scripts.  Sub-scripts are located in the 'scripts' folder and can be invoked by name, as follows:
-
-	run('myScript')
-	// or
-	run('myScript', [arg1:val1, arg2:val2 . . .])
-
-The run command is overloaded allowing the calling script to pass in an optional map of values which are bound to the sub-script by key name.
 
 
 ### Script Bindings
@@ -307,28 +222,6 @@ For example:
 		}
 	}
 
-### Closure (action) Bindings
-
-The Gravy runtime binds the following objects to the closure delegate prior to its execution.
-
-Routes:
-
-	req - the HttpServletRequest
-	res - the HttpServletResponse
-	out - HttpServletResponse.writer (PrintWriter)
-	chain - the FilterChain
-
-Controllers:
-
-	req - the HttpServletRequest
-	res - the HttpServletResponse
-	out - the HttpServletResponse.printWriter
-	render
-	forward
-
-## Development Mode
-
-When running your application in development mode (via the gravy command) 
 
 ## War Mode
 
