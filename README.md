@@ -6,7 +6,7 @@ This README is a work in progress, more to come . . .
 
 Gravy is a dynamic server scripting framework for the Groovy language on the Java enterprise.  Its design focuses on modularity and rapid development.
 
-Servlet 3.0 (the meat-and-potatoes) and Groovy (the Gravy).
+The Java Enterprise (the meat-and-potatoes) and Groovy (the Gravy).
 
 	route('/hello/:name') { 
 		out << "Hello $name!"
@@ -30,7 +30,7 @@ Servlet 3.0 (the meat-and-potatoes) and Groovy (the Gravy).
 
 ### Your First Application
 
-A Gravy application can be as simple as a single script (application.groovy), but most Gravy applications will also employ modules, views (templates), static content (images, css, js), and custom configuration.  To create an example application which demonstrates each of these additional conponents run the following command:
+A Gravy application can be as simple as a single script (application.groovy), but most Gravy applications will also employ modules, views (templates), static content (images, css, js), Java and Groovy sources, and custom configuration.  To create an example application which demonstrates each of these additional conponents run the following command:
 
 	$ gravy create [app-name] example
 
@@ -70,8 +70,9 @@ Point your browser at:
 
 	http://localhost:8080
 
+Gravy is a rapid development environment.  All source files are automatically re-compiled and re-deployed upon modifification.  Make a change, refresh your browser, and benefit from the instant feedback.
 
-## The Code
+## Pour it On
 
 ### Routes
 
@@ -111,7 +112,11 @@ Examples:
 
 Controllers are very similar to routes but there are a few notable differences.  First, controllers handle specific URI's rather than patterns.  Secondly, controllers are ignorant of http method, rather than defining handlers for http methods we define named actions.  
 
-A controller URI has two parts, the controller name and the action name. 
+A controller URI has two parts, the controller name and the action name. The action name is the right most node of the URI path, the controller name is everything to the left of the action name.  For example, given the following URI:
+
+	/friendly/controller/greeting
+
+The controller name is '/friendly/controller', and the action name is 'greeting'.  This tidbit will be useful for our discussion of views below.
 
 Examples:
 
@@ -272,7 +277,7 @@ The Gravy runtime binds the following objects to every route handler and control
 	</tr>
 	<tr><td colspan='2'><hr/></td></tr>	
 	<tr>
-		<td><chain</td>
+		<td>chain</td>
 		<td><a href='http://docs.oracle.com/javaee/6/api/javax/servlet/FilterChain.html'>FilterChain</a></td>
 	</tr>
 	<tr>
@@ -284,8 +289,14 @@ The Gravy runtime binds the following objects to every route handler and control
 	</tr>		
 </table>
 
-
 ### Rendering a View
+
+Gravy provides a number of options for view templating in your application:
+
+	- gstring module
+	- freemarker module
+	- scalate module
+	- JSP/JSTL
 
 
 
@@ -304,14 +315,16 @@ Gravy also provides a way to define scheduled tasks as follows:
 
 The following objects are bound to application.groovy, subscripts (the script folder), and module scripts:
 
-	Bound to all scripts:
+	URI Handler methods:
 	route
 	controller
+
 	root                    - denotes the root node of the uri hierarchy (aka '/')
 	config                  - the groovy ConfigObject 
 	log                     - the logger
 	run('<script-name>', [optional parameterList])    
 	                        - execute a subscript - scripts folder
+	Route / Filter Dispatch Types:
 	REQUEST                 - DispatcherType.REQUEST
 	FORWARD                 - DispatcherType.FORWARD
 	ERROR                   - DispatcherType.ERROR
@@ -346,13 +359,19 @@ For example:
 	}
 
 
-## War Mode
+## Preparing Your Application for Deployment (War Mode)
 
-To bundle your Gravy app for deployment to your web container run the following command:
+### Prerequisites
+
+	* A Servlet 3.0 compliant web container
+
+### gravy war
+
+To bundle your Gravy app for deployment to a stand-alone web container run the following command:
 
 	$ gravy war
 
-The war-ed application is organized as follows:
+The packaged application is organized as follows:
 
 	[app-name].war                     - webroot
         |
