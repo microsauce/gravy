@@ -22,4 +22,16 @@ do
   	cp="$cp$separator$f"
 done
 
-$JAVA_HOME/bin/java -cp $cp:$GRAVY_HOME/lib/gravy.jar org.codehaus.groovy.tools.GroovyStarter --classpath $cp --main groovy.ui.GroovyMain $GRAVY_HOME/bin/scripts/bootstrap.groovy "$@"
+JARS="$JAVA_HOME/lib/*.jar"
+for f in $JARS
+do
+	separator=":"
+	if [ "$first" = "first" ]; then
+		separator=""
+		first=""
+	fi
+
+  	cp="$cp$separator$f"
+done
+
+$JAVA_HOME/bin/java -cp $cp:$GRAVY_HOME/lib/gravy.jar org.codehaus.groovy.tools.GroovyStarter --classpath $cp --main groovy.ui.GroovyMain $GRAVY_HOME/bin/scripts/commandLine.groovy "$@"

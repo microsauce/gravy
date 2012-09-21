@@ -15,5 +15,8 @@ set cp=
 for /R %GRAVY_HOME%/lib/groovy %%a in (*.jar) do (
 	set cp=!cp!;%%a
 )
+for /R %JAVA_HOME%/lib %%a in (*.jar) do (
+	set cp=!cp!;%%a
+)
 
-%JAVA_HOME%\bin\java -cp %cp%;%GRAVY_HOME%\lib\gravy.jar org.codehaus.groovy.tools.GroovyStarter --classpath %cp%;%GRAVY_HOME%\lib\gravy.jar --main groovy.ui.GroovyMain %GRAVY_HOME%\bin\scripts\bootstrap.groovy %*
+%JAVA_HOME%\bin\java -cp %cp%;%GRAVY_HOME%\lib\gravy.jar org.codehaus.groovy.tools.GroovyStarter --classpath %cp%;%GRAVY_HOME%\lib\gravy.jar --main groovy.ui.GroovyMain %GRAVY_HOME%\bin\scripts\commandLine.groovy %*

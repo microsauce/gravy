@@ -1,33 +1,6 @@
-#!/usr/bin/env groovy
-
-import org.microsauce.util.CommandLine
-import org.microsauce.gravy.dev.Lifecycle
-
-//
-// parse command line
-//
-def commandLine = new CommandLine(args)
-if (commandLine.hasOption('help')) {
-	def help = '''gravy [clean|compile|test|run|war] [env dev|prod|other] [conf propertyName=propertyValue]
-
-Goals:
-clean         - delete all build products
-compile       - compile all Java and Groovy source (output to target/classes) - depends on clean
-test          - execute all test scripts defined in src/test/groovy - depends on compile
-run           - run your Gravy application in dev mode (this is the default goal) - depends on compile
-war           - bundle the application as a web archive [appName].war in the target folder - depends on test
-
-Flags:
-env           - specify the execution environment ('dev' by default)
-conf          - configure an application property on the command line,
-                overriding config.groovy
-skip-tests    - for the lazy'''
-	println help
-	System.exit(0)
-}
 
 /**
-* Initialize and launch gravy.
+* Bootstrap the Gravy development runtime
 */
 
 // environment validation
@@ -48,76 +21,15 @@ addFolder("$gravyHome/lib")
 addFolder("$gravyHome/lib/jnotify")
 addFolder("$gravyHome/lib/jetty8")
 addFolder("$gravyHome/lib/jetty8/jsp")
-addFolder("$gravyHome/lib/groovy")
-addFolder("$javaHome/lib")
 
-println ''
-
-if (commandLine.hasOption('create')) {
-	def name = commandLine.optionValue('create')
-	if ( name == null ) {
-		println 'please provide an app name'
-		System.exit(0)
-	}
-	def builder = new Lifecycle()
-	builder.createApp(name, commandLine.hasOption('example'))
-	System.exit(0)
-}
-if (commandLine.hasOption('create-mod')) {
-	def name = commandLine.optionValue('create-mod')
-	if ( name == null ) {
-		println 'please provide a module name'
-		System.exit(0)
-	}
-	def builder = new Lifecycle()
-	builder.createMod(name)
-	System.exit(0)
-}
-if (commandLine.hasOption('jar-mod')) {
-	def name = commandLine.optionValue('jar-mod')
-	if ( name == null ) {
-		println 'please provide a module name'
-		System.exit(0)
-	}
-	def builder = new Lifecycle()
-	builder.jarMod(name)
-	System.exit(0)
-}
-if (commandLine.hasOption('app-to-mod')) {
-	def name = commandLine.optionValue('app-to-mod')
-	def builder = new Lifecycle()
-	builder.appToMod(name)
-	System.exit(0)
-}
-if (commandLine.hasOption('war')) {
-	def name = commandLine.optionValue('name')
-	def builder = new Lifecycle()
-	builder.war(name, commandLine.hasOption('skip-test'))
-	System.exit(0)
-}
-if (commandLine.hasOption('test')) {
-	def tester = new Lifecycle()
-	tester.test()
-	System.exit(0)
-}
-if (commandLine.hasOption('compile')) {
-	def builder = new Lifecycle()
-	builder.compile()
-	System.exit(0)
-}
-if (commandLine.hasOption('clean')) {
-	def builder = new Lifecycle()
-	builder.clean()
-	System.exit(0)
-}
-
-//
-// start the dev server
-//
+// launch
 this.getClass().classLoader.rootLoader.loadClass('org.microsauce.gravy.server.bootstrap.StartUp')
 	.getMethod('main', String[].class)
 	.invoke(null, [args as String[]] as Object[])
 
+/*
+ 	script methods
+*/
 def addFolder(folder) {
 	new File(folder).eachFile { file ->
 		if (file.name.endsWith('.jar')) {

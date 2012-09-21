@@ -332,7 +332,7 @@ The following objects are bound to application.groovy, subscripts (the script fo
 	INCLUDE					- DispatcherType.INCLUDE
 
 	Exclusive to application.groovy:
-	module('mod-name')      - load a module
+	module('mod-name')      - load a module programmatically
  
 
 For example:
@@ -368,16 +368,22 @@ For example:
 
 	Goals:
 	clean         - delete all build products
-	compile       - compile all Java and Groovy source (output to target/classes) - depends on clean
+	compile       - compile all Java and Groovy sources (output to target/classes) - depends on clean
 	test          - execute all test scripts defined in src/test/groovy - depends on compile
 	run           - run your Gravy application in dev mode (this is the default goal) - depends on compile
-	war           - bundle the application as a web archive [appName].war in the target folder - depends on test
+	war           - bundle your application as a web archive [appName].war in the target folder - depends on test
 
 	Flags:
 	env           - specify the execution environment ('dev' by default)
 	conf          - configure an application property on the command line,
 	                overriding config.groovy
 	skip-tests    - for the lazy
+
+	Tools:
+	create [appName]      - create a new application with the given name
+	create-mod [modName]  - create a new module with the given name
+	jar-mod               - bundle a module as a jar file
+	app-to-mod [modName]  - convert an application into a module, optional name parameter (defaults to app name)
 
 
 
