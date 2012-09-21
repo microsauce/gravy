@@ -3,6 +3,29 @@
 import org.microsauce.util.CommandLine
 import org.microsauce.gravy.dev.Lifecycle
 
+//
+// parse command line
+//
+def commandLine = new CommandLine(args)
+if (commandLine.hasOption('help')) {
+	def help = '''gravy [clean|compile|test|run|war] [env dev|prod|other] [conf propertyName=propertyValue]
+
+Goals:
+clean         - delete all build products
+compile       - compile all Java and Groovy source (output to target/classes) - depends on clean
+test          - execute all test scripts defined in src/test/groovy - depends on compile
+run           - run your Gravy application in dev mode (this is the default goal) - depends on compile
+war           - bundle the application as a web archive [appName].war in the target folder - depends on test
+
+Flags:
+env           - specify the execution environment ('dev' by default)
+conf          - configure an application property on the command line,
+                overriding config.groovy
+skip-tests    - for the lazy'''
+	println help
+	System.exit(0)
+}
+
 /**
 * Initialize and launch gravy.
 */
@@ -23,7 +46,6 @@ println 'Building classpath . . .\n'
 println '\tgravy jars:'
 addFolder("$gravyHome/lib")
 addFolder("$gravyHome/lib/jnotify")
-//addFolder("$gravyHome/lib/freemarker")
 addFolder("$gravyHome/lib/jetty8")
 addFolder("$gravyHome/lib/jetty8/jsp")
 addFolder("$gravyHome/lib/groovy")
@@ -31,10 +53,6 @@ addFolder("$javaHome/lib")
 
 println ''
 
-//
-// parse command line
-//
-def commandLine = new CommandLine(args)
 if (commandLine.hasOption('create')) {
 	def name = commandLine.optionValue('create')
 	if ( name == null ) {

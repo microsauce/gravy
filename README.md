@@ -76,7 +76,7 @@ Gravy is a rapid development environment.  All source files are automatically re
 
 ### Routes
 
-A route is a mapping between a URI pattern and one or more handlers (Closure objects).  URI patterns can be defined as strings with wildcards and named parameters (:parmName).  You can define a handler for each supported http method (get, head, delete, put, post, and options) or you may define a general purpose handler (Route.handler) to service any and all request methods.  In Java enterprise terms routes are (basically) filters.  They are matched in the order they are defined.  They may issue a response or hand control to the next Route in the chain (via chain.doFilter()).
+A route is a mapping between a URI pattern and one or more handlers (Closure objects).  URI patterns can be defined as strings with wildcards and named parameters (:parmName) or as regular expressions.  You can define a handler for each supported http method (get, head, delete, put, post, and options) or you may define a general purpose handler (Route.handler) to service any and all request methods.  In Java enterprise terms routes are (basically) filters.  They are matched in the order they are defined.  They may issue a response or hand control to the next Route in the chain (via chain.doFilter()).
 
 Examples:
 
@@ -315,15 +315,15 @@ Gravy also provides a way to define scheduled tasks as follows:
 
 The following objects are bound to application.groovy, subscripts (the script folder), and module scripts:
 
-	URI Handler methods:
-	route
-	controller
-
+	URI Handler objects:
+	routes 					- create a new route
+	controller 				- create a new 
 	root                    - denotes the root node of the uri hierarchy (aka '/')
-	config                  - the groovy ConfigObject 
-	log                     - the logger
-	run('<script-name>', [optional parameterList])    
-	                        - execute a subscript - scripts folder
+
+	config                  - the application config object 
+	log                     - the application logger
+	run() 					- execute a subscript - scripts folder
+
 	Route / Filter Dispatch Types:
 	REQUEST                 - DispatcherType.REQUEST
 	FORWARD                 - DispatcherType.FORWARD
@@ -358,8 +358,32 @@ For example:
 		}
 	}
 
+## Configuration
 
-## Preparing Your Application for Deployment (War Mode)
+
+
+## The <tt>gravy</tt> Command
+
+	gravy [clean|compile|test|run|war] [env dev|prod|other] [conf propertyName=propertyValue]
+
+	Goals:
+	clean         - delete all build products
+	compile       - compile all Java and Groovy source (output to target/classes) - depends on clean
+	test          - execute all test scripts defined in src/test/groovy - depends on compile
+	run           - run your Gravy application in dev mode (this is the default goal) - depends on compile
+	war           - bundle the application as a web archive [appName].war in the target folder - depends on test
+
+	Flags:
+	env           - specify the execution environment ('dev' by default)
+	conf          - configure an application property on the command line,
+	                overriding config.groovy
+	skip-tests    - for the lazy
+
+
+
+## Preparing Your Application for Deployment
+
+Gravy applications are meant for deployment as web archives.  To package your applicaiton as a WAR file use the <tt>gravy war</tt> command.
 
 ### Prerequisites
 
@@ -367,7 +391,7 @@ For example:
 
 ### gravy war
 
-To bundle your Gravy app for deployment to a stand-alone web container run the following command:
+The war command produces a web archive in the 'target' sub-folder of your application:
 
 	$ gravy war
 
@@ -388,14 +412,19 @@ The packaged application is organized as follows:
 	    |- css
 	    |_ js 
 
+## Modules
 
+Modules are the primary mechanism for code reuse in Gravy applications.
 
-For your infrastructure it's still meat-and-potatoes, but for your developers it's all Gravy.
+## Sloganeering 
+
+	"For your infrastructure it's still meat-and-potatoes, but for your developers it's all Gravy."
 
 ## Credits:
+
 * [Groovy](http://groovy.codehaus.org/) - Groovy 2.0.1 script engine
-* [Jetty](http://www.eclipse.org/jetty/) - embedded Servlet 3.0 web container (dev mode)
-* [cron4j](http://www.sauronsoftware.it/projects/cron4j/) - cron task scheduler
-* [JNotify](http://jnotify.sourceforge.net/) - dev-mode source monitoring
-* [Freemarker](http://freemarker.sourceforge.net/) - for the freemarker template module
-* [Scalate](http://scalate.fusesource.org/) - for the scalate template module
+* [Jetty](http://www.eclipse.org/jetty/) - Embedded Servlet 3.0 web container (dev mode)
+* [cron4j](http://www.sauronsoftware.it/projects/cron4j/) - Cron task scheduler
+* [JNotify](http://jnotify.sourceforge.net/) - Dev-mode source monitoring
+* [Freemarker](http://freemarker.sourceforge.net/) - The freemarker module template engine
+* [Scalate](http://scalate.fusesource.org/) - The scalate module template engine
