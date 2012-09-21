@@ -268,7 +268,7 @@ The Gravy runtime binds the following objects to every route handler and control
 		<td>The response writer</td>
 	</tr>
 	<tr>
-		<td colspan='2'>Example:<br/><pre>out << 'Hello World!'</pre></td>
+		<td colspan='2'>Example:<br/><pre>out &lt;&lt; 'Hello World!'</pre></td>
 	</tr>
 	<tr><td colspan='2'><hr/></td></tr>	
 	<tr>
