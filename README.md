@@ -80,11 +80,15 @@ A route is a mapping between a URI pattern and one or more handlers (Closure obj
 
 Examples:
 
+Named URI parameter and wildcard pattern assigned to closure parameter:
+
 	// http:/hostname/Steve/is/Cool
 	// yields: 'Steve is Cool'
 	route '/:name/is/*', { adjective ->
 		out << "$name is $adjective"
 	}
+
+Named URI parameter:
 
 	// GET /hello/Steve
 	// yields: 'Hello Steve!'
@@ -94,6 +98,8 @@ Examples:
 		}
 	}
 	
+Regular expression with anonymous grouping accessable via 'splat':
+
 	// GET /hello/Jimmy
 	// yields: 'Hello Jimmy!'
 	route(~/\/hello\/(.*)/).with {
@@ -101,6 +107,8 @@ Examples:
 			out << "Hello ${splat[0]}!"
 		}
 	}
+
+Regular expression with grouping pattern assigned to closure parameter 'name':
 
 	// http:/hostname/hello/Suzie
 	// yields: 'Hello Suzie!'
@@ -120,6 +128,8 @@ The controller name is '/friendly/controller', and the action name is 'greeting'
 
 Examples:
 
+Create a controller by setting the action mapping:
+
 	controller('/friendly/controller', [
 		greeting: {
 			out << 'hello'
@@ -129,6 +139,8 @@ Examples:
 		}
 	])
 
+Create a contoller returning the action mapping and initializing via Groovy 'with' method:
+
 	conroller('/friendly/controller').with {
 		greeting = {
 			out << 'hello'
@@ -137,6 +149,8 @@ Examples:
 			out << 'good-bye'
 		}
 	}
+
+You can also define a controller by 
 
 	root.friendly.controller.with {
 		greeting = {  		// http://my-host/friendly/controller/greeting
@@ -160,8 +174,8 @@ The Gravy runtime binds the following objects to every route handler and control
 
 <table>
 	<tr>
-		<td>render</td>
-		<td>void render(String template, Map model)</td>
+		<td><b>render</b></td>
+		<td><b>void render(String template, Map model)</b></td>
 	</tr>
 	<tr>
 		<td></td>
@@ -170,10 +184,9 @@ The Gravy runtime binds the following objects to every route handler and control
 	<tr>
 		<td colspan='2'>Example:<br/><pre>render('/order/edit.html', [order: myOrder])</pre></td>
 	</tr>
-	<tr><td colspan='2'><hr/></td></tr>
 	<tr>
-		<td>renderJson</td>
-		<td>void renderJson(Map model)</td>
+		<td><b>renderJson</b></td>
+		<td><b>void renderJson(Map model)</b></td>
 	</tr>
 	<tr>
 		<td></td>
@@ -183,10 +196,9 @@ The Gravy runtime binds the following objects to every route handler and control
 		<td colspan='2'>Example:<br/>
 			<pre>renderJson([order: myOrder])</pre></td>
 	</tr>
-	<tr><td colspan='2'><hr/></td></tr>
 	<tr>
-		<td>forward</td>
-		<td>void forward(String uri)</td>
+		<td><b>forward</b></td>
+		<td><b>void forward(String uri)</b></td>
 	</tr>
 	<tr>
 		<td></td>
@@ -195,10 +207,9 @@ The Gravy runtime binds the following objects to every route handler and control
 	<tr>
 		<td colspan='2'>Example:<br/><pre>forward('/order/listing')</pre></td>
 	</tr>
-	<tr><td colspan='2'><hr/></td></tr>
 	<tr>
-		<td>redirect</td>
-		<td>void redirect(String uri)</td>
+		<td><b>redirect</b></td>
+		<td><b>void redirect(String uri)</b></td>
 	</tr>
 	<tr>
 		<td></td>
@@ -207,9 +218,8 @@ The Gravy runtime binds the following objects to every route handler and control
 	<tr>
 		<td colspan='2'>Example:<br/><pre>redirect('http://anotherUrl')</pre></td>
 	</tr>
-	<tr><td colspan='2'><hr/></td></tr>	
 	<tr>
-		<td>req</td>
+		<td><b>req</b></td>
 		<td><a href='http://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpServletRequest.html'>HttpServletRequest</a></td>
 	</tr>
 	<tr>
@@ -231,9 +241,8 @@ The Gravy runtime binds the following objects to every route handler and control
 	<tr>
 		<td colspan='2'>Example:<br/><pre>req.attr('userId')</pre></td>
 	</tr>
-	<tr><td colspan='2'><hr/></td></tr>
 	<tr>
-		<td>res</td>
+		<td><b>res</b></td>
 		<td><a href='http://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpServletResponse.html'>HttpServletResponse</a></td>
 	</tr>
 	<tr>
@@ -243,9 +252,8 @@ The Gravy runtime binds the following objects to every route handler and control
 	<tr>
 		<td colspan='2'>Example:<br/><pre>res.contentType = 'text/plain'</pre></td>
 	</tr>
-	<tr><td colspan='2'><hr/></td></tr>
 	<tr>
-		<td>sess</td>
+		<td><b>sess/b></td>
 		<td><a href='http://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpSession.html'>HttpSession</a></td>
 	</tr>
 	<tr>
@@ -263,9 +271,8 @@ The Gravy runtime binds the following objects to every route handler and control
 	<tr>
 		<td colspan='2'>Example:<br/><pre>sess.attr('userId', 17)</pre></td>
 	</tr>
-	<tr><td colspan='2'><hr/></td></tr>	
 	<tr>
-		<td>out</td>
+		<td><b>out</b></td>
 		<td><a href='http://docs.oracle.com/javase/6/docs/api/java/io/PrintWriter.html'>PrintWriter</a></td>
 	</tr>
 	<tr>
@@ -275,9 +282,8 @@ The Gravy runtime binds the following objects to every route handler and control
 	<tr>
 		<td colspan='2'>Example:<br/><pre>out &lt;&lt; 'Hello World!'</pre></td>
 	</tr>
-	<tr><td colspan='2'><hr/></td></tr>	
 	<tr>
-		<td>chain</td>
+		<td><b>chain</b></td>
 		<td><a href='http://docs.oracle.com/javaee/6/api/javax/servlet/FilterChain.html'>FilterChain</a></td>
 	</tr>
 	<tr>
