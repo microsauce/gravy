@@ -25,7 +25,7 @@ class GView {
 	def DEFAULTS = [
 		'documentRoot' : '.',
 		'mode' : Modes.LAZY,
-		'layoutFolder' : 'layouts',
+		'layoutFolder' : '.layouts',
 		'encoding' : 'utf-8',
 		'defaultLocale' : 'en_US'
 	]
@@ -80,7 +80,7 @@ class GView {
 
 		def buffer = new StringBuilder()
 		if ( layoutUri ) {
-			new File(documentRoot+'/layout/'+layoutUri).eachLine { line -> // layout subfolder is implicit
+			new File(documentRoot+'/.layouts/'+layoutUri).eachLine { line -> // layout subfolder is implicit
 				def matches = line =~ sectionPattern
 				if ( matches.size() > 0 ) {
 					def thisSection = sections[matches[0][2]] 
@@ -209,7 +209,7 @@ class GView {
 
 	def init() {
 
-		def layoutFilter = ~(documentRoot+'/layout/.*')
+		def layoutFilter = ~(documentRoot+'/.layouts/.*')
 		def i18nFilter = /.*\.i18n\.json/
 
 		if ( documentRoot.startsWith('.') )
@@ -295,8 +295,8 @@ class GView {
 		def modDates = []
 		modDates << tStamp(documentRoot + '/' + template.uri)
 		modDates << tStamp(documentRoot + '/' + template.uri+'.i18n.json')
-		modDates << tStamp(documentRoot + '/layout/' + template.layoutUri)
-		modDates << tStamp(documentRoot + '/layout/' + template.layoutUri+'.i18n.json')
+		modDates << tStamp(documentRoot + '/.layouts/' + template.layoutUri)
+		modDates << tStamp(documentRoot + '/.layouts/' + template.layoutUri+'.i18n.json')
 		modDates.max()
 	}
 
@@ -322,7 +322,7 @@ class GView {
 
 				// pre-process the template
 				def (layoutUri, processedText) = layoutPreprocessor(absolutePath, fileAsText)
-				def layoutAbsolutePath = layoutUri ? documentRoot+'/layout/'+layoutUri : null
+				def layoutAbsolutePath = layoutUri ? documentRoot+'/.layouts/'+layoutUri : null
 				preprocessors.each { thisProcessor ->
 					processedText = thisProcessor(absolutePath, processedText)
 				}

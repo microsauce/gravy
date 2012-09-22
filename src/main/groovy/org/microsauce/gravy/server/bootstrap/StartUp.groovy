@@ -30,7 +30,7 @@ class StartUp {
 		// parse command line
 		//
 		def commandLine = new CommandLine(args)
-		def environment = (commandLine.optionValue('env') ?: System.getProperty('gravy.env')) ?: 'prod'
+		def environment = (commandLine.optionValue('env') ?: System.getProperty('gravy.env')) ?: 'dev'
 
 		System.setProperty('gravy.env', environment)
 		System.setProperty('gravy.devMode', 'true')

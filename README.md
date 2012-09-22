@@ -70,7 +70,7 @@ Point your browser at:
 
 	http://localhost:8080
 
-Gravy is a rapid development environment.  All source files are automatically re-compiled and re-deployed upon modifification.  Make a change, refresh your browser, and benefit from the instant feedback.
+Gravy is a rapid development environment.  All source files are automatically re-compiled and re-deployed upon modification.  Make a change, refresh your browser, and benefit from the instant feedback.
 
 ## Pour it On
 
@@ -150,7 +150,7 @@ Create a contoller returning the action mapping and initializing via Groovy 'wit
 		}
 	}
 
-You can also define a controller by 
+You can also define a controller by root-branch notation as follows:
 
 	root.friendly.controller.with {
 		greeting = {  		// http://my-host/friendly/controller/greeting
@@ -303,6 +303,60 @@ Gravy provides a number of options for view templating in your application:
 	- freemarker module
 	- scalate module
 	- JSP/JSTL
+
+#### gstring module
+
+To enable the gstring module add 'gstring' to the gravy modules list in config.groovy.
+
+	gravy {
+		modules = ['gstring']
+	}
+
+The gstring module uses an enhanced version of the GStringTemplateEngine.  It has been enhanced with the following features:
+
+	1. Layouts
+	2. i18n
+	3. XSS sanitization
+
+##### Layouts
+
+All gstring layouts must be defined in the <tt>view/.layouts</tt> folder.  A layout is a template that has one or more named sections.  Any view utilizing a layout must provide content for each section.   Consider the following layout and view:
+
+view/.layout/catalog/main.html - the layout
+
+	<html>
+	<body>
+		<div class="header">
+			<#section header>
+		</div>
+		<div class="item">
+			<#section itemInfo>
+		</div>
+		<div class="footer">
+			<#section footer>
+		</div>
+	</body>
+	</html>
+
+view/catalog/itemDetail.html - the view
+
+	<#layout catalog/main.html>
+
+	<#section header>
+	
+	<h1>Page Header</h1>
+
+	<#section itemInfo>
+
+	<ul>
+		<li>foo - $1.00</li>
+		<li>bar - $2.00</li>
+	</ul>
+
+	<#section footer>
+
+	<i>copyright acme inc.</i>
+
 
 
 
