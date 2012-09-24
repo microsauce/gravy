@@ -80,9 +80,10 @@ if (commandLine.hasOption('app-to-mod')) {
 // Goals
 //
 if (commandLine.hasOption('war')) {
+	def conf =new ConfigSlurper().parse(new File('./conf/config.groovy').toURL())
 	def name = commandLine.optionValue('name')
 	def lifecycle = new Lifecycle()
-	lifecycle.war(name, commandLine.hasOption('skip-test'))
+	lifecycle.war(name, conf.gravy.modules ?: [], commandLine.hasOption('skip-test'))
 	System.exit(0)
 }
 if (commandLine.hasOption('test')) {

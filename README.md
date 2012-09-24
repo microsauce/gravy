@@ -343,21 +343,16 @@ view/catalog/itemDetail.html - the view
 	<#layout catalog/main.html>
 
 	<#section header>
-	
 	<h1>Page Header</h1>
 
 	<#section itemInfo>
-
 	<ul>
 		<li>foo - $1.00</li>
 		<li>bar - $2.00</li>
 	</ul>
-
+	
 	<#section footer>
-
 	<i>copyright acme inc.</i>
-
-
 
 
 ### Scheduled Tasks

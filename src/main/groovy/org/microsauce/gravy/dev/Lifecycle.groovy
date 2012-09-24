@@ -14,9 +14,16 @@ class Lifecycle {
 	private String appName
 
 	Lifecycle() {
-		System.setProperty('includeantruntime', 'false')
-
 		basedir = System.getProperty('user.dir')
+//		System.setProperty('includeantruntime', 'false')
+//		def configFile = new File("${basedir}/conf/config.groovy")
+//println "configFile $configFile"		
+//		if ( configFile.exists() ) {
+//			def conf = new ConfigSlurper().parse(configFile.toURL())
+//			modules = conf.gravy.modules ?: []
+//		}
+//		else
+//			modules = []
 
 		def sysEnv = System.getenv()
 		gravyHome = sysEnv['GRAVY_HOME']
@@ -133,7 +140,7 @@ class Lifecycle {
 		war(null)
 	}
 
-	void war(warNm, skipTests = false) {
+	void war(warNm, modules, skipTests = false) {
 
 		def warName = warNm ?: appName
 
@@ -199,6 +206,21 @@ class Lifecycle {
 		    		exclude(name:'jnotify/**')
 		    	}
 		    }
+
+		    // copy configured core-modules
+			if ( modules.size() > 0 ) {
+
+				for (coreMod in ['gstring', 'freemarker', 'scalate']) {
+				    if ( modules.contains(coreMod) ) {
+						echo "copy $coreMod module"				    	
+						copy(todir:"${tempWar}/WEB-INF/modules") {
+							fileset(dir:"${gravyHome}/modules") {
+					    		include(name:"${coreMod}/**")
+					    	}
+						}
+				    }
+			    }
+			}
 
 			zip(destfile:"${tempWar}.war", basedir:"${tempWar}")
 			delete(dir:"${tempWar}")
