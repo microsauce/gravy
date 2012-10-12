@@ -19,11 +19,14 @@ import org.codehaus.groovy.control.customizers.ASTTransformationCustomizer
 import org.apache.log4j.*
 import groovy.util.ConfigObject
 import org.microsauce.gravy.app.*
+import org.microsauce.gravy.dev.DevUtils
 
 
 @Log4j
 class StartUp {
-
+	// TODO appRoot = / of deployment
+// TODO appRoot - deploy path
+// TODO resoureRoot - 
 	def static main(args) {
 
 		//
@@ -39,7 +42,9 @@ class StartUp {
 		def hostName = commandLine.optionValue 'host'
 		def clConfig = commandLineEnv(commandLine)
 
-		System.setProperty('gravy.appRoot', System.getProperty('user.dir'))
+		def projectPath = System.getProperty('user.dir')
+		System.setProperty('gravy.appRoot', DevUtils.appDeployPath(projectPath) ) //System.getProperty('user.dir'))
+
 		clConfig.each {key, value ->
 			System.setProperty(key, value)
 		}

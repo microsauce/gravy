@@ -10,6 +10,7 @@ import org.eclipse.jetty.server.Handler
 import org.eclipse.jetty.server.handler.HandlerList
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.eclipse.jetty.servlet.ServletHolder
+import org.microsauce.gravy.dev.DevUtils
 import groovy.util.logging.Log4j
 
 @Log4j
@@ -26,8 +27,10 @@ class JettyWrapper extends ServerWrapper {
 		server = new Server(config.jetty.port)
 
         WebAppContext context = new WebAppContext()
-        context.setDescriptor(getDescriptorURI())
-        context.setResourceBase(config.jetty.webroot)
+println "descriptor: ${getDescriptorURI(config.appRoot)}"        
+        context.setDescriptor(getDescriptorURI(config.appRoot))
+println "resourceBase: ${getResourceBase(config.appRoot)}"        
+        context.setResourceBase(getResourceBase(config.appRoot)) 
         context.setContextPath(config.jetty.contextPath)
         context.setParentLoaderPriority(true)
  
@@ -43,12 +46,13 @@ class JettyWrapper extends ServerWrapper {
 		server.stop()
 	}
 
-	private String getDescriptorURI() {
-		def webXmlURI = config.jetty.webroot+'/WEB-INF/web.xml'
-		if ( !new File(webXmlURI).exists() )
-			webXmlURI = System.getenv()['GRAVY_HOME']+'/bin/scripts/essentials/webroot/WEB-INF/web.xml'
-			
-		webXmlURI
+	private String getDescriptorURI(appRoot) { 
+		getResourceBase(appRoot)+'/WEB-INF/web.xml'
+	}
+
+	private String getResourceBase(String appRoot) {
+		String appName = new File(appRoot).name
+		DevUtils.appDeployPath(appName)
 	}
 
 

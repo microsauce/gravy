@@ -7,6 +7,7 @@ import javax.servlet.*
 import groovy.util.logging.Log4j
 import org.apache.log4j.*
 import org.microsauce.gravy.*
+import org.microsauce.gravy.server.runtime.GravyTemplateServlet
 
 
 @Log4j
@@ -31,8 +32,9 @@ class GravyBootstrapListener implements ServletContextListener {
 		//
 		// set appRoot
 		//
+		def deployPath = servletContext.getRealPath("/")
 		if (!System.getProperty('gravy.devMode')) 
-			System.setProperty('gravy.appRoot', servletContext.getRealPath("/")+'/WEB-INF')
+			System.setProperty('gravy.appRoot', deployPath+'/WEB-INF')
 
 		//
 		// load configuration
@@ -43,6 +45,7 @@ class GravyBootstrapListener implements ServletContextListener {
 		//
 		// initialize logging
 		//
+println "initialize logging"
 		initLogging(config)
 
 		//
@@ -57,6 +60,18 @@ class GravyBootstrapListener implements ServletContextListener {
 		GravyDecorator.decorateHttpServletRequest()
 
 		//
+		// configure resource paths
+		//
+		List<String> resourceRoots = []
+		def mods = ['app']
+		mods.addAll(config.gravy.modules)
+		mods.each { mod ->
+			log.info "adding folder $mod to the resource path"
+			resourceRoots << deployPath+'/'+mod
+			GravyTemplateServlet.roots << deployPath+'/WEB-INF/view/'+mod
+		}
+
+		//
 		// instantiate and build the Application Context
 		//
 		def appBuilder = new AppBuilder(config)
@@ -66,6 +81,7 @@ class GravyBootstrapListener implements ServletContextListener {
 		// start the source observer 
 		//
 		if (config.gravy.refresh) {
+			config.gravy.project = System.getProperty('user.dir')
 			def sourceObserver = new JNotifySourceModObserver(config) 
 			sourceObserver.addScriptHandler(new RedeploySourceModHandler(config, applicationContext))
 
@@ -78,21 +94,25 @@ class GravyBootstrapListener implements ServletContextListener {
 		//
 		// add services to the servlet context
 		//
+
 		ServletContext context = sce.servletContext
+		int serialNumber = 0
 		applicationContext.getServlets().each { servlet ->
 			def name = servlet.servlet.getClass().name
 			if (name.lastIndexOf('.') > 0) {
 			    name = name.substring(name.lastIndexOf('.')+1)
 			}
-			addServlet(name, servlet, context)
+println "name: $name - servlet $servlet - context $context"			
+			addServlet(name+serialNumber++, servlet, context)
 		}
 
+		serialNumber = 0
 		applicationContext.getFilters().each { filter ->
 			def name = filter.filter.getClass().name
 			if (name.lastIndexOf('.') > 0) {
 			    name = name.substring(name.lastIndexOf('.')+1)
 			}
-			addFilter(name, filter, context)
+			addFilter(name+serialNumber++, filter, context)
 		}
 
 		addFilter('RouteFilter',new FilterWrapper([
@@ -101,6 +121,11 @@ class GravyBootstrapListener implements ServletContextListener {
 			dispatch: EnumSet.copyOf([DispatcherType.REQUEST, DispatcherType.FORWARD])]), context) // TODO REVISIT
 		addFilter('ControllerFilter',new FilterWrapper([
 			filter: new ControllerFilter(), 
+			mapping : '/*', 
+			dispatch: EnumSet.copyOf([DispatcherType.REQUEST, DispatcherType.FORWARD])]), context)
+
+		addFilter('GravyResourceFilter',new FilterWrapper([
+			filter: new GravyResourceFilter(resourceRoots, deployPath), 
 			mapping : '/*', 
 			dispatch: EnumSet.copyOf([DispatcherType.REQUEST, DispatcherType.FORWARD])]), context)
 	}
@@ -116,6 +141,7 @@ class GravyBootstrapListener implements ServletContextListener {
 	}
 
 	private void initLogging(config) {
+println "initLogging: ${config.log4j}"		
 		if (config.log4j) {
 			PropertyConfigurator.configure(config.toProperties())
 		}

@@ -5,25 +5,22 @@ import junit.framework.Test
 import junit.textui.TestRunner
 import org.codehaus.groovy.runtime.ScriptTestAdapter
 import groovy.io.FileType
+import java.nio.file.*
+import java.nio.file.attribute.*
+import org.microsauce.gravy.dev.DevUtils
 
 class Lifecycle {
 
 	private AntBuilder ant
-	private String basedir
+	private String projectBasedir
 	private String gravyHome
 	private String appName
+	private String tempFolder
+	private String deployFolder
 
 	Lifecycle() {
-		basedir = System.getProperty('user.dir')
-//		System.setProperty('includeantruntime', 'false')
-//		def configFile = new File("${basedir}/conf/config.groovy")
-//println "configFile $configFile"		
-//		if ( configFile.exists() ) {
-//			def conf = new ConfigSlurper().parse(configFile.toURL())
-//			modules = conf.gravy.modules ?: []
-//		}
-//		else
-//			modules = []
+		projectBasedir = System.getProperty('user.dir')
+		tempFolder = System.getProperty('java.io.tmpdir')
 
 		def sysEnv = System.getenv()
 		gravyHome = sysEnv['GRAVY_HOME']
@@ -31,22 +28,31 @@ class Lifecycle {
 			println 'BUILD FAILED: please set your GRAVY_HOME environment variable.'
 			System.exit(1)
 		}
-		appName = new File(basedir).name
+		appName = new File(projectBasedir).name
+		deployFolder = DevUtils.appDeployPath(projectBasedir) // tempFolder+'/gravyDeployments/'+appName
 
 		ant = new AntBuilder()
 	}
 
 	void clean() {
+		println '========================================================================='
+		println '= delete build artifacts                                                ='
+		println '========================================================================='
+
 		ant.sequential {
-			delete(dir:"${basedir}/target")
+			delete(dir:"${projectBasedir}/target")
 		}
 	}
 
 	void compile() {
+		println '========================================================================='
+		println '= compile java and groovy sources                                       ='
+		println '========================================================================='
+
 		clean()
 
 		ant.sequential {
-			mkdir(dir:"${basedir}/target/classes")
+			mkdir(dir:"${projectBasedir}/target/classes")
 
 			//
 			// define classpath
@@ -56,37 +62,37 @@ class Lifecycle {
 				fileset(dir:"${gravyHome}/lib") {
 					include(name:'**/*.jar')
 				}
-				if (exists("${basedir}/lib")) {
-					fileset(dir:"${basedir}/lib") {
+				if (exists("${projectBasedir}/lib")) {
+					fileset(dir:"${projectBasedir}/lib") {
 						include(name:'**/*.jar')
 					}
 				}
-				pathelement(path:"${basedir}/target/classes")
+				pathelement(path:"${projectBasedir}/target/classes")
 			}
 
 			// compile java
-			if (exists("${basedir}/src/main/java")) {
+			if (exists("${projectBasedir}/src/main/java")) {
 				echo 'compile java'
 				javac(
-						destdir:"${basedir}/target/classes",
+						destdir:"${projectBasedir}/target/classes",
 						classpathref:"build.classpath",
 						deprecation:"off") {
-					src(path:"${basedir}/src/main/java")
+					src(path:"${projectBasedir}/src/main/java")
 				}
 			} else {
 				echo 'no java sources found'
 			}
 
 			// compile groovy
-			if (exists("${basedir}/src/main/groovy")) {
+			if (exists("${projectBasedir}/src/main/groovy")) {
 				echo 'compile groovy'
 				taskdef(
 					name:'groovyc', 
 					classname:'org.codehaus.groovy.ant.Groovyc', 
 					classpathref:'build.classpath')
 				groovyc(
-					destdir:"${basedir}/target/classes",
-					srcdir:"${basedir}/src/main/groovy",
+					destdir:"${projectBasedir}/target/classes",
+					srcdir:"${projectBasedir}/src/main/groovy",
 					listfiles:'true') {
 					classpath(refid:'build.classpath')
 				}
@@ -95,9 +101,9 @@ class Lifecycle {
 			}
 
 			// copy resources
-			if (exists("${basedir}/src/main/resources")) {
-			    copy(todir:"${basedir}/target/classes") {
-			    	fileset(dir:"${basedir}/src/main/resources") {
+			if (exists("${projectBasedir}/src/main/resources")) {
+			    copy(todir:"${projectBasedir}/target/classes") {
+			    	fileset(dir:"${projectBasedir}/src/main/resources") {
 			    		include(name:'*/**')
 			    	}
 			    }
@@ -107,11 +113,15 @@ class Lifecycle {
 
 	boolean test() {
 
+		println '========================================================================='
+		println '= execute test scripts                                                  ='
+		println '========================================================================='
+
 		compile()
 
 		def allTests = new GroovyTestSuite()
-		if ( exists("${basedir}/src/test/groovy") ) {
-			def testScripts = getTestScripts("${basedir}/src/test/groovy")
+		if ( exists("${projectBasedir}/src/test/groovy") ) {
+			def testScripts = getTestScripts("${projectBasedir}/src/test/groovy")
 			testScripts.each { thisScript ->
 				allTests.addTest(new
 					ScriptTestAdapter(allTests.compile(thisScript), [] as String[]))
@@ -136,109 +146,141 @@ class Lifecycle {
 		testScripts
 	}
 
+	/*
+		deploy to the system tmp folder
+	*/
+	void deploy(modules) {
+
+		println '========================================================================='
+		println '= deploy application                                                    ='
+		println '========================================================================='
+
+		compile()
+
+		del deployFolder
+		folder deployFolder+'/WEB-INF/view'
+		folder deployFolder+'/WEB-INF/lib' // TODO hmm do I need this, load app like a mod - I DO need it for core jars (groovy etc)
+
+		modules.each { mod ->
+			linkMod mod
+		}
+
+		linkMod null  
+		ant.copy(todir:"${deployFolder}/WEB-INF/lib", flatten:'true') {
+			fileset(dir:"${gravyHome}/lib") {
+		    		include(name:'*/**')
+		    		exclude(name:'jetty8/**')
+		    		exclude(name:'jnotify/**')
+			}
+		}
+		if ( exists(projectBasedir+'/target/classes') ) 
+			link deployFolder+'/WEB-INF/classes', projectBasedir+'/target/classes'
+	}
+
+	private void linkMod(modName) {
+
+		def projectModPath = modName ? projectBasedir+'/modules/'+modName : projectBasedir
+		def coreModPath = modName ? gravyHome+'/modules/'+modName : projectBasedir
+		def modPath = exists(projectModPath) ? projectModPath : coreModPath
+		modName = modName ?: 'app'
+
+		def webInfMod = deployFolder+'/WEB-INF/modules/'+modName
+		folder webInfMod
+
+		def appScriptPath = modPath+'/application.groovy'
+		if ( exists(appScriptPath) ) link webInfMod+'/application.groovy', appScriptPath
+
+		// copy deployment descriptor to deployment WEB-INF folder
+		//
+		def webXml = gravyHome+'/bin/scripts/essentials/webroot/WEB-INF/web.xml'
+		ant.copy(file:"$webXml", todir:"${deployFolder}/WEB-INF") 
+
+		def webroot = modPath + '/webroot'
+		if ( exists(webroot) ) {
+			def modFolder = deployFolder+'/'+modName
+			link modFolder, webroot
+		}
+		def viewroot = modPath+'/view'
+		if ( exists(viewroot) ) {
+			def viewFolder = deployFolder+'/WEB-INF/view'
+			link viewFolder+'/'+modName, viewroot
+		}
+		def confroot = modPath+'/conf'
+		if ( exists(confroot) ) {
+			def confFolder = webInfMod+'/conf'
+			link confFolder, confroot
+		}
+		def scriptsroot = modPath+'/scripts'
+		if ( exists(scriptsroot) ) {
+			def scriptsFolder = webInfMod+'/scripts'
+			link scriptsFolder, scriptsroot
+		}
+		def libroot = modPath+'/lib'
+		if ( exists(libroot) ) {
+			def libFolder = webInfMod+'/lib'
+			link libFolder, libroot
+		}
+	}
+
+	private void link(link, target) {
+		if ( exists(link) ) 
+			new File(link).delete()
+
+		Path linkPath   = FileSystems.getDefault().getPath(link)
+		Path targetPath = FileSystems.getDefault().getPath(target)
+		FileAttribute[] fileAttr = new FileAttribute[0]
+		Files.createSymbolicLink(linkPath, targetPath, fileAttr)
+	}
+
+	private void folder(folder) {
+		if ( exists(folder) ) 
+			new File(folder).delete()
+
+		new File(folder).mkdirs()
+	}
+
+	private void del(file) {
+		if ( exists(file) ) 
+			new File(file).delete()
+	}
+
 	void war() {
 		war(null)
 	}
 
 	void war(warNm, modules, skipTests = false) {
 
+		println '========================================================================='
+		println '= bundle application as war                                             ='
+		println '========================================================================='
+
+		deploy(modules)
+
 		def warName = warNm ?: appName
 
-		compile()
 		if (!skipTests) if (!test()) return
 
 		ant.sequential {
 
-			def tempWar = "${basedir}/target/${warName}"
-			if (exists("${tempWar}")) delete(dir:"${tempWar}")
-			if (exists("${tempWar}.war")) delete(dir:"${tempWar}.war")
+			def tempWar = deployFolder
+			def warFile = "${projectBasedir}/target/${warName}.war"
 
-			mkdir(dir:"${tempWar}")
-			if (exists("${basedir}/webroot")) {
-			    copy(todir:"${tempWar}") {
-			    	fileset(dir:"${basedir}/webroot") {
-			    		include(name:'*/**')
-			    	}
-			    }
-			}
-
-		    if ( !exists("${basedir}/webroot/WEB-INF/web.xml") ) {
-		    	copy(todir:"${tempWar}") {
-		    		fileset(dir:"${gravyHome}/bin/scripts/essentials/webroot") {
-		    			include(name:'WEB-INF/**')
-		    		}
-		    	}
-		    }
-
-		    copy(todir:"${tempWar}/WEB-INF") {
-		    	fileset(dir:"${basedir}") {
-		    		include(name:'scripts/**')
-		    		include(name:'view/**')
-		    		include(name:'conf/**')
-		    		include(name:'modules/**')
-		    		include(name:'application.groovy')
-		    	}
-		    }
-		    copy(file:"${basedir}/application.groovy", todir:"${tempWar}/WEB-INF")
-
-		    // class files and resources
-		    mkdir(dir:"${tempWar}/WEB-INF/lib")
-		    mkdir(dir:"${tempWar}/WEB-INF/classes")
-		    if (new File("${basedir}/target/classes").exists()) {
-			    copy(todir:"${tempWar}/WEB-INF/classes") {
-			    	fileset(dir:"${basedir}/target/classes") {
-			    		include(name:'*/**')
-			    	}
-			    }
-		    }
-		    // libraries
-		    if (new File("${basedir}/lib").exists()) {
-			    copy(todir:"${tempWar}/WEB-INF/lib") {
-			    	fileset(dir:"${basedir}/lib") {
-			    		include(name:'*/**')
-			    	}
-			    }
-		    }
-			copy(todir:"${tempWar}/WEB-INF/lib", flatten:'true') {
-		    	fileset(dir:"${gravyHome}/lib") {
-		    		include(name:'*/**')
-		    		exclude(name:'jetty8/**')
-		    		exclude(name:'jnotify/**')
-		    	}
-		    }
-
-		    // copy configured core-modules
-			if ( modules.size() > 0 ) {
-
-				for (coreMod in ['gstring', 'freemarker', 'scalate']) {
-				    if ( modules.contains(coreMod) ) {
-						echo "copy $coreMod module"				    	
-						copy(todir:"${tempWar}/WEB-INF/modules") {
-							fileset(dir:"${gravyHome}/modules") {
-					    		include(name:"${coreMod}/**")
-					    	}
-						}
-				    }
-			    }
-			}
-
-			zip(destfile:"${tempWar}.war", basedir:"${tempWar}")
-			delete(dir:"${tempWar}")
+			zip(destfile:"${warFile}", basedir:"${tempWar}")
 		}
 
 	}
 
 	void jarMod(modName) {
 
-		if ( exists("${basedir}/modules/${modName}") ) {
-			def tempJar = "${basedir}/target/${modName}"
+		if ( exists("${projectBasedir}/modules/${modName}") ) {
+			def tempJar = "${projectBasedir}/target/${modName}"
 
 			clean()
 
 			ant.sequential {
 				mkdir(dir:"${tempJar}")
 			    copy(todir:"${tempJar}") {
-			    	fileset(dir:"${basedir}/modules/${modName}") {
+			    	fileset(dir:"${projectBasedir}/modules/${modName}") {
 			    		include(name:'*/**')
 			    	}
 			    }
@@ -257,52 +299,52 @@ class Lifecycle {
 
 		def jarName = jrName ?: appName
 
-		if (!exists("${basedir}/application.groovy")) {
-			println "a jar-able requires application.groovy be defined"
+		if (!exists("${projectBasedir}/application.groovy")) {
+			println "application.groovy must be defined"
 			return
 		}
 
-		if (exists("${basedir}/view") || exists("${basedir}/webroot")) {
+		if (exists("${projectBasedir}/view") || exists("${projectBasedir}/webroot")) {
 			println "please note: view and webroot are not included in module jar"
 		}
 
 		compile()
 		ant.sequential {
 			// rename application.groovy as module.groovy
-			def tempJar = "${basedir}/target/${jarName}"
+			def tempJar = "${projectBasedir}/target/${jarName}"
 			if (exists("${tempJar}")) delete(dir:"${tempJar}")
 			if (exists("${tempJar}.jar")) delete(dir:"${tempJar}.jar")
 
 			mkdir(dir:"${tempJar}")
 
 			// copy root script
-		    copy(file:"${basedir}/application.groovy", tofile:"${tempJar}/module.groovy")
+		    copy(file:"${projectBasedir}/application.groovy", tofile:"${tempJar}/module.groovy")
 
 		    // class files and resources
-		    if (new File("${basedir}/target/classes").exists()) {
+		    if (new File("${projectBasedir}/target/classes").exists()) {
 			    mkdir(dir:"${tempJar}/classes")
 			    copy(todir:"${tempJar}/classes") {
-			    	fileset(dir:"${basedir}/target/classes") {
+			    	fileset(dir:"${projectBasedir}/target/classes") {
 			    		include(name:'*/**')
 			    	}
 			    }
 		    }
 
 		    // scripts
-		    if (new File("${basedir}/scripts").exists()) {
+		    if (new File("${projectBasedir}/scripts").exists()) {
 			    mkdir(dir:"${tempJar}/scripts")
 			    copy(todir:"${tempJar}/scripts") {
-			    	fileset(dir:"${basedir}/scripts") {
+			    	fileset(dir:"${projectBasedir}/scripts") {
 			    		include(name:'*/**')
 			    	}
 			    }
 		    }
 
 		    // libraries
-		    if (new File("${basedir}/lib").exists()) {
+		    if (new File("${projectBasedir}/lib").exists()) {
 			    mkdir(dir:"${tempJar}/lib")
 			    copy(todir:"${tempJar}/lib") {
-			    	fileset(dir:"${basedir}/lib") {
+			    	fileset(dir:"${projectBasedir}/lib") {
 			    		include(name:'*/**')
 			    	}
 			    }

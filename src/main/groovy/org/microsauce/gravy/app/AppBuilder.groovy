@@ -34,9 +34,9 @@ class AppBuilder {
 		//
 		// prepare and execute application.groovy
 		//
-		if (new File("${config.appRoot}${SLASH}application.groovy").exists()) {
-			Script appScript = new Script([sourceUri:"${config.appRoot}${SLASH}application.groovy"])
-			new ApplicationScriptDecorator(config, applicationContext).decorate(appScript)
+		if (new File("${config.appRoot}${SLASH}WEB-INF${SLASH}modules${SLASH}app${SLASH}application.groovy").exists()) {
+			Script appScript = new Script([name: 'app',sourceUri:"${config.appRoot}${SLASH}WEB-INF${SLASH}modules${SLASH}app${SLASH}application.groovy"])
+			new ModuleScriptDecorator(config, applicationContext).decorate(appScript)
 			ScriptUtils.run(appScript)
 		}
 

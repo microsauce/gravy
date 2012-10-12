@@ -33,12 +33,12 @@ class JNotifySourceModObserver implements SourceModObserver {
 		ScriptListener scriptListenter = new ScriptListener()
 		SourceListener sourceListener = new SourceListener()
 
-    	if (exists("${config.appRoot}")) 
-    		JNotify.addWatch("${config.appRoot}", mask, false, scriptListenter)
-    	if (exists("${config.appRoot}/scripts")) 
-    		JNotify.addWatch("${config.appRoot}/scripts", mask, false, scriptListenter)
-    	if (exists("${config.appRoot}/src/main")) 
-    		JNotify.addWatch("${config.appRoot}/src/main", mask, true, sourceListener)
+    	if (exists("${config.gravy.project}")) 
+    		JNotify.addWatch("${config.gravy.project}", mask, false, scriptListenter)
+    	if (exists("${config.gravy.project}/scripts")) 
+    		JNotify.addWatch("${config.gravy.project}/scripts", mask, false, scriptListenter)
+    	if (exists("${config.gravy.project}/src/main")) 
+    		JNotify.addWatch("${config.gravy.project}/src/main", mask, true, sourceListener)
 
 	}
 

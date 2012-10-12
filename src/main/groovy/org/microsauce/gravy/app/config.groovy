@@ -21,8 +21,8 @@ class config {
 	def private ConfigObject config
 
 	private config(environment) {
-		def configFile = new File(System.getProperty('gravy.appRoot')+'/conf/config.groovy')
-
+		def configFile = new File(System.getProperty('gravy.appRoot')+'/WEB-INF/modules/app/conf/config.groovy')
+println "configFile: $configFile exists: ${configFile.exists()}"
 		try {
 			if ( configFile.exists() ) 
 				config = new ConfigSlurper(environment).parse(configFile.toURL())
@@ -46,12 +46,14 @@ class config {
 	def get() {config}
 
 	private void completeConfigDev(config) {
-		def appRoot = System.getProperty('gravy.appRoot')
+		def appRoot = System.getProperty('gravy.appRoot') 
 
 		config.appRoot 				= appRoot
 
 		config.jetty.contextPath 	= System.getProperty('jetty.contextPath') ?: config.jetty.contextPath ?: '/'
-		config.jetty.webroot 		= appRoot+(System.getProperty('jetty.webroot') ?: config.jetty.webroot ?: '/webroot')
+//		config.jetty.webroot 		= appRoot+(System.getProperty('jetty.webroot') ?: config.jetty.webroot ?: '/webroot')
+//def appName = new File(appRoot).name
+//config.jetty.deploy = 
 		config.jetty.port 			= System.getProperty('jetty.port') ?: config.tomcat.port ?: 8080
 		config.jetty.host 			= System.getProperty('jetty.host') ?: config.tomcat.host ?: 'localhost'
 

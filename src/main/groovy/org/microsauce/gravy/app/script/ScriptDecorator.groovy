@@ -23,7 +23,7 @@ class ScriptDecorator {
 
 	def protected getClassLoader() {
 		if ( config.gravy.refresh ) 
-			return new GravyDevModeClassLoader("${config.appRoot}${SLASH}target${SLASH}classes")
+			return new GravyDevModeClassLoader("${config.appRoot}${SLASH}WEB-INF${SLASH}classes")
 		else
 			return this.getClass().getClassLoader()
 	}

@@ -16,7 +16,8 @@ class ModuleScriptDecorator extends ScriptDecorator {
 		script.classLoader = getClassLoader()
 
 		def (moduleFolder, moduleUri) = getModuleFolder(script.name, config.appRoot)
-		script.sourceUri = moduleUri+"${SLASH}module.groovy"
+		script.sourceUri = moduleUri+"${SLASH}application.groovy"
+println "moduleFolder: $moduleFolder moduleUri: $moduleUri"		
 		if (moduleFolder.exists()) {
 			script.roots << moduleUri
 			script.roots << moduleUri+"${SLASH}scripts"
@@ -48,7 +49,7 @@ class ModuleScriptDecorator extends ScriptDecorator {
 	}
 
 	def private extractModule(modName) {
-		def modPath = "${config.appRoot}${SLASH}modules${SLASH}${modName}"
+		def modPath = "${config.appRoot}${SLASH}WEB-INF${SLASH}modules${SLASH}${modName}"
 		def modFile = new File(modPath)
 		def modJarPath = modPath+'.jar'
 		def modJar = new File(modJarPath)
@@ -65,13 +66,14 @@ class ModuleScriptDecorator extends ScriptDecorator {
 	}
 
 	def getModuleFolder(moduleName, appRoot) {
-		def moduleUri = "${appRoot}${SLASH}modules${SLASH}$moduleName"
+		def moduleUri = "${appRoot}${SLASH}WEB-INF${SLASH}modules${SLASH}$moduleName"
 		def moduleFolder = new File(moduleUri)
-		if (moduleFolder.exists()) return [moduleFolder, moduleUri]
-		else {
-			moduleUri = "${System.getenv()['GRAVY_HOME']}${SLASH}modules${SLASH}$moduleName" 
-			return [new File(moduleUri), moduleUri]
-		}
+		[moduleFolder, moduleUri]
+//		if (moduleFolder.exists()) return [moduleFolder, moduleUri]
+//		else {
+//			moduleUri = "${System.getenv()['GRAVY_HOME']}${SLASH}modules${SLASH}$moduleName" 
+//			return [new File(moduleUri), moduleUri]
+//		}
 	}
 
 }

@@ -11,11 +11,13 @@ import org.microsauce.gravy.server.util.ServerUtils
 import org.microsauce.gview.GView
 import groovy.util.logging.Log4j
 import groovy.transform.CompileStatic
+import org.microsauce.gravy.resovler.ResourceResolver
 
 @Log4j
 class GViewServlet extends GravyTemplateServlet {
 
 	private GView view
+	private ResourceResolver resolver
 
 	GViewServlet() {}
 

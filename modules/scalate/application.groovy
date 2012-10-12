@@ -37,7 +37,7 @@ class ScalateServlet extends GravyTemplateServlet {
 
 def runMode = config.scalate.mode ?: 'production'
 def appRoot = config.appRoot
-def documentRoot =  appRoot+(config.scalate.documentRoot ?: '/view')
+def documentRoot =  appRoot+'/WEB-INF/'+(config.scalate.documentRoot ?: '/view')
 def viewUri = config.gravy.viewUri ?: '/view/renderer'
 
 def viewServlet = new ScalateServlet(documentRoot, runMode)

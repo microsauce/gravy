@@ -79,6 +79,12 @@ if (commandLine.hasOption('app-to-mod')) {
 //
 // Goals
 //
+if (commandLine.hasOption('deploy')) {
+	def conf =new ConfigSlurper().parse(new File('./conf/config.groovy').toURL())
+	def lifecycle = new Lifecycle()
+	lifecycle.deploy(conf.gravy.modules ?: [])
+	System.exit(0)
+}
 if (commandLine.hasOption('war')) {
 	def conf =new ConfigSlurper().parse(new File('./conf/config.groovy').toURL())
 	def name = commandLine.optionValue('name')
@@ -106,7 +112,9 @@ if (commandLine.hasOption('clean')) {
 // default goal is run.  compile app sources and bootstrap the server.
 //
 def lifecycle = new Lifecycle()
-lifecycle.compile()
+def conf =new ConfigSlurper().parse(new File('./conf/config.groovy').toURL())
+lifecycle.deploy(conf.gravy.modules ?: [])
+
 
 //
 // start the dev server
