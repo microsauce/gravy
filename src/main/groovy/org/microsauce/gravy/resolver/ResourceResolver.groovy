@@ -32,9 +32,8 @@ class ResourceResolver {
 		RealPath realPath = resolvedPaths[uri]
 		if ( !realPath ) {
 			log.debug "real path not cached - resolve from resource path"
-println "roots class ${this.roots.getClass()} - this.root: ${this.roots}"			
+
 			for ( String thisRoot in this.roots ) {
-println "thisRoot class ${thisRoot.getClass()} - thisRoot: ${thisRoot}"			
 				File file = new File(thisRoot+uri)
 				log.debug "checking source path ${thisRoot+uri}"				
 				if ( file.exists() ) {
@@ -58,7 +57,7 @@ println "thisRoot class ${thisRoot.getClass()} - thisRoot: ${thisRoot}"
 		log.debug "resolve $uri to real uri"
 		if ( !realUri )  {
 			RealPath realPath = resolveUri uri
-println "resource resolver: realPath.path ${realPath.path} - basedir $basedir"			
+
 			realUri = realPath.path - basedir
 			resolvedUris[uri] = realUri
 			log.debug "$uri resolved to real uri $realUri"

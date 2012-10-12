@@ -27,9 +27,8 @@ class JettyWrapper extends ServerWrapper {
 		server = new Server(config.jetty.port)
 
         WebAppContext context = new WebAppContext()
-println "descriptor: ${getDescriptorURI(config.appRoot)}"        
+
         context.setDescriptor(getDescriptorURI(config.appRoot))
-println "resourceBase: ${getResourceBase(config.appRoot)}"        
         context.setResourceBase(getResourceBase(config.appRoot)) 
         context.setContextPath(config.jetty.contextPath)
         context.setParentLoaderPriority(true)

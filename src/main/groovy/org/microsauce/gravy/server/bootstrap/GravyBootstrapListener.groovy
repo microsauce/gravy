@@ -45,7 +45,6 @@ class GravyBootstrapListener implements ServletContextListener {
 		//
 		// initialize logging
 		//
-println "initialize logging"
 		initLogging(config)
 
 		//
@@ -102,7 +101,6 @@ println "initialize logging"
 			if (name.lastIndexOf('.') > 0) {
 			    name = name.substring(name.lastIndexOf('.')+1)
 			}
-println "name: $name - servlet $servlet - context $context"			
 			addServlet(name+serialNumber++, servlet, context)
 		}
 
@@ -141,7 +139,6 @@ println "name: $name - servlet $servlet - context $context"
 	}
 
 	private void initLogging(config) {
-println "initLogging: ${config.log4j}"		
 		if (config.log4j) {
 			PropertyConfigurator.configure(config.toProperties())
 		}

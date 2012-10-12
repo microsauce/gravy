@@ -15,7 +15,6 @@ class RedeploySourceModHandler implements SourceModHandler {
 
 	void handle() {
 		try {
-println "RedeploySourceModHandler --------------------------------------"			
 			app.reset()
 			Script script = new Script([name: 'app', sourceUri:"${config.appRoot}${SLASH}WEB-INF${SLASH}modules${SLASH}app${SLASH}application.groovy"])
 			new ModuleScriptDecorator(config, app).decorate(script)

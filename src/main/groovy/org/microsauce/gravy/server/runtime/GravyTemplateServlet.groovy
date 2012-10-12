@@ -26,7 +26,6 @@ abstract class GravyTemplateServlet extends HttpServlet {
 		this.documentRoot = documentRoot
 		this.runMode = runMode
 		resolver = new ResourceResolver(documentRoot)
-println "GravyTemplateServlet GravyTemplateServlet.roots = ${GravyTemplateServlet.roots}"		
 		resolver.roots.addAll(GravyTemplateServlet.roots) 
 	}
 

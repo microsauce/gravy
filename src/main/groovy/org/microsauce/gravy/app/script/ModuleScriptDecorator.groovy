@@ -17,7 +17,6 @@ class ModuleScriptDecorator extends ScriptDecorator {
 
 		def (moduleFolder, moduleUri) = getModuleFolder(script.name, config.appRoot)
 		script.sourceUri = moduleUri+"${SLASH}application.groovy"
-println "moduleFolder: $moduleFolder moduleUri: $moduleUri"		
 		if (moduleFolder.exists()) {
 			script.roots << moduleUri
 			script.roots << moduleUri+"${SLASH}scripts"
@@ -69,11 +68,6 @@ println "moduleFolder: $moduleFolder moduleUri: $moduleUri"
 		def moduleUri = "${appRoot}${SLASH}WEB-INF${SLASH}modules${SLASH}$moduleName"
 		def moduleFolder = new File(moduleUri)
 		[moduleFolder, moduleUri]
-//		if (moduleFolder.exists()) return [moduleFolder, moduleUri]
-//		else {
-//			moduleUri = "${System.getenv()['GRAVY_HOME']}${SLASH}modules${SLASH}$moduleName" 
-//			return [new File(moduleUri), moduleUri]
-//		}
 	}
 
 }
