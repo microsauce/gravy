@@ -55,7 +55,7 @@ class AppBuilder {
 				log.info "loading module $modName"
 				def module = new Script([name:modName])
 				moduleDecorator.decorate(module)
-				results[modName] = ScriptUtils.run(module) //, getClassLoader())
+				results[modName] = ScriptUtils.run(module) 
 				if ( results[modName] == applicationContext ) results[modName] = null
 
 				applicationContext.modCache[modName] = results[modName]

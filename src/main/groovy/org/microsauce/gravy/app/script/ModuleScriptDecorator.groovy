@@ -18,6 +18,7 @@ class ModuleScriptDecorator extends ScriptDecorator {
 		def (moduleFolder, moduleUri) = getModuleFolder(script.name, config.appRoot)
 		script.sourceUri = moduleUri+"${SLASH}application.groovy"
 		if (moduleFolder.exists()) {
+			script.binding.config = modConfig config, script.name, moduleUri
 			script.roots << moduleUri
 			script.roots << moduleUri+"${SLASH}scripts"
 
@@ -68,6 +69,22 @@ class ModuleScriptDecorator extends ScriptDecorator {
 		def moduleUri = "${appRoot}${SLASH}WEB-INF${SLASH}modules${SLASH}$moduleName"
 		def moduleFolder = new File(moduleUri)
 		[moduleFolder, moduleUri]
+	}
+
+	def modConfig(appConfig, modName, moduleUri) {
+		if ( modName == 'app' ) return appConfig
+
+		def modConfig = appConfig[modName]
+		def configFile = new File(moduleUri+'/conf/config.groovy')
+		if ( configFile.exists() ) {
+			modConfig = new ConfigSlurper(appConfig.env ?: 'prod').parse(configFile.toURL())
+			modConfig = modConfig.merge(appConfig[modName])
+		}
+		else modConfig = appConfig[modName]
+
+		modConfig.appRoot = appConfig.appRoot
+
+		modConfig
 	}
 
 }

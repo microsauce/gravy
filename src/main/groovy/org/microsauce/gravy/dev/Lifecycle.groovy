@@ -45,11 +45,12 @@ class Lifecycle {
 	}
 
 	void compile() {
+
+		clean()
+		
 		println '========================================================================='
 		println '= compile java and groovy sources                                       ='
 		println '========================================================================='
-
-		clean()
 
 		ant.sequential {
 			mkdir(dir:"${projectBasedir}/target/classes")
@@ -113,11 +114,11 @@ class Lifecycle {
 
 	boolean test() {
 
+		compile()
+
 		println '========================================================================='
 		println '= execute test scripts                                                  ='
 		println '========================================================================='
-
-		compile()
 
 		def allTests = new GroovyTestSuite()
 		if ( exists("${projectBasedir}/src/test/groovy") ) {
@@ -151,11 +152,11 @@ class Lifecycle {
 	*/
 	void deploy(modules) {
 
+		compile()
+
 		println '========================================================================='
 		println '= deploy application                                                    ='
 		println '========================================================================='
-
-		compile()
 
 		del deployFolder
 		folder deployFolder+'/WEB-INF/view'
@@ -250,11 +251,11 @@ class Lifecycle {
 
 	void war(warNm, modules, skipTests = false) {
 
+		deploy(modules)
+
 		println '========================================================================='
 		println '= bundle application as war                                             ='
 		println '========================================================================='
-
-		deploy(modules)
 
 		def warName = warNm ?: appName
 
