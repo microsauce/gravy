@@ -253,7 +253,7 @@ The Gravy runtime binds the following objects to every route handler and control
 		<td colspan='2'>Example:<br/><pre>res.contentType = 'text/plain'</pre></td>
 	</tr>
 	<tr>
-		<td><b>sess/b></td>
+		<td><b>sess</b></td>
 		<td><a href='http://docs.oracle.com/javaee/6/api/javax/servlet/http/HttpSession.html'>HttpSession</a></td>
 	</tr>
 	<tr>
@@ -461,17 +461,28 @@ The packaged application is organized as follows:
 	[app-name].war                     - webroot
         |
 	    |- WEB-INF         
-	    |     |- application.groovy    - main application script
-	    |     |- view                  - view templates
-	    |     |- conf                  - configuration (config.groovy)
-	    |     |- scripts               - subscripts called by application.groovy
+	    |     |- view                  - view templates document root
+	    |     |    |- app              - application templates
+	    |     |    |- [module 1]       - [module 1] templates
+	    |     |    |_ [module n]       - [module n] templates
+	    |     | 
 	    |     |- modules               - application modules 
-	    |     |- lib                   - application jar files
+	    |     |    |- app
+	    |     |    |   |- application.groovy    - application script
+	    |     |    |   |- conf                  - configuration (config.groovy)
+	    |     |    |   |- scripts               - subscripts called by application.groovy
+	    |     |    |   |_ lib                   - application jar files
+	    |     |    | 
+	    |     |    |- [module 1]
+	    |     |    |    |_ same as app
+	    |     |    |
+	    |     |    |_ [module n]
+	    |     |     
 	    |     |_ web.xml     
-	    |                    
-	    |- img
-	    |- css
-	    |_ js 
+	    |
+	    |- app                         
+	    |- [module 1]                    
+	    |_ [module n]
 
 ## Modules
 

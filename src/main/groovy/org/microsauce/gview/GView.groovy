@@ -80,7 +80,9 @@ class GView {
 
 		def buffer = new StringBuilder()
 		if ( layoutUri ) {
-			new File(documentRoot+'/.layouts/'+layoutUri).eachLine { line -> // layout subfolder is implicit
+			def relativePath = sourceUri - documentRoot
+			def moduleFolder = relativePath.split('/').findAll {node -> node != ''}[0]
+			new File(documentRoot+'/'+moduleFolder+'/.layouts/'+layoutUri).eachLine { line -> // layout subfolder is implicit
 				def matches = line =~ sectionPattern
 				if ( matches.size() > 0 ) {
 					def thisSection = sections[matches[0][2]] 
