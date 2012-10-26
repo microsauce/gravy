@@ -7,6 +7,18 @@
 
 import org.apache.log4j.*
 
+meta {
+	version='1.0'
+	author=''
+}
+
+dependencies {
+	// maven (m2) repositories
+	repositories=[]
+	
+	// maven coordinates 'group:artifactId:version'
+	lib=[]
+}
 
 gravy {
 	refresh = true

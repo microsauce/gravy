@@ -44,6 +44,8 @@ class config {
 
 	def get() {config}
 
+	def toProperties() {config.toProperties()}
+
 	private void completeConfigDev(config) {
 		def appRoot = System.getProperty('gravy.appRoot') 
 

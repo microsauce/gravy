@@ -12,9 +12,12 @@ if (commandLine.hasOption('help')) {
 
 Goals:
 clean         - delete all build products
+resolve       - resolve dependencies
+install       - install dependencies
 compile       - compile all Java and Groovy sources (output to target/classes) - depends on clean
 test          - execute all test scripts defined in src/test/groovy - depends on compile
-run           - run your Gravy application in dev mode (this is the default goal) - depends on compile
+assemble      - assemble the application - depends on test / compile
+run           - run your Gravy application in dev mode (this is the default goal) - depends on assemble
 war           - bundle your application as a web archive [appName].war in the target folder - depends on test
 
 Flags:
@@ -45,7 +48,7 @@ if (commandLine.hasOption('create')) {
 		println 'please provide an app name'
 		System.exit(0)
 	}
-	def lifecycle = new Lifecycle()
+	def lifecycle = new Lifecycle(getConfig())
 	lifecycle.createApp(name, commandLine.hasOption('example'))
 	System.exit(0)
 }
@@ -55,7 +58,7 @@ if (commandLine.hasOption('create-mod')) {
 		println 'please provide a module name'
 		System.exit(0)
 	}
-	def lifecycle = new Lifecycle()
+	def lifecycle = new Lifecycle(getConfig())
 	lifecycle.createMod(name)
 	System.exit(0)
 }
@@ -65,59 +68,82 @@ if (commandLine.hasOption('jar-mod')) {
 		println 'please provide a module name'
 		System.exit(0)
 	}
-	def lifecycle = new Lifecycle()
+	def lifecycle = new Lifecycle(modConfig(name)) //
 	lifecycle.jarMod(name)
 	System.exit(0)
 }
-if (commandLine.hasOption('app-to-mod')) {
-	def name = commandLine.optionValue('app-to-mod')
-	def lifecycle = new Lifecycle()
-	lifecycle.appToMod(name)
+if (commandLine.hasOption('mod-ify')) {
+	def lifecycle = new Lifecycle(getConfig())
+	lifecycle.modIfyApp()
 	System.exit(0)
 }
 
 //
 // Goals
 //
-if (commandLine.hasOption('deploy')) {
-	def conf =new ConfigSlurper().parse(new File('./conf/config.groovy').toURL())
-	def lifecycle = new Lifecycle()
-	lifecycle.deploy(conf.gravy.modules ?: [])
+if (commandLine.hasOption('war')) {
+//	def conf =new ConfigSlurper().parse(new File('./conf/config.groovy').toURL())
+	def name = commandLine.optionValue('name')
+	def lifecycle = new Lifecycle(getConfig())
+	lifecycle.war(name, commandLine.hasOption('skip-test'))
 	System.exit(0)
 }
-if (commandLine.hasOption('war')) {
-	def conf =new ConfigSlurper().parse(new File('./conf/config.groovy').toURL())
-	def name = commandLine.optionValue('name')
-	def lifecycle = new Lifecycle()
-	lifecycle.war(name, conf.gravy.modules ?: [], commandLine.hasOption('skip-test'))
+if (commandLine.hasOption('assemble')) {
+//	def conf =new ConfigSlurper().parse(new File('./conf/config.groovy').toURL())
+	def lifecycle = new Lifecycle(getConfig())
+	lifecycle.assemble()
 	System.exit(0)
 }
 if (commandLine.hasOption('test')) {
-	def tester = new Lifecycle()
+	def tester = new Lifecycle(getConfig())
 	tester.test()
 	System.exit(0)
 }
 if (commandLine.hasOption('compile')) {
-	def lifecycle = new Lifecycle()
+	def lifecycle = new Lifecycle(getConfig())
 	lifecycle.compile()
 	System.exit(0)
 }
+if ( commandLine.hasOption('resolve') ) {
+	def lifecycle = new Lifecycle(getConfig())
+	lifecycle.resolve()
+}
 if (commandLine.hasOption('clean')) {
-	def lifecycle = new Lifecycle()
-	lifecycle.clean()
+	def lifecycle = new Lifecycle(getConfig())
+	lifecycle.cleanAll() // delete build products and managed dependencies
 	System.exit(0)
 }
 
 //
 // default goal is run.  compile app sources and bootstrap the server.
 //
-def lifecycle = new Lifecycle()
-def conf =new ConfigSlurper().parse(new File('./conf/config.groovy').toURL())
-lifecycle.deploy(conf.gravy.modules ?: [])
-
+def lifecycle = new Lifecycle(getConfig())
+//def conf =new ConfigSlurper().parse(new File('./conf/config.groovy').toURL())
+lifecycle.assemble()
 
 //
 // start the dev server
 //
 def gse = new GroovyScriptEngine(["$gravyHome/bin/scripts"] as String[])
 gse.run('bootstrap.groovy', [args : args] as Binding)
+
+
+//
+// methods
+//
+Properties getConfig() {
+	def projectFolder = System.getProperty('user.dir')
+	def configFile = new File("${projectFolder}/conf/config.groovy")
+	if ( configFile.exists() )
+		return new ConfigSlurper().parse(new File("${projectFolder}/conf/config.groovy").toURL()).toProperties()
+	else return null
+}
+
+Properties modConfig(modName) {
+	def projectFolder = System.getProperty('user.dir')
+	def configFile = new File("${projectFolder}/modules/${modName}/conf/config.groovy")
+	if ( configFile.exists() )
+		return new ConfigSlurper().parse(new File("${projectFolder}/conf/config.groovy").toURL()).toProperties()
+	else return null
+}
+

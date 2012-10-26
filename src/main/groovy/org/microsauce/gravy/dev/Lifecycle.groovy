@@ -8,17 +8,27 @@ import groovy.io.FileType
 import java.nio.file.*
 import java.nio.file.attribute.*
 import org.microsauce.gravy.dev.DevUtils
+import com.microsauce.gravy.dev.dependency.DependencyResolver
 
 class Lifecycle {
 
 	private AntBuilder ant
+	private DependencyResolver resolver
 	private String projectBasedir
 	private String gravyHome
 	private String appName
 	private String tempFolder
 	private String deployFolder
 
-	Lifecycle() {
+	private String version
+	def private managedLibs
+	def private managedModules
+	private String author
+	private String description
+
+	def private moduleNames = null
+
+	Lifecycle(Properties config = null) {
 		projectBasedir = System.getProperty('user.dir')
 		tempFolder = System.getProperty('java.io.tmpdir')
 
@@ -29,9 +39,47 @@ class Lifecycle {
 			System.exit(1)
 		}
 		appName = new File(projectBasedir).name
-		deployFolder = DevUtils.appDeployPath(projectBasedir) // tempFolder+'/gravyDeployments/'+appName
+		deployFolder = DevUtils.appDeployPath(projectBasedir) 
 
 		ant = new AntBuilder()
+
+		configure(config)
+	}
+
+	private configure(Properties config) {
+		config = config ?: new Properties()
+		version = config.getProperty('meta.version') 				// defaults to null
+		author = config.getProperty('meta.author') 					// defaults to null
+		description = config.getProperty('meta.description') 		// defaults to null
+
+		// dependencies
+		managedLibs = parseMavenCoordinates config.getProperty('dependencies.libs') 		// defaults to null
+
+		managedModules = parseMavenCoordinates config.getProperty('dependencies.modules')	// defaults to null
+
+		resolver = new DependencyResolver(projectBasedir)
+	}
+
+	private listModules() { // this will replace the gravy.modules config
+
+		if ( moduleNames == null ) {
+			moduleNames = [] as Set
+
+			def modFolder = new File("${projectBasedir}/modules")
+			def modulesFolder = modFolder
+			modulesFolder.eachFile { thisFile ->
+				if ( thisFile.isDirectory() )
+					moduleNames << thisFile.name
+			}
+
+			if ( managedModules ) {
+				managedModules.each { thisMod ->
+					moduleNames << moduleName(thisMod)
+				}
+			}
+		}
+
+		moduleNames
 	}
 
 	void clean() {
@@ -40,13 +88,26 @@ class Lifecycle {
 		println '========================================================================='
 
 		ant.sequential {
+			delete(dir:"${projectBasedir}/target/classes")
+		}
+	}
+
+	void cleanAll() {
+		println '========================================================================='
+		println '= delete ALL artifacts (build products and managed dependencies)        ='
+		println '========================================================================='
+
+		ant.sequential {
 			delete(dir:"${projectBasedir}/target")
 		}
+
+		ant.echo "delete deployment folder $deployFolder"
+		del deployFolder
 	}
 
 	void compile() {
 
-		clean()
+		resolve()
 		
 		println '========================================================================='
 		println '= compile java and groovy sources                                       ='
@@ -147,26 +208,99 @@ class Lifecycle {
 		testScripts
 	}
 
+	void resolve() { // resolve managed dependencies
+
+		clean()
+
+		println '========================================================================='
+		println '= resolve dependencies                                                  ='
+		println '========================================================================='
+
+		managedLibs.each { thisLib ->
+			def jar = jarName thisLib
+			if ( !exists("${projectBasedir}/target/lib/${jar}") ) {
+				resolver.installDependency thisLib, "${projectBasedir}/target/lib" 
+				if ( exists("${projectBasedir}/lib") ) {
+					ant.copy(todir:"${projectBasedir}/target/lib") {
+						fileset(dir:"${projectBasedir}/lib") {
+				    		include(name:'*/**')
+						}
+					} // ant.copy
+				} // if exists lib
+			}
+		}
+
+		managedModules.each { thisMod ->
+			def modName = moduleName thisMod
+			if ( !exists("${projectBasedir}/target/modules/${modName}") )
+				resolver.installModule thisMod
+		}
+	}
+
+	private String moduleName(String mavenCoordinates) {
+		validMavenCoordinates mavenCoordinates
+
+		mavenCoordinates.split(':')[1]		
+	}
+
+	private String jarName(String mavenCoordinates) {
+		validMavenCoordinates mavenCoordinates
+
+		String[] coords = mavenCoordinates.split(':')
+		coords[1]+'-'+coords[2]+'.jar'
+	}
+
+	private void validMavenCoordinates(String mavenCoordinates) {
+		if ( !(mavenCoordinates ==~ /[a-zA-Z0-9\-]+:[a-zA-Z0-9\-]+:[0-9\.]+/) )
+			throw new Exception("invalid maven coordinates ${mavenCoordinates}.  Valid coordinates are of the form group:artifactId:version")
+	}
+
+	private String[] parseMavenCoordinates(String coordinates) {
+		if ( coordinates == null ) return [] as String[]
+		// remove square brackets 
+		coordinates.replaceAll('\\[', '').replaceAll('\\]', '').replaceAll(' ', '').split(',')
+	}
+
 	/*
-		deploy to the system tmp folder
+		deploy to the user tmp folder
 	*/
-	void deploy(modules) {
+	void assemble() {
+		assemble(false)
+	}
 
-		compile()
+	private deploySrcArtifacts() {
+		if ( exists(projectBasedir+'/target/classes') ) {
+			ant.jar(destfile:"${deployFolder}/WEB-INF/modules/app/lib/${appName}.jar", basedir:"${projectBasedir}/target/classes") 
+		}
+	}
+
+	private jarSrcArtifacts() {
+		if ( exists(projectBasedir+'/target/classes') ) {
+			ant.jar(destfile:"${projectBasedir}/lib/${appName}.jar", basedir:"${projectBasedir}/target/classes") 
+		}
+	}
+
+	void assemble(boolean skipCompile) {
+
+		if ( !skipCompile )
+			compile()
 
 		println '========================================================================='
-		println '= deploy application                                                    ='
+		println '= assembling application                                                ='
 		println '========================================================================='
+
+		def modules = listModules()
 
 		del deployFolder
 		folder deployFolder+'/WEB-INF/view'
-		folder deployFolder+'/WEB-INF/lib' // TODO hmm do I need this, load app like a mod - I DO need it for core jars (groovy etc)
+		folder deployFolder+'/WEB-INF/lib' 
 
 		modules.each { mod ->
 			linkMod mod
 		}
 
-		linkMod null  
+		linkMod null // app
+		deploySrcArtifacts()
 		ant.copy(todir:"${deployFolder}/WEB-INF/lib", flatten:'true') {
 			fileset(dir:"${gravyHome}/lib") {
 		    		include(name:'*/**')
@@ -174,15 +308,22 @@ class Lifecycle {
 		    		exclude(name:'jnotify/**')
 			}
 		}
-		if ( exists(projectBasedir+'/target/classes') ) 
-			link deployFolder+'/WEB-INF/classes', projectBasedir+'/target/classes'
+//		if ( exists(projectBasedir+'/target/classes') ) 
+//			link deployFolder+'/WEB-INF/classes', projectBasedir+'/target/classes'
+	}
+
+	void deploy(String warPath, String deployPath) {
+		ant.copy(file:"$warPath", todir:"$deployPath") 
 	}
 
 	private void linkMod(modName) {
 
+		def managedModPath = modName ? projectBasedir+'/target/modules/'+modName : projectBasedir
 		def projectModPath = modName ? projectBasedir+'/modules/'+modName : projectBasedir
 		def coreModPath = modName ? gravyHome+'/modules/'+modName : projectBasedir
-		def modPath = exists(projectModPath) ? projectModPath : coreModPath
+		def modPath = exists(managedModPath) ? managedModPath : projectModPath
+		if ( modPath == projectModPath )
+			modPath = exists(projectModPath) ? projectModPath : coreModPath
 		modName = modName ?: 'app'
 
 		def webInfMod = deployFolder+'/WEB-INF/modules/'+modName
@@ -241,119 +382,73 @@ class Lifecycle {
 	}
 
 	private void del(file) {
-		if ( exists(file) ) 
-			new File(file).delete()
+		File f = new File(file)
+		if ( f.exists() ) {
+			if ( f.isDirectory() )
+				deleteFolder( file )
+			else
+				f.delete()
+		}
 	}
 
-	void war() {
-		war(null)
+	private void deleteFolder(String folderPath) {
+	    Path path = FileSystems.getDefault().getPath(folderPath)
+	    DirectoryStream<Path> files = Files.newDirectoryStream( path )
+
+	    if(files!=null) { 
+	        for(Path entry in files) {
+	            if(Files.isDirectory(entry) && !Files.isSymbolicLink(entry)) {
+	                deleteFolder(entry.toFile().absolutePath)
+	            } else {
+	                Files.delete(entry)
+	            }
+	        }
+	    }
+	    Files.delete(path)
 	}
+	
 
-	void war(warNm, modules, skipTests = false) {
+	void war(warNm, skipTests = false) {
 
-		deploy(modules)
+		def modules = listModules()
+		def warName = warNm ?: appName
+
+		if (!skipTests) if (!test()) return
+
+		assemble true
 
 		println '========================================================================='
 		println '= bundle application as war                                             ='
 		println '========================================================================='
-
-		def warName = warNm ?: appName
-
-		if (!skipTests) if (!test()) return
 
 		ant.sequential {
 
 			def tempWar = deployFolder
 			def warFile = "${projectBasedir}/target/${warName}.war"
 
-			zip(destfile:"${warFile}", basedir:"${tempWar}")
+			zip(destfile:"${warFile}", basedir:"${deployFolder}")
 		}
 
 	}
 
 	void jarMod(modName) {
+		def jarName = modName+(version ? '-'+version : '')+'.jar'
 
-		if ( exists("${projectBasedir}/modules/${modName}") ) {
-			def tempJar = "${projectBasedir}/target/${modName}"
+		println '========================================================================='
+		println '= create module jar                                                     ='
+		println '========================================================================='
 
-			clean()
-
-			ant.sequential {
-				mkdir(dir:"${tempJar}")
-			    copy(todir:"${tempJar}") {
-			    	fileset(dir:"${projectBasedir}/modules/${modName}") {
-			    		include(name:'*/**')
-			    	}
-			    }
-
-			    zip(destfile:"${tempJar}.jar", basedir:"${tempJar}")
-				delete(dir:"${tempJar}")
-			}
-
-		} else {
-			println "module '${modName}' does not exist"
-		}
-
-	}
-
-	void appToMod(jrName) {
-
-		def jarName = jrName ?: appName
-
-		if (!exists("${projectBasedir}/application.groovy")) {
-			println "application.groovy must be defined"
-			return
-		}
-
-		if (exists("${projectBasedir}/view") || exists("${projectBasedir}/webroot")) {
-			println "please note: view and webroot are not included in module jar"
-		}
-
-		compile()
-		ant.sequential {
-			// rename application.groovy as module.groovy
-			def tempJar = "${projectBasedir}/target/${jarName}"
-			if (exists("${tempJar}")) delete(dir:"${tempJar}")
-			if (exists("${tempJar}.jar")) delete(dir:"${tempJar}.jar")
-
-			mkdir(dir:"${tempJar}")
-
-			// copy root script
-		    copy(file:"${projectBasedir}/application.groovy", tofile:"${tempJar}/module.groovy")
-
-		    // class files and resources
-		    if (new File("${projectBasedir}/target/classes").exists()) {
-			    mkdir(dir:"${tempJar}/classes")
-			    copy(todir:"${tempJar}/classes") {
-			    	fileset(dir:"${projectBasedir}/target/classes") {
-			    		include(name:'*/**')
-			    	}
-			    }
+		ant.jar(destfile:"${projectBasedir}/target/${jarName}") {
+		    fileset(dir:"${projectBasedir}/modules/${name}") {
+		        include(name:"application.groovy")
+		        include(name:"view/**")
+		        include(name:"webroot/**")
+		        include(name:"conf/**")
+		        include(name:"lib/**")
+		        include(name:"scripts/**")
 		    }
-
-		    // scripts
-		    if (new File("${projectBasedir}/scripts").exists()) {
-			    mkdir(dir:"${tempJar}/scripts")
-			    copy(todir:"${tempJar}/scripts") {
-			    	fileset(dir:"${projectBasedir}/scripts") {
-			    		include(name:'*/**')
-			    	}
-			    }
-		    }
-
-		    // libraries
-		    if (new File("${projectBasedir}/lib").exists()) {
-			    mkdir(dir:"${tempJar}/lib")
-			    copy(todir:"${tempJar}/lib") {
-			    	fileset(dir:"${projectBasedir}/lib") {
-			    		include(name:'*/**')
-			    	}
-			    }
-		    }
-
-			zip(destfile:"${tempJar}.jar", basedir:"${tempJar}")
-			delete(dir:"${tempJar}")
 		}
+
 	}
 
 	void createApp(appName, example = false) {
@@ -391,6 +486,28 @@ class Lifecycle {
 		    	fileset(dir:"${sourceFolder}") {
 		    		include(name:'*/**')
 		    	}
+		    }
+		}
+	}
+
+	void modIfyApp() {
+
+		compile()
+
+		println '========================================================================='
+		println '= create application module jar                                         ='
+		println '========================================================================='
+
+		jarSrcArtifacts()
+		def jarName = appName+(version ? '-'+version : '')+'.jar'
+		ant.jar(destfile:"${projectBasedir}/target/${jarName}") {
+		    fileset(dir:"${projectBasedir}") {
+		        include(name:"application.groovy")
+		        include(name:"view/**")
+		        include(name:"webroot/**")
+		        include(name:"conf/**")
+		        include(name:"lib/**")
+		        include(name:"scripts/**")
 		    }
 		}
 	}
