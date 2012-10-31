@@ -14,15 +14,23 @@ if (!javaHome || !gravyHome) {
 }
 
 // build classpath
-println 'Bootstrapping gravy environment:\n\n'
-println 'Building classpath . . .\n'
-println '\tgravy jars:'
+println ''
+println '========================================================================='
+println '= build runtime classpath                                               ='
+println '========================================================================='
+println ''
+
 addFolder("$gravyHome/lib")
 addFolder("$gravyHome/lib/jnotify")
 addFolder("$gravyHome/lib/jetty8")
 addFolder("$gravyHome/lib/jetty8/jsp")
 
 // launch
+println ''
+println '========================================================================='
+println '= launch application server                                             ='
+println '========================================================================='
+println ''
 this.getClass().classLoader.rootLoader.loadClass('org.microsauce.gravy.server.bootstrap.StartUp')
 	.getMethod('main', String[].class)
 	.invoke(null, [args as String[]] as Object[])

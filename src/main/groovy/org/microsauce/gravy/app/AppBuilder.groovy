@@ -29,14 +29,16 @@ class AppBuilder {
 		//
 		// load modules listed in the gravy configuration
 		//
-		loadModules()
+		def moduleResults = loadModules()
 
 		//
 		// prepare and execute application.groovy
 		//
+
 		if (new File("${config.appRoot}${SLASH}WEB-INF${SLASH}modules${SLASH}app${SLASH}application.groovy").exists()) {
 			Script appScript = new Script([name: 'app',sourceUri:"${config.appRoot}${SLASH}WEB-INF${SLASH}modules${SLASH}app${SLASH}application.groovy"])
 			new ModuleScriptDecorator(config, applicationContext).decorate(appScript)
+			appScript.binding.putAll moduleResults
 			ScriptUtils.run(appScript)
 		}
 
@@ -51,7 +53,8 @@ class AppBuilder {
 		def results = [:]
 		if (config.gravy.modules) {
 			def moduleDecorator = new ModuleScriptDecorator(config, applicationContext)
-			for (modName in config.gravy.modules) {
+		
+			for (modName in listModules()) { 
 				log.info "loading module $modName"
 				def module = new Script([name:modName])
 				moduleDecorator.decorate(module)
@@ -63,6 +66,16 @@ class AppBuilder {
 		}
 
 		results
+	}
+
+	def private listModules() {
+		// return all except 'app'
+		def modulesFolder = new File("${config.appRoot}${SLASH}WEB-INF${SLASH}modules")
+		def moduleNames = []
+		modulesFolder.eachDir { dir ->
+			if ( dir.name != 'app' ) moduleNames << dir.name
+		}
+		moduleNames
 	}
 
 }

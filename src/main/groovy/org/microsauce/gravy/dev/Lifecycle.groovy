@@ -82,6 +82,26 @@ class Lifecycle {
 		moduleNames
 	}
 
+
+
+	void install(coreModuleName) {
+		println '========================================================================='
+		println "= install core module: $coreModuleName"
+		println '========================================================================='
+
+		ant.sequential {
+			copy(todir:"${projectBasedir}/modules/${coreModuleName}") {
+				if (exists("${gravyHome}/modules/${coreModuleName}")) {
+			    	fileset(dir:"${gravyHome}/modules/${coreModuleName}") {
+			    		include(name:'*/**')
+			    	}
+				} else {
+					echo("module $coreModuleName not found")
+				}
+			}
+		}
+	}
+
 	void clean() {
 		println '========================================================================='
 		println '= delete build artifacts                                                ='
@@ -308,11 +328,16 @@ class Lifecycle {
 		    		exclude(name:'jnotify/**')
 			}
 		}
-//		if ( exists(projectBasedir+'/target/classes') ) 
-//			link deployFolder+'/WEB-INF/classes', projectBasedir+'/target/classes'
 	}
 
-	void deploy(String warPath, String deployPath) {
+	void deploy(String warName, String deployPath) {
+		war(warName, deployPath)
+
+		println '========================================================================='
+		println '= deploying application                                                 ='
+		println '========================================================================='
+
+		def warPath = "${projectBasedir}/target/${warName}.war"
 		ant.copy(file:"$warPath", todir:"$deployPath") 
 	}
 
@@ -490,7 +515,7 @@ class Lifecycle {
 		}
 	}
 
-	void modIfyApp() {
+	String modIfyApp() {
 
 		compile()
 
@@ -500,7 +525,8 @@ class Lifecycle {
 
 		jarSrcArtifacts()
 		def jarName = appName+(version ? '-'+version : '')+'.jar'
-		ant.jar(destfile:"${projectBasedir}/target/${jarName}") {
+		def destFile = "${projectBasedir}/target/${jarName}"
+		ant.jar(destfile: "${destFile}") {
 		    fileset(dir:"${projectBasedir}") {
 		        include(name:"application.groovy")
 		        include(name:"view/**")
@@ -510,6 +536,18 @@ class Lifecycle {
 		        include(name:"scripts/**")
 		    }
 		}
+
+		destFile.toString()
+	}
+
+	void publish(deployLocation) {
+		def jarPath = modIfyApp()
+
+		println '========================================================================='
+		println '= publish application module jar                                        ='
+		println '========================================================================='
+
+		ant.copy(file:"${jarPath}", todir:"${deployLocation}")
 	}
 
 	private boolean exists(String path) {

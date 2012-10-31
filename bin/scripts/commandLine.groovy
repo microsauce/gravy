@@ -13,7 +13,6 @@ if (commandLine.hasOption('help')) {
 Goals:
 clean         - delete all build products
 resolve       - resolve dependencies
-install       - install dependencies
 compile       - compile all Java and Groovy sources (output to target/classes) - depends on clean
 test          - execute all test scripts defined in src/test/groovy - depends on compile
 assemble      - assemble the application - depends on test / compile
@@ -50,6 +49,16 @@ if (commandLine.hasOption('create')) {
 	}
 	def lifecycle = new Lifecycle(getConfig())
 	lifecycle.createApp(name, commandLine.hasOption('example'))
+	System.exit(0)
+}
+if (commandLine.hasOption('install')) {
+	def name = commandLine.optionValue('install')
+	if ( name == null ) {
+		println 'please provide a core module name'
+		System.exit(0)
+	}
+	def lifecycle = new Lifecycle(getConfig())
+	lifecycle.install(name)
 	System.exit(0)
 }
 if (commandLine.hasOption('create-mod')) {
