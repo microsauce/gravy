@@ -78,17 +78,6 @@ class DependencyResolver {
         resolverUrls.add url
     }
 
-    public static void main(String ... args) {
-        DependencyResolver resolver = new DependencyResolver('')
-//      resolver.addResolver 'http://download.java.net/maven/2'
-        println 'resolving artifact . . .'
-        File artifactFile = resolver.resolveArtifact('ant', 'ant', '1.6')
-//      File artifactFile = resolver.resolveArtifact('foo', 'fee', '1.6')
-//      File artifactFile = resolver.resolveArtifact('junit', 'junit', '3.8.1')
-        println "cached file: ${artifactFile.absolutePath}"
-        println 'done'
-    }
-    
     private URLResolver newURLResolver(String name, String url) {
         URLResolver resolver = new URLResolver()
         resolver.setM2compatible(true)

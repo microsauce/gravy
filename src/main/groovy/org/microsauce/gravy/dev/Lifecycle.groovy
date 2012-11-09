@@ -9,6 +9,7 @@ import java.nio.file.*
 import java.nio.file.attribute.*
 import org.microsauce.gravy.dev.DevUtils
 import com.microsauce.gravy.dev.dependency.DependencyResolver
+import org.codehaus.groovy.tools.RootLoader
 
 class Lifecycle {
 
@@ -82,11 +83,9 @@ class Lifecycle {
 		moduleNames
 	}
 
-
-
-	void install(coreModuleName) {
+	void installCoreModule(coreModuleName) {
 		println '========================================================================='
-		println "= install core module: $coreModuleName"
+		println "= install core module: ${coreModuleName.padRight(49)}="
 		println '========================================================================='
 
 		ant.sequential {
@@ -201,23 +200,14 @@ class Lifecycle {
 		println '= execute test scripts                                                  ='
 		println '========================================================================='
 
-		def allTests = new GroovyTestSuite()
-		if ( exists("${projectBasedir}/src/test/groovy") ) {
-			def testScripts = getTestScripts("${projectBasedir}/src/test/groovy")
-			testScripts.each { thisScript ->
-				allTests.addTest(new
-					ScriptTestAdapter(allTests.compile(thisScript), [] as String[]))
-			}
+		def classLoader = testClassLoader()
+		def testerClass = classLoader.loadClass('org.microsauce.gravy.dev.Tester')
+		def tester = testerClass.newInstance()
+		tester.runTests(projectBasedir)
+//		gse.run('bootstrapTest.groovy', [projectBasedir:projectBasedir] as Binding)
 
-			if (allTests.countTestCases() < 1) return 0
-
-			TestRunner.run(allTests).wasSuccessful()
-		} else {
-			ant.echo "there are no unit test scripts defined for application $appName"
-			return true
-		}
 	}
-
+/*
 	def private getTestScripts(testFolder) {
 		def testScripts = []
 		new File(testFolder).eachFileRecurse(FileType.FILES) { thisFile ->
@@ -226,6 +216,32 @@ class Lifecycle {
 		}
 
 		testScripts
+	}
+*/
+	private ClassLoader testClassLoader() {
+		def urls = [] 
+		def target = new File("${projectBasedir}/target/classes")
+		if ( target.exists() ) {
+			urls << new File("${projectBasedir}/target/classes").toURL()
+		}
+		target = new File("${projectBasedir}/target/lib")
+		if ( target.exists() ) {
+			new File("${projectBasedir}/target/lib").eachFile { thisFile ->
+				urls << thisFile.toURI().toURL()
+			}
+		}
+		new File("${gravyHome}/lib/junit").eachFile { thisFile ->
+			urls << thisFile.toURI().toURL()
+		}
+		new File("${gravyHome}/lib/groovy").eachFile { thisFile ->
+			urls << thisFile.toURI().toURL()
+		}
+		new File("${gravyHome}/lib").eachFile { thisFile ->
+			if ( thisFile.name.endsWith('.jar') )
+				urls << thisFile.toURI().toURL()
+		}
+
+		new RootLoader(urls as URL[], this.class.classLoader)
 	}
 
 	void resolve() { // resolve managed dependencies
@@ -236,34 +252,40 @@ class Lifecycle {
 		println '= resolve dependencies                                                  ='
 		println '========================================================================='
 
-		managedLibs.each { thisLib ->
-			def jar = jarName thisLib
-			if ( !exists("${projectBasedir}/target/lib/${jar}") ) {
-				resolver.installDependency thisLib, "${projectBasedir}/target/lib" 
-				if ( exists("${projectBasedir}/lib") ) {
-					ant.copy(todir:"${projectBasedir}/target/lib") {
-						fileset(dir:"${projectBasedir}/lib") {
-				    		include(name:'*/**')
-						}
-					} // ant.copy
-				} // if exists lib
+		if ( managedLibs && managedLibs.size() > 0 ) {
+			managedLibs.each { thisLib ->
+				def jar = jarName thisLib
+				if ( !exists("${projectBasedir}/target/lib/${jar}") ) {
+					resolver.installDependency thisLib, "${projectBasedir}/target/lib" 
+					if ( exists("${projectBasedir}/lib") ) {
+						ant.copy(todir:"${projectBasedir}/target/lib") {
+							fileset(dir:"${projectBasedir}/lib") {
+					    		include(name:'*/**')
+							}
+						} // ant.copy
+					} // if exists lib
+				}
 			}
 		}
 
-		managedModules.each { thisMod ->
-			def modName = moduleName thisMod
-			if ( !exists("${projectBasedir}/target/modules/${modName}") )
-				resolver.installModule thisMod
+		if ( managedModules && managedModules.size() > 0 ) {
+			managedModules.each { thisMod ->
+				def modName = moduleName thisMod
+				if ( !exists("${projectBasedir}/target/modules/${modName}") )
+					resolver.installModule thisMod
+			}
 		}
 	}
 
 	private String moduleName(String mavenCoordinates) {
+		if ( mavenCoordinates == null || mavenCoordinates == '' ) return null
 		validMavenCoordinates mavenCoordinates
 
 		mavenCoordinates.split(':')[1]		
 	}
 
 	private String jarName(String mavenCoordinates) {
+		if ( mavenCoordinates == null || mavenCoordinates == '' ) return null
 		validMavenCoordinates mavenCoordinates
 
 		String[] coords = mavenCoordinates.split(':')
@@ -271,14 +293,15 @@ class Lifecycle {
 	}
 
 	private void validMavenCoordinates(String mavenCoordinates) {
+		if (mavenCoordinates == null || mavenCoordinates == '') return
 		if ( !(mavenCoordinates ==~ /[a-zA-Z0-9\-]+:[a-zA-Z0-9\-]+:[0-9\.]+/) )
 			throw new Exception("invalid maven coordinates ${mavenCoordinates}.  Valid coordinates are of the form group:artifactId:version")
 	}
 
-	private String[] parseMavenCoordinates(String coordinates) {
-		if ( coordinates == null ) return [] as String[]
+	private parseMavenCoordinates(String coordinates) {
+		if ( coordinates == null || coordinates == '' || coordinates == '[]' ) return [] as String[]
 		// remove square brackets 
-		coordinates.replaceAll('\\[', '').replaceAll('\\]', '').replaceAll(' ', '').split(',')
+		coordinates.replaceAll('\\[', '').replaceAll('\\]', '').replaceAll(' ', '').split(',') as List
 	}
 
 	/*

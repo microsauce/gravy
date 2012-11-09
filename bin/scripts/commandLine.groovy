@@ -51,14 +51,19 @@ if (commandLine.hasOption('create')) {
 	lifecycle.createApp(name, commandLine.hasOption('example'))
 	System.exit(0)
 }
-if (commandLine.hasOption('install')) {
-	def name = commandLine.optionValue('install')
+if (commandLine.hasOption('list-mods')) {
+	def lifecycle = new Lifecycle(getConfig())
+	listCoreModules(gravyHome)
+	System.exit(0)
+}
+if (commandLine.hasOption('install-mod')) {
+	def name = commandLine.optionValue('install-mod')
 	if ( name == null ) {
 		println 'please provide a core module name'
 		System.exit(0)
 	}
 	def lifecycle = new Lifecycle(getConfig())
-	lifecycle.install(name)
+	lifecycle.installCoreModule(name)
 	System.exit(0)
 }
 if (commandLine.hasOption('create-mod')) {
@@ -86,6 +91,7 @@ if (commandLine.hasOption('mod-ify')) {
 	lifecycle.modIfyApp()
 	System.exit(0)
 }
+// TODO instantiate Lifecycle via newLifecycle
 
 //
 // Goals
@@ -104,8 +110,10 @@ if (commandLine.hasOption('assemble')) {
 	System.exit(0)
 }
 if (commandLine.hasOption('test')) {
-	def tester = new Lifecycle(getConfig())
-	tester.test()
+//println "rootLoader: ${this.class.classLoader.rootLoader}"
+	def lifecycle = new Lifecycle(getConfig()) //new Lifecycle(getConfig())
+	lifecycle.test()
+//	tester.test() 
 	System.exit(0)
 }
 if (commandLine.hasOption('compile')) {
@@ -155,4 +163,39 @@ Properties modConfig(modName) {
 		return new ConfigSlurper().parse(new File("${projectFolder}/conf/config.groovy").toURL()).toProperties()
 	else return null
 }
+
+ConfigObject coreModConfig(modConfFile) {
+//	def configFile = new File("${projectFolder}/modules/${modName}/conf/config.groovy")
+	if ( modConfFile.exists() )
+		return new ConfigSlurper().parse(modConfFile.toURL())
+	else return null
+}
+
+void listCoreModules(gravyHome) {
+	println ''
+	println "   Name (Version)              Description"
+	println "   ================================================================================================="
+	new File("${gravyHome}/modules").eachDir { modDir ->
+		def modConf = new File(modDir, '/conf/config.groovy')
+		def configObject = coreModConfig(modConf)
+		if ( !configObject ) {
+			println "${modDir.name}"
+		} else {
+			def description = configObject.meta.description
+			def version = configObject.meta.version
+			def author = configObject.meta.author
+
+			println "   ${(modDir.name+' ('+version+')').padRight(25) } - ${description}"
+		}
+	}
+	println ''
+}
+
+//Lifecycle newLifecycle(properties) {
+//	def gcl = new GroovyClassLoader(this.getClass().getClassLoader().rootLoader)
+//	def clazz = gcl.loadClass('org.microsauce.gravy.dev.Lifecycle')
+//	clazz.getConstructor(Properties.class).newInstance(properties)
+//}
+
+
 

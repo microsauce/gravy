@@ -7,37 +7,18 @@
 
 import org.apache.log4j.*
 
+meta {
+	version='1.0'
+	author=''
+	description=''
+}
 
 gravy {
 	refresh = true
 	env=System.getProperty('gravy.env')
 	errorPage='/error' 
 	viewUri='/view/renderer'
-	modules=['gstring']
-	//modules=['scalate']
 }
-
-//
-// module configuration 
-//
-gstring {
-	documentRoot='/view'
-	uri=gravy.viewUri
-}
-/*
-freemarker {
-	documentRoot='/view'
-	uri=gravy.viewUri
-}
-scalate {
-	documentRoot='/view'
-	uri=gravy.viewUri
-}
-*/
-
-//
-// embedded jetty configuration
-//
 
 jetty {
 	webroot='/webroot'
