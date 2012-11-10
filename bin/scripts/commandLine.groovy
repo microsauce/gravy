@@ -47,12 +47,12 @@ if (commandLine.hasOption('create')) {
 		println 'please provide an app name'
 		System.exit(0)
 	}
-	def lifecycle = new Lifecycle(getConfig())
+	def lifecycle = new Lifecycle(getConfigObject())
 	lifecycle.createApp(name, commandLine.hasOption('example'))
 	System.exit(0)
 }
 if (commandLine.hasOption('list-mods')) {
-	def lifecycle = new Lifecycle(getConfig())
+	def lifecycle = new Lifecycle(getConfigObject())
 	listCoreModules(gravyHome)
 	System.exit(0)
 }
@@ -62,7 +62,7 @@ if (commandLine.hasOption('install-mod')) {
 		println 'please provide a core module name'
 		System.exit(0)
 	}
-	def lifecycle = new Lifecycle(getConfig())
+	def lifecycle = new Lifecycle(getConfigObject())
 	lifecycle.installCoreModule(name)
 	System.exit(0)
 }
@@ -72,7 +72,7 @@ if (commandLine.hasOption('create-mod')) {
 		println 'please provide a module name'
 		System.exit(0)
 	}
-	def lifecycle = new Lifecycle(getConfig())
+	def lifecycle = new Lifecycle(getConfigObject())
 	lifecycle.createMod(name)
 	System.exit(0)
 }
@@ -82,12 +82,12 @@ if (commandLine.hasOption('jar-mod')) {
 		println 'please provide a module name'
 		System.exit(0)
 	}
-	def lifecycle = new Lifecycle(modConfig(name)) //
+	def lifecycle = new Lifecycle(getConfigObject(name)) //
 	lifecycle.jarMod(name)
 	System.exit(0)
 }
 if (commandLine.hasOption('mod-ify')) {
-	def lifecycle = new Lifecycle(getConfig())
+	def lifecycle = new Lifecycle(getConfigObject())
 	lifecycle.modIfyApp()
 	System.exit(0)
 }
@@ -99,34 +99,34 @@ if (commandLine.hasOption('mod-ify')) {
 if (commandLine.hasOption('war')) {
 //	def conf =new ConfigSlurper().parse(new File('./conf/config.groovy').toURL())
 	def name = commandLine.optionValue('name')
-	def lifecycle = new Lifecycle(getConfig())
+	def lifecycle = new Lifecycle(getConfigObject())
 	lifecycle.war(name, commandLine.hasOption('skip-test'))
 	System.exit(0)
 }
 if (commandLine.hasOption('assemble')) {
 //	def conf =new ConfigSlurper().parse(new File('./conf/config.groovy').toURL())
-	def lifecycle = new Lifecycle(getConfig())
+	def lifecycle = new Lifecycle(getConfigObject())
 	lifecycle.assemble()
 	System.exit(0)
 }
 if (commandLine.hasOption('test')) {
-//println "rootLoader: ${this.class.classLoader.rootLoader}"
-	def lifecycle = new Lifecycle(getConfig()) //new Lifecycle(getConfig())
+	def configObject = getConfigObject()
+	println "test: configObject2: ${configObject} - type: ${configObject.getClass()}"
+	def lifecycle = new Lifecycle(getConfigObject) //new Lifecycle(getConfig())
 	lifecycle.test()
-//	tester.test() 
 	System.exit(0)
 }
 if (commandLine.hasOption('compile')) {
-	def lifecycle = new Lifecycle(getConfig())
+	def lifecycle = new Lifecycle(getConfigObject())
 	lifecycle.compile()
 	System.exit(0)
 }
 if ( commandLine.hasOption('resolve') ) {
-	def lifecycle = new Lifecycle(getConfig())
+	def lifecycle = new Lifecycle(getConfigObject())
 	lifecycle.resolve()
 }
 if (commandLine.hasOption('clean')) {
-	def lifecycle = new Lifecycle(getConfig())
+	def lifecycle = new Lifecycle(getConfigObject())
 	lifecycle.cleanAll() // delete build products and managed dependencies
 	System.exit(0)
 }
@@ -134,7 +134,7 @@ if (commandLine.hasOption('clean')) {
 //
 // default goal is run.  compile app sources and bootstrap the server.
 //
-def lifecycle = new Lifecycle(getConfig())
+def lifecycle = new Lifecycle(getConfigObject())
 //def conf =new ConfigSlurper().parse(new File('./conf/config.groovy').toURL())
 lifecycle.assemble()
 
@@ -148,11 +148,12 @@ gse.run('bootstrap.groovy', [args : args] as Binding)
 //
 // methods
 //
-Properties getConfig() {
+ConfigObject getConfigObject() {
 	def projectFolder = System.getProperty('user.dir')
 	def configFile = new File("${projectFolder}/conf/config.groovy")
+	
 	if ( configFile.exists() )
-		return new ConfigSlurper().parse(new File("${projectFolder}/conf/config.groovy").toURL()).toProperties()
+		return new ConfigSlurper().parse(configFile.toURL())
 	else return null
 }
 
@@ -165,7 +166,6 @@ Properties modConfig(modName) {
 }
 
 ConfigObject coreModConfig(modConfFile) {
-//	def configFile = new File("${projectFolder}/modules/${modName}/conf/config.groovy")
 	if ( modConfFile.exists() )
 		return new ConfigSlurper().parse(modConfFile.toURL())
 	else return null
@@ -190,12 +190,4 @@ void listCoreModules(gravyHome) {
 	}
 	println ''
 }
-
-//Lifecycle newLifecycle(properties) {
-//	def gcl = new GroovyClassLoader(this.getClass().getClassLoader().rootLoader)
-//	def clazz = gcl.loadClass('org.microsauce.gravy.dev.Lifecycle')
-//	clazz.getConstructor(Properties.class).newInstance(properties)
-//}
-
-
 

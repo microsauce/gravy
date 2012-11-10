@@ -29,7 +29,8 @@ class Lifecycle {
 
 	def private moduleNames = null
 
-	Lifecycle(Properties config = null) {
+	Lifecycle(config) {
+
 		projectBasedir = System.getProperty('user.dir')
 		tempFolder = System.getProperty('java.io.tmpdir')
 
@@ -47,16 +48,16 @@ class Lifecycle {
 		configure(config)
 	}
 
-	private configure(Properties config) {
-		config = config ?: new Properties()
-		version = config.getProperty('meta.version') 				// defaults to null
-		author = config.getProperty('meta.author') 					// defaults to null
-		description = config.getProperty('meta.description') 		// defaults to null
+	private configure(config) {
+		config = config ?: new ConfigObject()
+		version = config.meta.version				            // defaults to null
+		author = config.meta.author								// defaults to null
+		description = config.meta.description			 		// defaults to null
 
 		// dependencies
-		managedLibs = parseMavenCoordinates config.getProperty('dependencies.libs') 		// defaults to null
+		managedLibs = config.dependencies.libs  				// defaults to null
 
-		managedModules = parseMavenCoordinates config.getProperty('dependencies.modules')	// defaults to null
+		managedModules = config.dependencies.modules 	        // defaults to null
 
 		resolver = new DependencyResolver(projectBasedir)
 	}
@@ -204,20 +205,8 @@ class Lifecycle {
 		def testerClass = classLoader.loadClass('org.microsauce.gravy.dev.Tester')
 		def tester = testerClass.newInstance()
 		tester.runTests(projectBasedir)
-//		gse.run('bootstrapTest.groovy', [projectBasedir:projectBasedir] as Binding)
-
 	}
-/*
-	def private getTestScripts(testFolder) {
-		def testScripts = []
-		new File(testFolder).eachFileRecurse(FileType.FILES) { thisFile ->
-			if (thisFile.name.endsWith('.groovy'))
-				testScripts << thisFile.absolutePath
-		}
 
-		testScripts
-	}
-*/
 	private ClassLoader testClassLoader() {
 		def urls = [] 
 		def target = new File("${projectBasedir}/target/classes")
@@ -296,12 +285,6 @@ class Lifecycle {
 		if (mavenCoordinates == null || mavenCoordinates == '') return
 		if ( !(mavenCoordinates ==~ /[a-zA-Z0-9\-]+:[a-zA-Z0-9\-]+:[0-9\.]+/) )
 			throw new Exception("invalid maven coordinates ${mavenCoordinates}.  Valid coordinates are of the form group:artifactId:version")
-	}
-
-	private parseMavenCoordinates(String coordinates) {
-		if ( coordinates == null || coordinates == '' || coordinates == '[]' ) return [] as String[]
-		// remove square brackets 
-		coordinates.replaceAll('\\[', '').replaceAll('\\]', '').replaceAll(' ', '').split(',') as List
 	}
 
 	/*
