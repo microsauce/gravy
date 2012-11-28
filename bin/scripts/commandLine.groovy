@@ -1,29 +1,56 @@
 #!/usr/bin/env groovy
 
-import org.microsauce.util.CommandLine
-import org.microsauce.gravy.dev.Lifecycle
+import org.microsauce.gravy.dev.lifecycle.Lifecycle;
+import org.microsauce.gravy.util.CommandLine;
 
 //
 // parse command line
 //
-def commandLine = new CommandLine(args)
+def subCommands = [
+	'clean',
+	'resolve',
+	'compile',
+	'test',
+	'assemble',
+	'run',
+	'war',
+	'create',
+	'mod-ify',
+	'list-mods',
+	'install-mod',
+	'jar-mod'
+]
+def commandLine = new CommandLine(args, subCommands)
+commandLine.defaultCommand = 'run'
+def command = commandLine.command
 if (commandLine.hasOption('help')) {
-	def help = '''gravy [clean|compile|test|run|war] [env dev|prod|other] [conf propertyName=propertyValue]
+	def help = '''gravy [clean|resolve|compile|test|run|war] [env dev|prod|other] [conf propertyName=propertyValue]
 
-Goals:
+ Lifecycle Goals:
+=++++++++++++++++=
 clean         - delete all build products
-resolve       - resolve dependencies
+resolve       - resolve dependencies (libraries and modules)
 compile       - compile all Java and Groovy sources (output to target/classes) - depends on clean
 test          - execute all test scripts defined in src/test/groovy - depends on compile
 assemble      - assemble the application - depends on test / compile
 run           - run your Gravy application in dev mode (this is the default goal) - depends on assemble
 war           - bundle your application as a web archive [appName].war in the target folder - depends on test
 
-Flags:
+ Tools:
+=++++++=
+create        - create a new application
+list-mods	  - list available core modules
+install-mod   - install a core module in this application
+mod-ify	      - build this appliction as module jar
+
+ Flags:
+=++++++=
 env           - specify the execution environment ('dev' by default)
-conf          - configure an application property on the command line,
-                overriding config.groovy
-skip-tests    - for the lazy'''
+conf          - configure an application property on the command line, overriding config.groovy
+skip-tests    - for the lazy
+
+
+'''
 	println help
 	System.exit(0)
 }
@@ -91,7 +118,6 @@ if (commandLine.hasOption('mod-ify')) {
 	lifecycle.modIfyApp()
 	System.exit(0)
 }
-// TODO instantiate Lifecycle via newLifecycle
 
 //
 // Goals
@@ -134,16 +160,16 @@ if (commandLine.hasOption('clean')) {
 //
 // default goal is run.  compile app sources and bootstrap the server.
 //
-def lifecycle = new Lifecycle(getConfigObject())
-//def conf =new ConfigSlurper().parse(new File('./conf/config.groovy').toURL())
-lifecycle.assemble()
+if ( command == 'run' ) {   
+	def lifecycle = new Lifecycle(getConfigObject())
+	lifecycle.assemble()
 
-//
-// start the dev server
-//
-def gse = new GroovyScriptEngine(["$gravyHome/bin/scripts"] as String[])
-gse.run('bootstrap.groovy', [args : args] as Binding)
-
+	//
+	// start the dev server
+	//
+	def gse = new GroovyScriptEngine(["$gravyHome/bin/scripts"] as String[])
+	gse.run('bootstrap.groovy', [args : args] as Binding)
+}
 
 //
 // methods

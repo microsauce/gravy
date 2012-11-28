@@ -31,7 +31,7 @@ println '=======================================================================
 println '= launch application server                                             ='
 println '========================================================================='
 println ''
-this.getClass().classLoader.rootLoader.loadClass('org.microsauce.gravy.server.bootstrap.StartUp')
+this.getClass().classLoader.rootLoader.loadClass('org.microsauce.gravy.dev.runtime.StartUp')
 	.getMethod('main', String[].class)
 	.invoke(null, [args as String[]] as Object[])
 
