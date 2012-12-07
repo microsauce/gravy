@@ -10,22 +10,22 @@ import javax.servlet.http.HttpServletResponse
 @Log4j
 class ErrorHandler {
 
-	static ErrorHandler instance
+//	static ErrorHandler instance
 
-	static ErrorHandler initInstance(String errorPage, String viewUri) {
-		if ( instance == null ) instance = new ErrorHandler(errorPage, viewUri)
-		instance
-	}
+//	static ErrorHandler initInstance(String errorPage, String viewUri) {
+//		if ( instance == null ) instance = new ErrorHandler(errorPage, viewUri)
+//		instance
+//	}
 
-	static ErrorHandler getInstance() {
-		if ( instance == null ) throw new RuntimeException('ErrorHandler not properly initialized.')
-		instance
-	}
+//	static ErrorHandler getInstance() {
+//		if ( instance == null ) throw new RuntimeException('ErrorHandler not properly initialized.')
+//		instance
+//	}
 
 	String errorPage
 	String viewUri
 
-	private ErrorHandler(String errorPage, String viewUri) {
+	ErrorHandler(String errorPage, String viewUri) {
 		this.errorPage = errorPage
 		this.viewUri = viewUri
 	}
@@ -51,7 +51,7 @@ class ErrorHandler {
 		else {
 			HttpServletResponse _res = (HttpServletResponse) res
 			HttpServletRequest _req = (HttpServletRequest) req
-			_res.writer << "Error ${errorType}.  Unable to load requested resource ${_req.requestURI}: ${message}"
+			_res.writer << "Error ${errorType}.  There was an error loading requested resource ${_req.requestURI}: ${message}"
 			_res.writer.flush()
 		}
 	}

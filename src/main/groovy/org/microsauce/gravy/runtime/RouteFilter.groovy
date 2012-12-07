@@ -20,9 +20,9 @@ class RouteFilter implements Filter {
 	Context context
 	ErrorHandler errorHandler
 
-	RouteFilter(Context context) {
+	RouteFilter(Context context, ErrorHandler errorHandler) {
 		this.context = context
-		errorHandler = ErrorHandler.getInstance()
+		this.errorHandler = errorHandler
 	}
 
 	@CompileStatic

@@ -17,6 +17,8 @@ import org.microsauce.gravy.runtime.ErrorHandler
  */
 abstract class Handler {
 	
+	ErrorHandler errorHandler 
+	
 	abstract Object doExecute(HttpServletRequest req, HttpServletResponse res, FilterChain chain, HandlerBinding handlerBinding)
 	
 	@CompileStatic
@@ -28,7 +30,7 @@ abstract class Handler {
 			doExecute(req, res, chain, handlerBinding)
 		}
 		catch ( Throwable t ) {
-			ErrorHandler.instance.handleError(500, "execution failed for uri ${req.getRequestURI()}", req, res, t)
+			errorHandler.handleError(500, "execution failed for uri ${req.getRequestURI()}", req, res, t)
 		}
 	}
 	

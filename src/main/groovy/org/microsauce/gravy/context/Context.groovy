@@ -94,6 +94,7 @@ class Context {
 		retService
 	}
 	
+	// TODO delete this
 	@CompileStatic
 	void complete() { 
 		log.info 'completing application context'

@@ -40,6 +40,7 @@ class ServerUtils {
 		cp == '/' ? str : cp+str
 	}
 
+	@CompileStatic
 	static String getUri(HttpServletRequest req) {		
 		String uri
 		if (req.getContextPath() != '/')

@@ -8,6 +8,7 @@ import org.microsauce.gravy.context.Context
 import org.microsauce.gravy.context.ServiceFactory
 import org.microsauce.gravy.module.groovy.GroovyModuleFactory
 import org.microsauce.gravy.module.javascript.JSModuleFactory
+import org.microsauce.gravy.runtime.ErrorHandler
 import org.microsauce.gravy.runtime.GravyTemplateServlet
 
 
@@ -71,7 +72,7 @@ abstract class ModuleFactory {
 	
 	
 	@CompileStatic
-	Module createModule(Context context, File moduleFolder, ConfigObject appConfig, String env, Boolean isApp) {
+	Module createModule(Context context, File moduleFolder, ConfigObject appConfig, String env, ErrorHandler errorHandler, Boolean isApp) {
 
 		// create classloader and load module class		
 		ClassLoader cl = createModuleClassLoader(moduleFolder)
@@ -88,6 +89,7 @@ abstract class ModuleFactory {
 		module.moduleConfig = loadModuleConfig(moduleFolder, env)
 		module.applicationConfig = appConfig
 		module.viewRoots = GravyTemplateServlet.roots
+		module.errorHandler = errorHandler
 
 		if ( appConfig != null && appConfig[module.name] instanceof ConfigObject )
 			module.config = module.moduleConfig.merge((ConfigObject)appConfig[module.name])

@@ -3,6 +3,7 @@ package org.microsauce.gravy.context
 import javax.servlet.DispatcherType
 
 import org.microsauce.gravy.module.Module
+import org.microsauce.gravy.runtime.ErrorHandler
 
 
 abstract class Service {
@@ -22,9 +23,12 @@ abstract class Service {
 
 	Map<String, Handler> handlers = [:]
 	HandlerFactory handlerFactory
+	ErrorHandler errorHandler
+	
 
 	void setHandler(String method, Object rawHandler, Object scriptContext) {
 		Handler handler = handlerFactory.makeHandler rawHandler, scriptContext
+		handler.errorHandler = errorHandler
 		handlers[method] = handler
 	}
 }

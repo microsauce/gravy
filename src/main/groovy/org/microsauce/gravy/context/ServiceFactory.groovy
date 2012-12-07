@@ -8,11 +8,13 @@ import javax.servlet.DispatcherType
 
 import org.microsauce.gravy.context.groovy.GroovyServiceFactory
 import org.microsauce.gravy.context.javascript.JSServiceFactory
-import org.microsauce.gravy.module.Module
 import org.microsauce.gravy.module.groovy.GroovyModule
 import org.microsauce.gravy.module.javascript.JSModule
+import org.microsauce.gravy.runtime.ErrorHandler
 import org.microsauce.gravy.util.pattern.RegExUtils
 
+
+// TODO this can probably be a concrete class
 abstract class ServiceFactory {
 
 	private static Map<Class, ? extends ServiceFactory> FACTORIES
@@ -30,20 +32,26 @@ abstract class ServiceFactory {
 	
 	@Override
 	@CompileStatic
-	public EnterpriseService makeEnterpriseService(Object scriptContext, String uriPattern, Map<String, Object> methodHandlers, List<DispatcherType> dispatch) {
+	public EnterpriseService makeEnterpriseService(Object scriptContext, String uriPattern, Map<String, Object> methodHandlers, List<DispatcherType> dispatch, ErrorHandler errorHandler) {
 
 		EnterpriseService service = new EnterpriseService()
 		Map<String, Object> parseRoute = RegExUtils.parseRoute(uriPattern)
 		
-		service.handlerFactory = HandlerFactory.getHandlerFactory(this.class) // TODO
+		HandlerFactory handlerFactory = HandlerFactory.getHandlerFactory(this.class)		
 		service.uriPattern = (Pattern) parseRoute.uriPattern
 		service.uriString = uriPattern
 	 	service.params = parseRoute.params as List<String>
 		service.dispatch = dispatch
+
+		methodHandlers.each { String method, Object rawHandler ->
+			Handler handler = handlerFactory.makeHandler(rawHandler, scriptContext)
+			handler.errorHandler = errorHandler
+			service.handlers.put(method, handler)
+		}
+
+//		doMakeEnterpriseService(scriptContext, service, methodHandlers)
 		
-		doMakeEnterpriseService(scriptContext, service, methodHandlers)
-		
-		return service;
+		service
 	}
 	
 	abstract EnterpriseService doMakeEnterpriseService(Object scriptContext, EnterpriseService service, Map<String, Object> methodHandlers)

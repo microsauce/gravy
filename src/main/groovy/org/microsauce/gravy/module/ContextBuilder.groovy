@@ -7,6 +7,7 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 import org.microsauce.gravy.context.Context
+import org.microsauce.gravy.runtime.ErrorHandler
 
 
 @Log4j
@@ -18,19 +19,21 @@ class ContextBuilder {
 	Context context
 	File appRoot
 	String env = env
+	ErrorHandler errorHandler
 
 	
-	ContextBuilder(File appRoot, String env) {
+	ContextBuilder(File appRoot, String env, ErrorHandler errorHandler) {
 		context = new Context()
 		this.appRoot = appRoot
 		this.env = env
+		this.errorHandler = errorHandler
 	}
 	
 	@CompileStatic
 	Context build() {
-		Module app = instantiateApplication(env)
+		Module app = instantiateApplication()
 		application = app
-		Collection<Module> modules = instantiateModules(context, app.moduleConfig, env)
+		Collection<Module> modules = instantiateModules(app.moduleConfig)
 		
 		Map<String, Object> moduleBindings = [:]
 		for ( thisModule in modules ) {
@@ -44,7 +47,7 @@ class ContextBuilder {
 
 	
 	@CompileStatic
-	private Collection<Module> instantiateModules(Context context, ConfigObject appConfig, String env) {
+	private Collection<Module> instantiateModules(ConfigObject appConfig) {
 		List<Module> modules = []
 		
 		for (modFolder in ContextBuilder.listModules(appRoot)) { 
@@ -66,7 +69,8 @@ class ContextBuilder {
 		ModuleFactory moduleFactory = ModuleFactory.getInstance fileExtension
 		if ( moduleFactory == null )
 			throw new Exception("unable to find module loader for file type ${fileExtension}.")
-		moduleFactory.createModule(context, modFolder, appConfig, env, isApp)
+			
+		moduleFactory.createModule(context, modFolder, appConfig, env, errorHandler, isApp)
 	}
 	
 	@CompileStatic
@@ -110,7 +114,7 @@ class ContextBuilder {
 		folders
 	}
 	
-	private Module instantiateApplication(String env) {
+	private Module instantiateApplication() {
 		File modFolder = new File(appRoot, 'modules')
 		File appFolder = new File(modFolder, 'app')
 		instantiateModule(context, appFolder, null, env, true)

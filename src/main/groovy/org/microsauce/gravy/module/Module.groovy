@@ -10,10 +10,12 @@ import org.microsauce.gravy.context.Context
 import org.microsauce.gravy.context.CronService
 import org.microsauce.gravy.context.EnterpriseService
 import org.microsauce.gravy.context.ServiceFactory
+import org.microsauce.gravy.runtime.ErrorHandler
 import org.microsauce.gravy.runtime.GravyTemplateServlet
 
 
 abstract class Module { // TODO trash the idea of Module loader instead create a module abstract base class with implementations for each supported language
+	
 	
 	String name 
 	Boolean isApp
@@ -26,6 +28,7 @@ abstract class Module { // TODO trash the idea of Module loader instead create a
 	ServiceFactory serviceFactory
 	Map<String, Map<String, Object>> rawServiceMap = [:]
 	List<String> viewRoots
+	ErrorHandler errorHandler 
 
 	Object returnValue
 	Map binding // used by the main app script only (mod1 ret val, mod2, etc)
@@ -52,7 +55,7 @@ abstract class Module { // TODO trash the idea of Module loader instead create a
 		GravyTemplateServlet.roots.addAll(viewRoots) 
 		
 		if (binding == null) binding = [:]
-		returnValue = doLoad(binding) // TODO verify merge
+		returnValue = doLoad(binding) // TODO: verify merge
 	}
 	
 	/**
@@ -70,7 +73,8 @@ abstract class Module { // TODO trash the idea of Module loader instead create a
 		} else {
 			Map<String, Object> methodHandler = [:]
 			methodHandler[method] = rawHandler
-			service = serviceFactory.makeEnterpriseService(scriptContext, uriPattern, methodHandler, dispatch)
+			service = serviceFactory.makeEnterpriseService(scriptContext, uriPattern, methodHandler, dispatch, errorHandler)
+			service.errorHandler = errorHandler
 			service.module = this
 		}
 		

@@ -66,7 +66,10 @@ class GravyBootstrapListener implements ServletContextListener {
 		//
 		String errorPage = config.gravy.errorPage ?: null
 		String viewUri = config.gravy.viewUri ?: null
-		ErrorHandler.initInstance(errorPage, viewUri)
+		// TODO instantiate error handler here and pass it into:
+		// TODO ContextBuilder > ModuleFactory > ServiceFactory -> EnterpriseService -> HandlerFactory -> Handler
+		//ErrorHandler.initInstance(errorPage, viewUri)
+		ErrorHandler errorHandler = new ErrorHandler(errorPage, viewUri)
 
 		//
 		// configure resource paths
@@ -87,7 +90,7 @@ class GravyBootstrapListener implements ServletContextListener {
 		//
 		// instantiate and build the Application Context
 		//
-		ContextBuilder contextBuilder = new ContextBuilder(appRootFolder, environment)
+		ContextBuilder contextBuilder = new ContextBuilder(appRootFolder, environment, errorHandler)
 		contextBuilder.build()
 		Context context = contextBuilder.context
 		this.context = context
@@ -97,7 +100,7 @@ class GravyBootstrapListener implements ServletContextListener {
 			startSourceObserver app
 		}
 					
-		initEnterpriseRuntime context, resourceRoots, deployPath, sce
+		initEnterpriseRuntime context, resourceRoots, deployPath, sce, errorHandler
 		initCronRuntime context
 		
 	}
@@ -128,7 +131,7 @@ class GravyBootstrapListener implements ServletContextListener {
 	}
 
 	
-	private void initEnterpriseRuntime(Context context, List<String> resourceRoots, String deployPath, ServletContextEvent sce) {
+	private void initEnterpriseRuntime(Context context, List<String> resourceRoots, String deployPath, ServletContextEvent sce, ErrorHandler errorHandler) {
 		ServletContext servletContext = sce.servletContext
 		int serialNumber = 0
 		context.servlets.each { servlet ->
@@ -149,7 +152,7 @@ class GravyBootstrapListener implements ServletContextListener {
 		}
 
 		addFilter('RouteFilter',new FilterWrapper([
-			filter: new RouteFilter(context),
+			filter: new RouteFilter(context, errorHandler),
 			mapping : '/*',
 			dispatch: EnumSet.copyOf([DispatcherType.REQUEST, DispatcherType.FORWARD])]), servletContext) // TODO REVISIT
 //		addFilter('ControllerFilter',new FilterWrapper([
