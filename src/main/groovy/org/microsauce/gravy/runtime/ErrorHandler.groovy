@@ -1,18 +1,19 @@
 package org.microsauce.gravy.runtime
 
+import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j
 
-import org.microsauce.gravy.runtime.ErrorHandler;
-
 import javax.servlet.*
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
 @Log4j
 class ErrorHandler {
 
-	def static instance
+	static ErrorHandler instance
 
-	static ErrorHandler getInstance(config) {
-		if ( instance == null ) instance = new ErrorHandler(config)
+	static ErrorHandler initInstance(String errorPage, String viewUri) {
+		if ( instance == null ) instance = new ErrorHandler(errorPage, viewUri)
 		instance
 	}
 
@@ -21,26 +22,38 @@ class ErrorHandler {
 		instance
 	}
 
-	def config
+	String errorPage
+	String viewUri
 
-	private ErrorHandler(config) {
-		this.config = config
+	private ErrorHandler(String errorPage, String viewUri) {
+		this.errorPage = errorPage
+		this.viewUri = viewUri
 	}
 
-	def errorCode() {
+	@CompileStatic
+	String errorCode() {
 		def addr = InetAddress.getLocalHost();
 	    byte[] ipAddr = addr.getAddress();
     	def hostName = addr.getHostName()
 		"${hostName}-${System.currentTimeMillis()}".toString()
 	}
 	
+	@CompileStatic
 	void handleError(Integer errorType, String message, ServletRequest req, ServletResponse res, Throwable exception) {
 		def errorCode = errorCode()
 		log.error("*** ${errorCode} *** ${message}", exception)
-		req.setAttribute('_model', [errorType: errorType, message: message, errorCode: errorCode])
-		req.setAttribute('_view', config.gravy.errorPage)
-		def rd = req.getRequestDispatcher(config.gravy.viewUri)
-		rd.forward(req, res)
+		if ( errorPage && viewUri ) {
+			req.setAttribute('_model', [errorType: errorType, message: message, errorCode: errorCode])
+			req.setAttribute('_view', errorPage)
+			def rd = ((HttpServletRequest)req).getRequestDispatcher(viewUri)
+			rd.forward(req, res)
+		}
+		else {
+			HttpServletResponse _res = (HttpServletResponse) res
+			HttpServletRequest _req = (HttpServletRequest) req
+			_res.writer << "Error ${errorType}.  Unable to load requested resource ${_req.requestURI}: ${message}"
+			_res.writer.flush()
+		}
 	}
 
 }

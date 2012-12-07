@@ -15,7 +15,7 @@ class GravyDecorator {
 	def static decorateBinding() {
 		//
 		// TODO the following Binding.metaClass assignments are a workaround
-		// for GROOVY-5367 (still open as of Groovy 2.0.1/scheduled for 3.0).
+		// for GROOVY-5367 (still open as of Groovy 2.0.4/scheduled for 3.0).
 		// When resolved I will add render and forward to the closure delagate 
 		// binding rather than the Binding metaClass.
 		//
@@ -34,7 +34,6 @@ class GravyDecorator {
 			res.contentType = 'text/html'
 			req.setAttribute('_view', viewName)
 			req.setAttribute('_model', model)
-			req.setAttribute('_controller', controller)
 			def rd = req.getRequestDispatcher(conf.gravy.viewUri)
 			rd.forward(req, res)
 		}

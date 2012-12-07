@@ -30,7 +30,7 @@ class FreemarkerServlet extends GravyTemplateServlet {
 def runMode = config.freemarker.mode ?: 'prod'
 def appRoot = config.appRoot
 def documentRoot =  appRoot+'/WEB-INF/view'
-def viewUri = config.gravy.viewUri ?: '/view/renderer'
+def viewUri = config.gravy.viewUri ?: '/view/freemarker'
 
 def viewServlet = new FreemarkerServlet(documentRoot, runMode)
 servlet(viewUri, viewServlet)

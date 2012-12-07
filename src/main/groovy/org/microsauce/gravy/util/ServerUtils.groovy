@@ -1,14 +1,22 @@
 package org.microsauce.gravy.util
 
+import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j
 
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
+
+// TODO delete this
 @Log4j
 class ServerUtils {
 
+	/**
+	 * TODO this need to move to the Groovy Action/Handler implementation
+	 */
+	@CompileStatic
 	static Map buildContext(HttpServletRequest req, HttpServletResponse res, Class classBinding) {
+		
 		def binding = [:]
 		res.contentType = 'text/html'
 		if ( classBinding ) {
@@ -32,7 +40,7 @@ class ServerUtils {
 		cp == '/' ? str : cp+str
 	}
 
-	static String getUri(HttpServletRequest req) {
+	static String getUri(HttpServletRequest req) {		
 		String uri
 		if (req.getContextPath() != '/')
 			uri = req.requestURI.substring(req.contextPath.length())

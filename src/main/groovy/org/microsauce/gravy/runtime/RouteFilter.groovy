@@ -1,29 +1,27 @@
 package org.microsauce.gravy.runtime
 
-import javax.servlet.http.HttpServlet
-import javax.servlet.http.HttpServletResponse
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.ServletResponse
-import javax.servlet.ServletRequest
+import groovy.transform.CompileStatic
+import groovy.util.logging.Log4j
+
 import javax.servlet.Filter
 import javax.servlet.FilterChain
-import javax.servlet.RequestDispatcher
-import org.microsauce.gravy.server.util.ServerUtils
+import javax.servlet.ServletRequest
+import javax.servlet.ServletResponse
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
-import org.microsauce.gravy.context.ApplicationContext;
-import org.microsauce.gravy.context.Route;
+import org.microsauce.gravy.context.Context
+import org.microsauce.gravy.context.EnterpriseService
 import org.microsauce.gravy.util.ServerUtils
-import groovy.util.logging.Log4j
-import groovy.transform.CompileStatic
 
 @Log4j
 class RouteFilter implements Filter {
 
-	ApplicationContext applicationContext
+	Context context
 	ErrorHandler errorHandler
 
-	RouteFilter() {
-		applicationContext = ApplicationContext.instance
+	RouteFilter(Context context) {
+		this.context = context
 		errorHandler = ErrorHandler.getInstance()
 	}
 
@@ -52,8 +50,9 @@ class RouteFilter implements Filter {
 	@CompileStatic
 	private FilterChain buildChain(FilterChain chain, ServletRequest req) {
 
-		List<Route> matchingRoutes = applicationContext.findRoutes(
-			ServerUtils.getUri((HttpServletRequest)req), req.dispatcherType)
+		HttpServletRequest _req = (HttpServletRequest)req
+		List<EnterpriseService> matchingRoutes = context.findService(
+			ServerUtils.getUri((HttpServletRequest)req), _req.dispatcherType)
 		FilterChain routeChain = null
 		if (matchingRoutes.size() >0) 
 			routeChain = new RouteChain(chain, matchingRoutes)

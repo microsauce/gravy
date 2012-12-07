@@ -1,9 +1,15 @@
 package org.microsauce.gravy.util
 
-import java.text.SimpleDateFormat
-import groovy.util.logging.Log4j
 import groovy.transform.CompileStatic
+import groovy.util.logging.Log4j
 
+import java.text.SimpleDateFormat
+
+import javax.servlet.http.HttpServletRequest
+
+
+
+// TODO replace this with utility that converts form data to JSON
 /**
 * Mapper is a utility for generating a Groovy/Java object graph based on the given request's parameters.
 *
@@ -115,7 +121,12 @@ public class Mapper {
 		}
 		counter
 	}
-
+@CompileStatic
+Map<String, String> parmMap(HttpServletRequest req) {
+	Map<String, String> parmMap = [:]
+	
+}
+	
 	def buildParameterMap(req, parameterTypes) {
 		def parameterMap = [:]  // root
 		def errors = []

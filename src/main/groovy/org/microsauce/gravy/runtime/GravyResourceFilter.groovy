@@ -40,6 +40,7 @@ class GravyResourceFilter implements Filter {
 			res.outputStream.write resolver.retrieve(uri)
 			res.outputStream.flush()
 		} else chain.doFilter request, response
+
 	}
 
 	void destroy() {}

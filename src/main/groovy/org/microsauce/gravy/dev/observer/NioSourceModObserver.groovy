@@ -106,14 +106,11 @@ class NioSourceModObserver implements SourceModObserver {
 		Path path = (Path)key.watchable();
 
         for ( WatchEvent<?> event: key.pollEvents()){
-println "&&&&&&&&&&&&&&&&&& event ${event}"        	
 			Path fullPath = path.resolve(event.context())
-println "&&&&&&&&&&&&&&&&&& fullPath ${fullPath}"        	
 
             WatchEvent.Kind kind = event.kind()
             if (kind == OVERFLOW) continue
 
-println "@@@@@@@@@@@@@@@@ ${kind.name()} - ${event.context()}"           
             switch (kind.name()){
                 case "ENTRY_MODIFY":
                     if (isScript(fullPath.toString())) {

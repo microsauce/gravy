@@ -1,50 +1,59 @@
 package org.microsauce.gravy.module.config
 
+import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j
 
 @Log4j
 class Config {
 
-	def private static instance
+	private static Config instance
 	
-	def static getInstance(environment) { 
+	@CompileStatic
+	static Config getInstance(String environment) { 
 		
 		if (!instance) instance = new Config(environment)
 		return instance
 	}
 
-	def static getInstance() {
+	@CompileStatic
+	static Config getInstance() {
 		if (!instance) new Exception("configuration not properly initialized")
 		return instance
 	}
 
 	def private ConfigObject config
-
-	private Config(environment) {
-		def configFile = new File(System.getProperty('gravy.appRoot')+'/WEB-INF/modules/app/conf/config.groovy')
+	
+	private Config(String environment) {
+		init(environment)
+	}
+	
+	@CompileStatic
+	private void init(String environment) {
+		File configFile = new File(System.getProperty('gravy.appRoot')+'/WEB-INF/modules/app/conf/config.groovy')
 		try {
-			if ( configFile.exists() ) 
+			if ( configFile.exists() )
 				config = new ConfigSlurper(environment).parse(configFile.toURL())
 		}
 		catch (all) {
-			all.printStackTrace()	
+			all.printStackTrace()
 			log.error 'error loading environment.groovy', all
 		}
 		finally {
 			if (!config) config = new ConfigObject()
 		}
 
-		if (System.getProperty('gravy.devMode')) 
+		if (System.getProperty('gravy.devMode'))
 			completeConfigDev config
-		else 
+		else
 			completeConfigWar config
 
-		config.gravy.env = environment
 	}
 
-	def get() {config}
+	@CompileStatic
+	ConfigObject get() {config}
 
-	def toProperties() {config.toProperties()}
+	@CompileStatic
+	Properties toProperties() {config.toProperties()}
 
 	private void completeConfigDev(config) {
 		def appRoot = System.getProperty('gravy.appRoot') 

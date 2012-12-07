@@ -10,7 +10,7 @@ class ResourceResolver {
 
 	Map<String,RealPath> resolvedPaths = [:]	// uri - real path
 	Map<String,String> resolvedUris = [:]		// uri - real path
-	Map<String,byte[]> cachedFiles = [:] 		// real path - file content
+	Map<String,byte[]> cachedFiles = [:] 		// real path - file content // TODO 
 	List<String> roots = []
 	List<CacheConstraints> constraints = []
 	String basedir
@@ -67,7 +67,7 @@ class ResourceResolver {
 	}
 
 	@CompileStatic
-	byte[] retrieve(String uri) throws FileNotFoundException {
+	byte[] retrieve(String uri) throws FileNotFoundException { // TODO return an output stream
 		byte[] bytes = null
 		RealPath realPath = resolveUri(uri)
 		if ( realPath.cached == null )
@@ -80,7 +80,7 @@ class ResourceResolver {
 			}
 		} else bytes = new File(realPath.path).readBytes()
 
-		bytes
+		bytes // TODO byte array output stream ???
 	}
 
 	@CompileStatic

@@ -1,37 +1,43 @@
+
+
 package org.microsauce.gravy.runtime
 
+import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j
+import it.sauronsoftware.cron4j.Scheduler
 
 import javax.servlet.*
 
 import org.apache.log4j.*
 import org.microsauce.gravy.*
 import org.microsauce.gravy.app.*
-import org.microsauce.gravy.context.ApplicationContext
+import org.microsauce.gravy.context.Context
 import org.microsauce.gravy.dev.observer.BuildSourceModHandler
 import org.microsauce.gravy.dev.observer.JNotifySourceModObserver
 import org.microsauce.gravy.dev.observer.RedeploySourceModHandler
-import org.microsauce.gravy.module.AppBuilder
+import org.microsauce.gravy.module.ContextBuilder
+import org.microsauce.gravy.module.Module
+import org.microsauce.gravy.module.ModuleFactory
 import org.microsauce.gravy.server.runtime.*
 import org.microsauce.gravy.util.monkeypatch.groovy.GravyDecorator
-import org.microsauce.gravy.module.config.Config
 
 
 @Log4j
 class GravyBootstrapListener implements ServletContextListener {
 
-	private ApplicationContext app
+	private Context context
 
+	@CompileStatic
 	void contextDestroyed(ServletContextEvent sce) {
 		log.info 'application is shutting down . . .'
-		if (app) {
-			app.reset()
-			if (app.shutdown)
-			  	app.shutdown()
+		if ( context.cronScheduler ) {
+			if (context.cronScheduler.started)
+			  	context.cronScheduler.stop()
 		}
 		log.info 'Shutdown complete.'
 	}
 
+//	@CompileStatic
 	void contextInitialized(ServletContextEvent sce) {
 		log.info('building application context . . .')
 		def servletContext = sce.servletContext
@@ -39,15 +45,16 @@ class GravyBootstrapListener implements ServletContextListener {
 		//
 		// set appRoot
 		//
-		def deployPath = servletContext.getRealPath("/")
+		String deployPath = servletContext.getRealPath("/")
+		String appRoot = deployPath+'/WEB-INF'
 		if (!System.getProperty('gravy.devMode')) 
-			System.setProperty('gravy.appRoot', deployPath+'/WEB-INF')
+			System.setProperty('gravy.appRoot', appRoot)
 
 		//
 		// load configuration
 		//
-		def environment = System.getProperty('gravy.env') ?: 'prod'
-		def config = Config.getInstance(environment).get()
+		String environment = System.getProperty('gravy.env') ?: 'prod'
+		ConfigObject config = ModuleFactory.loadModuleConfig(new File("${appRoot}/modules/app"), environment) //Config.getInstance(environment).get()
 
 		//
 		// initialize logging
@@ -57,84 +64,106 @@ class GravyBootstrapListener implements ServletContextListener {
 		//
 		// initialize error handler
 		//
-		ErrorHandler.getInstance(config)
-
-		//
-		// decorate
-		//
-		GravyDecorator.decorateBinding()
-		GravyDecorator.decorateHttpServletRequest()
+		String errorPage = config.gravy.errorPage ?: null
+		String viewUri = config.gravy.viewUri ?: null
+		ErrorHandler.initInstance(errorPage, viewUri)
 
 		//
 		// configure resource paths
 		//
+		File appRootFolder = new File(appRoot) 
 		List<String> resourceRoots = []
-		def mods = ['app']
-		mods.addAll(config.gravy.modules)
-		mods.each { mod ->
-			log.info "adding folder $mod to the resource path"
-			resourceRoots << deployPath+'/'+mod
-			GravyTemplateServlet.roots << deployPath+'/WEB-INF/view/'+mod
+		for ( File modFolder in ContextBuilder.listAllModules(appRootFolder) ) {
+			log.info "adding folder ${modFolder.name} to the resource path"
+			String moduleName = modFolder.name
+			String moduleResoursesFolder = "${deployPath}/${moduleName}".toString()
+			if ( new File(moduleResoursesFolder).exists() )
+				resourceRoots << moduleResoursesFolder
+			String moduleViewFolder = "${deployPath}/WEB-INF/view/${moduleName}".toString()
+			if (new File(moduleViewFolder).exists() )
+				GravyTemplateServlet.roots << moduleViewFolder // deployPath+'/WEB-INF/view/'+mod
 		}
 
 		//
 		// instantiate and build the Application Context
 		//
-		def appBuilder = new AppBuilder(config)
-		def applicationContext = appBuilder.buildContext()
+		ContextBuilder contextBuilder = new ContextBuilder(appRootFolder, environment)
+		contextBuilder.build()
+		Context context = contextBuilder.context
+		this.context = context
+		Module app = contextBuilder.application
 
-		//
-		// start the source observer 
-		//
 		if (config.gravy.refresh) {
-			config.gravy.project = System.getProperty('user.dir')
-			def sourceObserver = new JNotifySourceModObserver(config) 
-			sourceObserver.addScriptHandler(new RedeploySourceModHandler(config, applicationContext))
-
-			sourceObserver.addCompiledSourceHandler(new BuildSourceModHandler(config, applicationContext))
-			sourceObserver.addCompiledSourceHandler(new RedeploySourceModHandler(config, applicationContext))
-
-			sourceObserver.start()
+			startSourceObserver app
 		}
+					
+		initEnterpriseRuntime context, resourceRoots, deployPath, sce
+		initCronRuntime context
+		
+	}
 
-		//
-		// add services to the servlet context
-		//
+	private void initCronRuntime(Context context) {
+		if ( context.cronServices ) {
+			context.cronScheduler = new Scheduler()
+			context.cronServices.each { task ->
+				context.cronScheduler.schedule(task.cronString, task.action as Runnable)
+			}
 
-		ServletContext context = sce.servletContext
+			context.cronScheduler.start()
+		}
+	}
+	
+	@CompileStatic
+	private void startSourceObserver(Module app) {
+		Map binding = app.binding
+		String projectFolder = System.getProperty('user.dir')
+		def sourceObserver = new JNotifySourceModObserver(projectFolder) //app.folder.absolutePath)
+		sourceObserver.addScriptHandler(new RedeploySourceModHandler(app))
+
+		sourceObserver.addCompiledSourceHandler(new BuildSourceModHandler())
+		sourceObserver.addCompiledSourceHandler(new RedeploySourceModHandler(app))
+
+		sourceObserver.start()
+
+	}
+
+	
+	private void initEnterpriseRuntime(Context context, List<String> resourceRoots, String deployPath, ServletContextEvent sce) {
+		ServletContext servletContext = sce.servletContext
 		int serialNumber = 0
-		applicationContext.getServlets().each { servlet ->
+		context.servlets.each { servlet ->
 			def name = servlet.servlet.getClass().name
 			if (name.lastIndexOf('.') > 0) {
-			    name = name.substring(name.lastIndexOf('.')+1)
+				name = name.substring(name.lastIndexOf('.')+1)
 			}
-			addServlet(name+serialNumber++, servlet, context)
+			addServlet(name+serialNumber++, servlet, servletContext)
 		}
 
 		serialNumber = 0
-		applicationContext.getFilters().each { filter ->
+		context.filters.each { filter ->
 			def name = filter.filter.getClass().name
 			if (name.lastIndexOf('.') > 0) {
-			    name = name.substring(name.lastIndexOf('.')+1)
+				name = name.substring(name.lastIndexOf('.')+1)
 			}
-			addFilter(name+serialNumber++, filter, context)
+			addFilter(name+serialNumber++, filter, servletContext)
 		}
 
 		addFilter('RouteFilter',new FilterWrapper([
-			filter: new RouteFilter(), 
-			mapping : '/*', 
-			dispatch: EnumSet.copyOf([DispatcherType.REQUEST, DispatcherType.FORWARD])]), context) // TODO REVISIT
-		addFilter('ControllerFilter',new FilterWrapper([
-			filter: new ControllerFilter(), 
-			mapping : '/*', 
-			dispatch: EnumSet.copyOf([DispatcherType.REQUEST, DispatcherType.FORWARD])]), context)
-
+			filter: new RouteFilter(context),
+			mapping : '/*',
+			dispatch: EnumSet.copyOf([DispatcherType.REQUEST, DispatcherType.FORWARD])]), servletContext) // TODO REVISIT
+//		addFilter('ControllerFilter',new FilterWrapper([
+//			filter: new ControllerFilter(),
+//			mapping : '/*',
+//			dispatch: EnumSet.copyOf([DispatcherType.REQUEST, DispatcherType.FORWARD])]), context)
 		addFilter('GravyResourceFilter',new FilterWrapper([
-			filter: new GravyResourceFilter(resourceRoots, deployPath), 
-			mapping : '/*', 
-			dispatch: EnumSet.copyOf([DispatcherType.REQUEST, DispatcherType.FORWARD])]), context)
-	}
+			filter: new GravyResourceFilter(resourceRoots, deployPath),
+			mapping : '/*',
+			dispatch: EnumSet.copyOf([DispatcherType.REQUEST, DispatcherType.FORWARD])]), servletContext)
 
+	}
+	
+	
 	private void addFilter(String name, FilterWrapper filter, ServletContext context) {
 		def filterReg = context.addFilter(name, filter.filter)
 		filterReg.addMappingForUrlPatterns(filter.dispatch, true, filter.mapping) 
@@ -145,11 +174,11 @@ class GravyBootstrapListener implements ServletContextListener {
 		servletReg.addMapping(servlet.mapping)
 	}
 
-	private void initLogging(config) {
+	@CompileStatic
+	private void initLogging(ConfigObject config) {
 		if (config.log4j) {
 			PropertyConfigurator.configure(config.toProperties())
 		}
 	}
-
 
 }

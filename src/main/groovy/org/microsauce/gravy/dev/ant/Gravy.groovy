@@ -9,7 +9,9 @@ class Gravy extends Task {
 	Set<String> noArgGoals 
 	Set<String> allGoals 
 
-
+	//
+	// life-cycle goals
+	// 
 	static String CLEAN 	= 'clean'
 	static String RESOLVE	= 'resolve'
 	static String COMPILE   = 'compile'
@@ -17,10 +19,14 @@ class Gravy extends Task {
 	static String ASSEMBLE  = 'assemble'
 	static String WAR 		= 'war'		// takes args
 	static String DEPLOY 	= 'deploy'	// takes args
-
-	static String MOD_IFY = 'modIfy'
 	static String PUBLISH = 'publish'	// TODO
-
+	
+	//
+	// tools
+	//
+	static String MOD_IFY = 'modIfy'
+	static String JAR_MOD = 'jarMod'
+	
 
 	String projectPath
 	String deployPath

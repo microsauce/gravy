@@ -11,17 +11,20 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 import org.microsauce.gravy.app.*
-import org.microsauce.gravy.context.ActionUtils
-import org.microsauce.gravy.context.Route
+import org.microsauce.gravy.context.Context
+import org.microsauce.gravy.context.EnterpriseService
+import org.microsauce.gravy.context.Handler
+import org.microsauce.gravy.context.groovy.ActionUtils
 import org.microsauce.gravy.util.ServerUtils
 
 class RouteChain implements FilterChain {
 
-	List<Route> routes
+	List<EnterpriseService> routes
 	Integer currentPosition = 0
 	FilterChain serverChain
+	Context context
 
-	RouteChain(serverChain, routes) {
+	RouteChain(FilterChain serverChain, List<EnterpriseService> routes) {
 		this.serverChain = serverChain
 		this.routes = routes
 	}
@@ -32,59 +35,20 @@ class RouteChain implements FilterChain {
 			// finish up with the 'native' filter 
 			serverChain.doFilter(req, res) 
 		else {
-			Route route = routes[currentPosition++]
-			bindAndRouteRequest(route, req, res)
+			EnterpriseService route = routes[currentPosition++]
+			String method = ((HttpServletRequest)req).method.toLowerCase()
+			Handler handler = route.handlers[method] ?: route.handlers[EnterpriseService.DEFAULT]
+			try {
+				handler.execute((HttpServletRequest)req, (HttpServletResponse)res, serverChain, route.uriPattern, route.params)
+			}
+catch(Throwable t) {
+	t.printStackTrace()				
+}
+			finally {
+				if ( !res.committed )
+					res.writer.flush()
+			}
 		}
 	}
 
-	@CompileStatic
-	private void bindAndRouteRequest(Route route, ServletRequest req, ServletResponse res) {
-		HttpServletRequest request = (HttpServletRequest)req		
-		String requestUri = request.requestURI
-		String method = request.method.toLowerCase()
-
-		Matcher matches =  requestUri =~ route.uriPattern
-		Map binding = [:]
-		Integer ndx = 1
-		List<String> splat = []
-		if ( route.params.size() > 0 ) {
-//			route.params.each { param ->
-//				if ( param == '*' )
-//					splat << matches[0][ndx++]
-//				else
-//					binding[param] = matches[0][ndx++]
-//			}
-			while (matches.find()) {
-				Integer groupCount = matches.groupCount()
-				for (;ndx<=groupCount;ndx++) {
-					String param = route.params[ndx-1]
-					if ( param == '*' )
-						splat << matches.group(ndx)
-					else
-						binding[param] = matches.group(ndx)
-				}
-			}
-		} else if (matches.groupCount() > 0) {
-			Integer groupCount = matches.groupCount()
-			while (matches.find()) {
-				for (;ndx <= groupCount; ndx++ ) {
-					splat << matches.group(ndx)
-				}
-			}
-		}
-		binding['splat'] = splat
-
-		binding.route = route.uriPattern.toString()
-		binding.controller = null
-		binding.chain = this
-		binding << ServerUtils.buildContext(request, (HttpServletResponse)res, route.binding)
-
-		Closure action = route.getAction(method)
-		List<String> paramList = []
-		if ( action.maximumNumberOfParameters == splat.size() ) 
-			paramList = splat
-
-		ActionUtils.call(action, binding, paramList) 
-		res.writer.flush()
-	}
 }

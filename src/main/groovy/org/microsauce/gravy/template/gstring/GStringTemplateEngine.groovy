@@ -284,7 +284,6 @@ class GStringTemplateEngine {
 		}
 		catch ( all ) {
 			log.error("ERROR: failed to render view ${uri}:\n${all.message}", all)
-//			all.printStackTrace()
 			throw all
 		}
 		if ( !result )

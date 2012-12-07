@@ -12,11 +12,11 @@ class JNotifySourceModObserver implements SourceModObserver {
 	private List<SourceModHandler> scriptHandlers = []
 	private List<SourceModHandler> sourceHandlers = []
 
-	private ConfigObject config
+	private String projectFolder
 
-	JNotifySourceModObserver(ConfigObject config) {
-		this.config = config
+	JNotifySourceModObserver(String projectFolder) {
 		addLibraryPath()
+		this.projectFolder = projectFolder
 	}
 
 	public void addScriptHandler(SourceModHandler handler) {
@@ -33,12 +33,12 @@ class JNotifySourceModObserver implements SourceModObserver {
 		ScriptListener scriptListenter = new ScriptListener()
 		SourceListener sourceListener = new SourceListener()
 
-    	if (exists("${config.gravy.project}")) 
-    		JNotify.addWatch("${config.gravy.project}", mask, false, scriptListenter)
-    	if (exists("${config.gravy.project}/scripts")) 
-    		JNotify.addWatch("${config.gravy.project}/scripts", mask, false, scriptListenter)
-    	if (exists("${config.gravy.project}/src/main")) 
-    		JNotify.addWatch("${config.gravy.project}/src/main", mask, true, sourceListener)
+    	if (exists(projectFolder)) 
+    		JNotify.addWatch(projectFolder, mask, false, scriptListenter)
+    	if (exists("${projectFolder}/scripts")) 
+    		JNotify.addWatch("${projectFolder}/scripts", mask, false, scriptListenter)
+    	if (exists("${projectFolder}/src/main")) 
+    		JNotify.addWatch("${projectFolder}/src/main", mask, true, sourceListener)
 
 	}
 
