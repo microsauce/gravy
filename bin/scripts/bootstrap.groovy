@@ -24,6 +24,7 @@ addFolder("$gravyHome/lib")
 addFolder("$gravyHome/lib/jnotify")
 addFolder("$gravyHome/lib/jetty8")
 addFolder("$gravyHome/lib/jetty8/jsp")
+addFolder("$gravyHome/lib/rhino")
 
 // launch
 println ''

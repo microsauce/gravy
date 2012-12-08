@@ -360,11 +360,16 @@ class Lifecycle {
 		def webInfMod = deployFolder+'/WEB-INF/modules/'+modName
 		folder webInfMod
 
-		def appScriptPath = modPath+'/application.groovy'
-		if ( exists(appScriptPath) ) link webInfMod+'/application.groovy', appScriptPath
-
+//		def appScriptPath = modPath+'/application.groovy'
+//		if ( exists(appScriptPath) ) link webInfMod+'/application.groovy', appScriptPath
+		new File(modPath).eachFile { file ->
+			if ( file.name.startsWith('application.') ) {
+				link webInfMod+'/'+file.name, file.absolutePath
+			}
+		}
+		
 		// copy deployment descriptor to deployment WEB-INF folder
-		//
+		// TODO web.xml needs to be installed in webroot/WEB-INF on first startup
 		def webXml = gravyHome+'/bin/scripts/essentials/webroot/WEB-INF/web.xml'
 		ant.copy(file:"$webXml", todir:"${deployFolder}/WEB-INF") 
 

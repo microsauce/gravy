@@ -41,7 +41,7 @@ abstract class ModuleFactory {
 		modConfig
 	}
 	
-	
+	// TODO add logging defaults
 	private static void completeConfig(ConfigObject config) {
 		if (System.getProperty('gravy.devMode')) {
 			def appRoot = System.getProperty('gravy.appRoot')

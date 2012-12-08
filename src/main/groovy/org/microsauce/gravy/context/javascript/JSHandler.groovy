@@ -26,15 +26,27 @@ class JSHandler extends Handler {
 	@CompileStatic
 	public Object doExecute(HttpServletRequest req, HttpServletResponse res,
 			FilterChain chain, HandlerBinding handlerBinding) {
-		def contextFactory  = new org.mozilla.javascript.ContextFactory()
-		Context ctx = contextFactory.enter()
+//		def contextFactory  = new org.mozilla.javascript.ContextFactory()
+		Context ctx = org.mozilla.javascript.Context.enter() // contextFactory.enter()
 		try {
 			// make the handler binding available to JS
 			req.setAttribute('_handlerBinding', handlerBinding)
-			jsFunction.call(ctx, scope, null, [req, res, chain] as Object[] ) // TODO the user defined JS function will have only two parameters (req, res) this function is itself wrapped in a three argument function
+			jsFunction.call(ctx, scope, null, [new JSRequest(req), res, chain] as Object[] ) // TODO the user defined JS function will have only two parameters (req, res) this function is itself wrapped in a three argument function
 		}
 		finally {
 			ctx.exit()
+		}
+	}
+			
+	class JSRequest {
+		HttpServletRequest request
+		JSRequest(HttpServletRequest request) {
+			this.request
+		}
+		
+		Object getAttribute(String name) {
+println "JSRequest.getAttribute: $name "			
+			request.getAttribute name
 		}
 	}
 	

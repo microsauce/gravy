@@ -30,14 +30,22 @@
 	</target>
 
 	<target name="compileJava" depends="init"
-			description="Compile ava sources">
+			description="Compile java sources">
 		<javac destdir="${basedir}/target/classes"
 				classpathref="build.classpath" deprecation="off" >
 			<src path="${basedir}/src/main/java"/>
 		</javac>
 	</target>
 
-	<target name="jar" depends="compileGroovy,compileJava"> 
+	<target name="javaScript" depends="compileGroovy">
+	    <copy todir="${basedir}/target/classes">
+	    	<fileset dir="${basedir}/src/main/javascript">
+	    		<include name="*/**"/>
+	    	</fileset>
+	    </copy>
+	</target>
+	
+	<target name="jar" depends="compileGroovy,compileJava,javaScript"> 
 		<jar destfile="${basedir}/lib/gravy.jar"
 			basedir="${basedir}/target/classes" />
 	</target>
