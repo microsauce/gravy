@@ -2,6 +2,10 @@ package org.microsauce.gravy.context.javascript
 
 import groovy.transform.CompileStatic
 
+import java.lang.reflect.InvocationHandler
+import java.lang.reflect.Method
+import java.lang.reflect.Proxy
+
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -10,11 +14,12 @@ import org.microsauce.gravy.context.Handler
 import org.microsauce.gravy.context.HandlerBinding
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeFunction
+import org.mozilla.javascript.NativeJSON
 import org.mozilla.javascript.ScriptableObject
 
 class JSHandler extends Handler {
 
-	ScriptableObject scope // TODO verify that 'context' is bound to the scope prior to application.js execution
+	ScriptableObject scope 
 	NativeFunction jsFunction
 	
 	JSHandler(NativeFunction jsFunction, ScriptableObject scope) {
@@ -26,27 +31,72 @@ class JSHandler extends Handler {
 	@CompileStatic
 	public Object doExecute(HttpServletRequest req, HttpServletResponse res,
 			FilterChain chain, HandlerBinding handlerBinding) {
-//		def contextFactory  = new org.mozilla.javascript.ContextFactory()
-		Context ctx = org.mozilla.javascript.Context.enter() // contextFactory.enter()
+
+		Context ctx = org.mozilla.javascript.Context.enter() 
 		try {
 			// make the handler binding available to JS
 			req.setAttribute('_handlerBinding', handlerBinding)
-			jsFunction.call(ctx, scope, null, [new JSRequest(req), res, chain] as Object[] ) // TODO the user defined JS function will have only two parameters (req, res) this function is itself wrapped in a three argument function
+			JSHttpServletRequest jsReq = (JSHttpServletRequest)Proxy.newProxyInstance(
+				this.class.getClassLoader(),  
+				[JSHttpServletRequest.class] as Class[],
+				new JSRequestProxy(req, ctx, scope));
+			jsFunction.call(ctx, scope, null, [jsReq, res, chain] as Object[] ) // TODO the user defined JS function will have only two parameters (req, res) this function is itself wrapped in a three argument function
 		}
 		finally {
 			ctx.exit()
 		}
 	}
 			
-	class JSRequest {
+	// TODO refactor to another name/package, useful outside of JS/CS
+	//
+	class JSResponse {
+		// add the following:
+		// render
+	}
+	
+	interface JSHttpServletRequest extends HttpServletRequest {
+		Object attr(String key, Object value)
+	}
+	
+	class JSRequestProxy implements InvocationHandler {
+		
 		HttpServletRequest request
-		JSRequest(HttpServletRequest request) {
-			this.request
+		Context ctx
+		ScriptableObject scope
+		
+		JSRequestProxy(HttpServletRequest request, Context ctx, ScriptableObject scope) {
+			this.request = request
+			this.ctx = ctx
+			this.scope = scope
 		}
 		
-		Object getAttribute(String name) {
-println "JSRequest.getAttribute: $name "			
-			request.getAttribute name
+		@CompileStatic
+		public Object invoke(final Object   proxy, final Method method,
+			final Object[] args) throws Throwable {
+			
+			Object value = null
+			if (method.name == 'attr')
+				value = attr((String)args[0], args[1])
+			else {
+				Method targetMethod = request.class.getDeclaredMethod(method.name, method.parameterTypes)
+				value = targetMethod.invoke(request, args)
+			}
+
+			return value
+		}
+		//@CompileStatic // when compile statically I don't have access to NativeJSON.pars(3 arg)
+		Object attr(String key, Object value) {
+			Object ret = value
+			if ( value != null ) {
+				Object jsonValue = NativeJSON.stringify(ctx, scope, value, null, null)
+				request.setAttribute key, jsonValue
+			}
+			else {
+				String jsonString = (String) request.getAttribute(key)
+				ret = NativeJSON.parse(ctx, scope, jsonString)
+			}
+				
+			return ret
 		}
 	}
 	

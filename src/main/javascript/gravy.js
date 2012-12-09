@@ -38,13 +38,9 @@ http methods
 
 
 GET = 'get';
-
 POST = 'post';
-
 PUT = 'put';
-
 OPTIONS = 'post';
-
 DELETE = 'delete';
 
 /*
@@ -53,9 +49,7 @@ dispatch types
 
 
 REQUEST = DispatcherType.REQUEST;
-
 FORWARD = DispatcherType.FORWARD;
-
 ERROR = DispatcherType.ERROR;
 
 /*
@@ -71,7 +65,6 @@ print = function(str) {
   return out.print(str);
 };
 
-println('1')
 serialize = function(obj) {
   return JSON.stringify(obj);
 };
@@ -79,7 +72,6 @@ serialize = function(obj) {
 deserialize = function(str) {
   return JSON.parse(str);
 };
-println('2')
 
 attr = function(key, value) {
   var ret;
