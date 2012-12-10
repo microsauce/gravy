@@ -32,7 +32,7 @@ abstract class ServiceFactory {
 	
 	@Override
 	@CompileStatic
-	public EnterpriseService makeEnterpriseService(Object scriptContext, String uriPattern, Map<String, Object> methodHandlers, List<DispatcherType> dispatch, ErrorHandler errorHandler) {
+	public EnterpriseService makeEnterpriseService(Object scriptContext, String uriPattern, Map<String, Object> methodHandlers, List<DispatcherType> dispatch, ErrorHandler errorHandler, String viewUri) {
 
 		EnterpriseService service = new EnterpriseService()
 		Map<String, Object> parseRoute = RegExUtils.parseRoute(uriPattern)
@@ -42,10 +42,12 @@ abstract class ServiceFactory {
 		service.uriString = uriPattern
 	 	service.params = parseRoute.params as List<String>
 		service.dispatch = dispatch
+		service.viewUri = viewUri
 
 		methodHandlers.each { String method, Object rawHandler ->
 			Handler handler = handlerFactory.makeHandler(rawHandler, scriptContext)
 			handler.errorHandler = errorHandler
+			handler.viewUri = viewUri
 			service.handlers.put(method, handler)
 		}
 

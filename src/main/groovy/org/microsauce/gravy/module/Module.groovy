@@ -9,14 +9,15 @@ import javax.servlet.http.HttpServlet
 import org.microsauce.gravy.context.Context
 import org.microsauce.gravy.context.CronService
 import org.microsauce.gravy.context.EnterpriseService
+import org.microsauce.gravy.context.Handler
 import org.microsauce.gravy.context.ServiceFactory
 import org.microsauce.gravy.runtime.ErrorHandler
 import org.microsauce.gravy.runtime.GravyTemplateServlet
 
 
-abstract class Module { // TODO trash the idea of Module loader instead create a module abstract base class with implementations for each supported language
+abstract class Module { 
 	
-	
+	// TODO add viewUri - from config
 	String name 
 	Boolean isApp
 	ClassLoader classLoader 
@@ -27,6 +28,7 @@ abstract class Module { // TODO trash the idea of Module loader instead create a
 	ConfigObject config // the effective config
 	ServiceFactory serviceFactory
 	Map<String, Map<String, Object>> rawServiceMap = [:]
+	String viewUri
 	List<String> viewRoots
 	ErrorHandler errorHandler 
 
@@ -69,11 +71,13 @@ abstract class Module { // TODO trash the idea of Module loader instead create a
 	public void addEnterpriseService(String uriPattern, String method, Object rawHandler, List<DispatcherType> dispatch) {
 		EnterpriseService service = context.findServiceByUriString(uriPattern)
 		if ( service ) {
-			service.handlers[method] = service.handlerFactory.makeHandler(rawHandler, scriptContext)
+			Handler thisHandler = service.handlerFactory.makeHandler(rawHandler, scriptContext)
+			thisHandler.viewUri = viewUri
+			service.handlers[method] = thisHandler
 		} else {
 			Map<String, Object> methodHandler = [:]
 			methodHandler[method] = rawHandler
-			service = serviceFactory.makeEnterpriseService(scriptContext, uriPattern, methodHandler, dispatch, errorHandler)
+			service = serviceFactory.makeEnterpriseService(scriptContext, uriPattern, methodHandler, dispatch, errorHandler, viewUri)
 			service.errorHandler = errorHandler
 			service.module = this
 		}

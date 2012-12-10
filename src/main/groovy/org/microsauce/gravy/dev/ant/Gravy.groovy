@@ -3,7 +3,12 @@ package org.microsauce.gravy.dev.ant
 import org.apache.tools.ant.Task
 import org.apache.tools.ant.Project
 import org.microsauce.gravy.dev.lifecycle.Lifecycle;
-
+/**
+ * Gravy Ant task. TODO status: untested
+ * 
+ * @author jboone
+ *
+ */
 class Gravy extends Task {
 
 	Set<String> noArgGoals 

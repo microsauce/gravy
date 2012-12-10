@@ -42,6 +42,16 @@ abstract class ModuleFactory {
 	}
 	
 	// TODO add logging defaults
+	// TODO create new config category 'global' i.e.
+	// 		global {
+	//			jsonAttr = true // when false use native language objects
+	//			dateFormat = 'MM/dd/yyyy etc' // ??? json date conversions
+	//			errorUri = '/error/page'
+	//			refresh = true // default false (always true in devMode)
+	//     		log {
+	//				// log config
+	//			}
+	//		}
 	private static void completeConfig(ConfigObject config) {
 		if (System.getProperty('gravy.devMode')) {
 			def appRoot = System.getProperty('gravy.appRoot')
@@ -87,6 +97,7 @@ abstract class ModuleFactory {
 		module.classLoader = cl
 		module.folder = moduleFolder
 		module.moduleConfig = loadModuleConfig(moduleFolder, env)
+		module.viewUri = module.moduleConfig.viewUri
 		module.applicationConfig = appConfig
 		module.viewRoots = GravyTemplateServlet.roots
 		module.errorHandler = errorHandler
@@ -105,6 +116,10 @@ abstract class ModuleFactory {
 		
 		List<URL> classpath = []
 		LoaderConfiguration loaderConf = new LoaderConfiguration()
+		
+		// TODO when in dev mode put <projectRoot>/target/classes first in classpath
+		
+		
 		// module lib -- web-inf/moduleName/lib
 		File modLib = new File(moduleFolder, 'lib')
 		if ( modLib.exists() ) {

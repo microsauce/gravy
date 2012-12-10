@@ -15,11 +15,11 @@ import org.microsauce.gravy.context.Context
 import org.microsauce.gravy.dev.observer.BuildSourceModHandler
 import org.microsauce.gravy.dev.observer.JNotifySourceModObserver
 import org.microsauce.gravy.dev.observer.RedeploySourceModHandler
+import org.microsauce.gravy.lang.groovy.patch.GravyDecorator;
 import org.microsauce.gravy.module.ContextBuilder
 import org.microsauce.gravy.module.Module
 import org.microsauce.gravy.module.ModuleFactory
 import org.microsauce.gravy.server.runtime.*
-import org.microsauce.gravy.util.monkeypatch.groovy.GravyDecorator
 
 
 @Log4j

@@ -23,16 +23,16 @@ class JSModule extends Module {
 		org.mozilla.javascript.Context ctx = org.mozilla.javascript.Context.enter() //contextFactory.enter()
 		
 		try {
-			// bind the module context and templateEngine
+			// instantiate the module script context
 			if (!scriptContext) scriptContext = new ImporterTopLevel(ctx) 
 			
 			ScriptableObject _scope = (ScriptableObject) scriptContext
-			
-//			scope.put('context', scope, context) // TODO
+
 			_scope.put('module', _scope, this)
 			_scope.put('out', _scope, System.out)
 			_scope.put('log', _scope, log)
-//			_scope.put('isCoffee', _scope, false)
+
+			// add module return values to the script scope (app only)
 			if ( binding ) {
 				binding.each { String key, Object value ->
 					_scope.put(key, _scope, value)

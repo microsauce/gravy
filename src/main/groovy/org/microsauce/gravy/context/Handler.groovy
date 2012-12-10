@@ -17,7 +17,9 @@ import org.microsauce.gravy.runtime.ErrorHandler
  */
 abstract class Handler {
 	
+	// TODO add module reference here
 	ErrorHandler errorHandler 
+	String viewUri
 	
 	abstract Object doExecute(HttpServletRequest req, HttpServletResponse res, FilterChain chain, HandlerBinding handlerBinding)
 	
@@ -34,6 +36,7 @@ abstract class Handler {
 		}
 	}
 	
+	// TODO is this too restricting (abstract) ???
 	private void prepareRequest(HttpServletRequest req) {}
 	
 	private void prepareResponse(HttpServletResponse res) {

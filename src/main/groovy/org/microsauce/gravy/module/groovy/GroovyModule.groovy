@@ -4,11 +4,11 @@ import groovy.transform.CompileStatic
 
 import org.microsauce.gravy.context.Context
 import org.microsauce.gravy.lang.groovy.api.GroovyAPI
+import org.microsauce.gravy.lang.groovy.patch.GravyDecorator;
 import org.microsauce.gravy.lang.groovy.script.Script
 import org.microsauce.gravy.lang.groovy.script.ScriptDecorator
 import org.microsauce.gravy.lang.groovy.script.ScriptUtils
 import org.microsauce.gravy.module.Module
-import org.microsauce.gravy.util.monkeypatch.groovy.GravyDecorator
 
 class GroovyModule extends Module { // TODO pull code in from ScriptUtils,  
 

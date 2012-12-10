@@ -24,7 +24,7 @@ abstract class Service {
 	Map<String, Handler> handlers = [:]
 	HandlerFactory handlerFactory
 	ErrorHandler errorHandler
-	
+	String viewUri
 
 	void setHandler(String method, Object rawHandler, Object scriptContext) {
 		Handler handler = handlerFactory.makeHandler rawHandler, scriptContext
