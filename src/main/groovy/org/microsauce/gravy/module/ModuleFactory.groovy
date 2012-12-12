@@ -16,8 +16,8 @@ abstract class ModuleFactory {
 
 	static Map FACTORY_TYPES = [
 		'groovy' : GroovyModuleFactory.class,
-		'js' :  JSModuleFactory.class //,
-		//'coffee' : CoffeeModuleFactory.class
+		'js' :  JSModuleFactory.class,
+		'coffee' : JSModuleFactory.class
 	]
 	
 	@CompileStatic
@@ -63,7 +63,7 @@ abstract class ModuleFactory {
 			config.jetty.host 			= System.getProperty('jetty.host') ?: config.tomcat.host ?: 'localhost'
 	
 			config.gravy.refresh		= System.getProperty('gravy.refresh') ?: config.gravy.refresh ?: true
-//			config.gravy.viewUri		= System.getProperty('gravy.viewUri') ?: config.gravy.viewUri ?: '/view/renderer'
+			config.gravy.viewUri		= System.getProperty('gravy.viewUri') ?: config.gravy.viewUri ?: '/view/gstring'
 //			config.gravy.errorUri		= System.getProperty('gravy.errorUri') ?: config.gravy.errorUri ?: '/error'
 	
 			//
@@ -82,7 +82,7 @@ abstract class ModuleFactory {
 	
 	
 	@CompileStatic
-	Module createModule(Context context, File moduleFolder, ConfigObject appConfig, String env, ErrorHandler errorHandler, Boolean isApp) {
+	Module createModule(Context context, File moduleFolder, File appScript, ConfigObject appConfig, String env, ErrorHandler errorHandler, Boolean isApp) {
 
 		// create classloader and load module class		
 		ClassLoader cl = createModuleClassLoader(moduleFolder)
@@ -90,22 +90,24 @@ abstract class ModuleFactory {
 		Module module = (Module) moduleClass.newInstance()
 		
 		// initialize module
+		module.moduleConfig = loadModuleConfig(moduleFolder, env)
+		if ( appConfig != null && appConfig[module.name] instanceof ConfigObject )
+			module.config = module.moduleConfig.merge((ConfigObject)appConfig[module.name])
+		else
+			module.config = module.moduleConfig
 		module.context = context
 		module.name = moduleFolder.name
 		module.scriptFile = new File(moduleScriptName())
 		module.isApp = isApp
 		module.classLoader = cl
 		module.folder = moduleFolder
-		module.moduleConfig = loadModuleConfig(moduleFolder, env)
-		module.viewUri = module.moduleConfig.viewUri
+		ConfigObject gravyConfig = (ConfigObject)module.config.gravy
+		module.viewUri = gravyConfig.viewUri
 		module.applicationConfig = appConfig
 		module.viewRoots = GravyTemplateServlet.roots
 		module.errorHandler = errorHandler
+		module.scriptFile = appScript
 
-		if ( appConfig != null && appConfig[module.name] instanceof ConfigObject )
-			module.config = module.moduleConfig.merge((ConfigObject)appConfig[module.name])
-		else
-			module.config = module.moduleConfig
 		// module.bindings 
 		module.serviceFactory = ServiceFactory.getFactory(module.class)
 		module

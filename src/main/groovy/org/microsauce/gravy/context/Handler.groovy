@@ -8,6 +8,7 @@ import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
+import org.microsauce.gravy.module.Module
 import org.microsauce.gravy.runtime.ErrorHandler
 
 /**
@@ -18,6 +19,7 @@ import org.microsauce.gravy.runtime.ErrorHandler
 abstract class Handler {
 	
 	// TODO add module reference here
+	Module module
 	ErrorHandler errorHandler 
 	String viewUri
 	
@@ -32,7 +34,10 @@ abstract class Handler {
 			doExecute(req, res, chain, handlerBinding)
 		}
 		catch ( Throwable t ) {
-			errorHandler.handleError(500, "execution failed for uri ${req.getRequestURI()}", req, res, t)
+			errorHandler.handleError(
+				HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
+				"execution failed for uri ${req.getRequestURI()}", 
+				req, res, t)
 		}
 	}
 	

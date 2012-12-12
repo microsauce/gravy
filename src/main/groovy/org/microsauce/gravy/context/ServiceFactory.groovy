@@ -8,12 +8,13 @@ import javax.servlet.DispatcherType
 
 import org.microsauce.gravy.context.groovy.GroovyServiceFactory
 import org.microsauce.gravy.context.javascript.JSServiceFactory
+import org.microsauce.gravy.module.Module
 import org.microsauce.gravy.module.groovy.GroovyModule
 import org.microsauce.gravy.module.javascript.JSModule
-import org.microsauce.gravy.runtime.ErrorHandler
 import org.microsauce.gravy.util.pattern.RegExUtils
 
 
+// TODO roll all of this into Module 
 // TODO this can probably be a concrete class
 abstract class ServiceFactory {
 
@@ -32,7 +33,7 @@ abstract class ServiceFactory {
 	
 	@Override
 	@CompileStatic
-	public EnterpriseService makeEnterpriseService(Object scriptContext, String uriPattern, Map<String, Object> methodHandlers, List<DispatcherType> dispatch, ErrorHandler errorHandler, String viewUri) {
+	public EnterpriseService makeEnterpriseService(Object scriptContext, String uriPattern, Map<String, Object> methodHandlers, List<DispatcherType> dispatch, Module module ) { //ErrorHandler errorHandler, String viewUri) {
 
 		EnterpriseService service = new EnterpriseService()
 		Map<String, Object> parseRoute = RegExUtils.parseRoute(uriPattern)
@@ -42,12 +43,13 @@ abstract class ServiceFactory {
 		service.uriString = uriPattern
 	 	service.params = parseRoute.params as List<String>
 		service.dispatch = dispatch
-		service.viewUri = viewUri
+		service.viewUri = module.viewUri
 
 		methodHandlers.each { String method, Object rawHandler ->
 			Handler handler = handlerFactory.makeHandler(rawHandler, scriptContext)
-			handler.errorHandler = errorHandler
-			handler.viewUri = viewUri
+			handler.errorHandler = module.errorHandler
+			handler.viewUri = module.viewUri
+			handler.module = module
 			service.handlers.put(method, handler)
 		}
 

@@ -4,6 +4,7 @@ import groovy.transform.CompileStatic
 
 import java.lang.reflect.Proxy
 
+import javax.script.CompiledScript;
 import javax.servlet.FilterChain
 import javax.servlet.RequestDispatcher
 import javax.servlet.http.HttpServletRequest
@@ -12,6 +13,7 @@ import javax.servlet.http.HttpSession
 
 import org.microsauce.gravy.context.Handler
 import org.microsauce.gravy.context.HandlerBinding
+import org.microsauce.gravy.lang.coffeescript.CoffeeC;
 import org.microsauce.gravy.lang.patch.BaseEnterpriseProxy
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeFunction
@@ -19,13 +21,14 @@ import org.mozilla.javascript.NativeJSON
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.ScriptableObject
 
+
+// TODO put JSON attributes on the back burner
+
 class JSHandler extends Handler {
 
 	ScriptableObject scope 
-	//NativeFunction jsFunction
 	NativeObject jsObject
 	
-//	JSHandler(NativeFunction jsFunction, ScriptableObject scope) {
 	JSHandler(NativeObject jsObject, ScriptableObject scope) {
 		this.jsObject = jsObject
 		this.scope = scope
@@ -38,20 +41,14 @@ class JSHandler extends Handler {
 
 		Context ctx = org.mozilla.javascript.Context.enter() 
 		try {
-			// make the handler binding available to JS
-			req.setAttribute('_handlerBinding', handlerBinding)
 			JSHttpSession jsSess = patchSession(req, ctx, scope)
 			JSHttpServletRequest jsReq = patchRequest(req, res, jsSess, chain, ctx, scope)
 			JSHttpServletResponse jsRes = patchResponse(req, res)
-			// TODO update gravy.sh, encapsulate the user defined handler to a JS class 'JSHandler'
-			// assign the uri parameters to this class as members/properties accessible by name in the
-			// handler as follows:
-			// uri: /hello/:name
-			// this.name // JS
-			// @name // coffee
-//			jsFunction.call(ctx, scope, null, [jsReq, jsReq] as Object[] ) // TODO the user defined JS function will have only two parameters (req, res) this function is itself wrapped in a three argument function
-			//module.handler.callMethod(module.handler, 'invokeHandler', ['foobity'] as Object[])
-			jsObject.callMethod(jsObject, 'invokeHandler', [jsReq, jsRes, handlerBinding.paramMap, handlerBinding.paramList] as Object[] ) // TODO the user defined JS function will have only two parameters (req, res) this function is itself wrapped in a three argument function
+			jsObject.callMethod(
+				jsObject, 
+				'invokeHandler', 
+				[jsReq, jsRes, handlerBinding.paramMap, handlerBinding.paramList] as Object[] 
+			) 
 		}
 		finally {
 			ctx.exit()
@@ -69,7 +66,7 @@ class JSHandler extends Handler {
 		JSHttpServletResponse jsRes = (JSHttpServletResponse)Proxy.newProxyInstance(
 			this.class.getClassLoader(),
 			[JSHttpServletResponse.class] as Class[],
-			new JSResponseProxy(res, req))
+			new JSResponseProxy(res, req, viewUri))
 		return jsRes
 	}
 	@CompileStatic JSHttpSession patchSession(HttpServletRequest req, Context ctx, ScriptableObject scope) {
@@ -102,10 +99,12 @@ class JSHandler extends Handler {
 	class JSResponseProxy<T extends HttpServletResponse> extends BaseEnterpriseProxy {
 		
 		HttpServletRequest request
+		String viewUri
 		
-		JSResponseProxy(HttpServletResponse res, HttpServletRequest request) {
+		JSResponseProxy(HttpServletResponse res, HttpServletRequest request, String viewUri) {
 			super(res)
 			this.request = request
+			this.viewUri = viewUri
 		}
 		
 		@CompileStatic void render(String _viewUri, Object model) {
@@ -134,8 +133,6 @@ class JSHandler extends Handler {
 			this.scope = scope
 		}
 		
-		// @CompileStatic //  TODO the private NativeJSON.parse(3 arg) is inaccessable when compiled statically
-		// the public 4 arg requires a Callable 'reviver' (presumably a js function)
 		Object get(String key) {
 			String jsonString = (String) ((T)target).getAttribute(key)
 			NativeJSON.parse(ctx, scope, jsonString)
@@ -145,7 +142,7 @@ class JSHandler extends Handler {
 			Object jsonValue = NativeJSON.stringify(ctx, scope, value, null, null)
 			((T)target).setAttribute key, jsonValue
 		}
-
+		
 	} 
 	
 	class JSRequestProxy<T extends HttpServletRequest> extends BaseEnterpriseProxy {
@@ -158,7 +155,7 @@ class JSHandler extends Handler {
 		
 		JSRequestProxy(Object target, HttpServletResponse res, HttpSession session, FilterChain chain, Context ctx, ScriptableObject scope) {
 			super(target)
-			this.response = response
+			this.response = res
 			this.session = session
 			this.chain = chain
 			this.ctx = ctx

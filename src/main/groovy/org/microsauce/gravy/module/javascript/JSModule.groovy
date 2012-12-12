@@ -3,9 +3,8 @@ package org.microsauce.gravy.module.javascript
 import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j
 
-import javax.servlet.http.HttpServletRequest
-
 import org.microsauce.gravy.context.Context
+import org.microsauce.gravy.lang.coffeescript.CoffeeC
 import org.microsauce.gravy.module.Module
 import org.mozilla.javascript.ImporterTopLevel
 import org.mozilla.javascript.ScriptableObject
@@ -18,17 +17,14 @@ class JSModule extends Module {
 	protected Object doLoad(Map<String, Object> binding) {
 		
 		// initialize the module context
-//		Context context = new Context()
-//		ContextFactory contextFactory  = new org.mozilla.javascript.ContextFactory()
-		org.mozilla.javascript.Context ctx = org.mozilla.javascript.Context.enter() //contextFactory.enter()
+		org.mozilla.javascript.Context ctx = org.mozilla.javascript.Context.enter() 
 		
 		try {
 			// instantiate the module script context
 			if (!scriptContext) scriptContext = new ImporterTopLevel(ctx) 
 			
 			ScriptableObject _scope = (ScriptableObject) scriptContext
-
-			_scope.put('module', _scope, this)
+			_scope.put('gravyModule', _scope, this)
 			_scope.put('out', _scope, System.out)
 			_scope.put('log', _scope, log)
 
@@ -45,23 +41,22 @@ class JSModule extends Module {
 			ctx.evaluateReader(_scope, gsReader, "gravy.js", 1, null)
 			
 			// read and evaluate application.js
-			File applicationScript = new File(folder, '/application.js')
-			Reader applicationReader = new FileReader(applicationScript)
-			ctx.evaluateReader(_scope, applicationReader, "application.js", 1, null)
+			String applicationScript = load(scriptFile.name, folder)
+			println '========================================================================='
+			println '= compiled coffee script (application.coffee.js)                        ='
+			println '========================================================================='
+			println applicationScript			
+			ctx.evaluateString(_scope, applicationScript, scriptFile.name, 1, null)
 
+			// TODO why do I assign the module property here ???
 			// assign the module to each route
-			for ( service in context.enterpriseServices ) {
-				service.module = this
-			}
-			
-			for ( service in context.cronServices ) {
-				service.module = this
-			}			
-		}
-		catch ( all ) {
-			log.error "failed to load module: ${name}", all
-			all.printStackTrace()
-			throw all
+//			for ( service in context.enterpriseServices ) {
+//				service.module = this
+//			}
+//			
+//			for ( service in context.cronServices ) {
+//				service.module = this
+//			}			
 		}
 		finally {
 			ctx.exit()
@@ -69,5 +64,37 @@ class JSModule extends Module {
 		
 		context
 	}
+	
+	@CompileStatic public String load(String scriptUri) {
+		load(scriptUri, new File(this.folder, 'lib'))
+	}
+		
+	
+	@CompileStatic public String load(String scriptUri, File baseDir) {
+		log.info "loading ${this.name} script $scriptUri"
+		File scriptFile = new File(this.folder, scriptUri)
+		if ( scriptFile.exists() ) {
+			if ( scriptUri.endsWith('.js') ) {
+				return scriptFile.text
+			}
+			else if ( scriptUri.endsWith('.coffee') ) {
+				String script = null
+				File compiledScriptFile = new File(scriptFile.absolutePath+'.js')
+				if (scriptFile.lastModified() > compiledScriptFile.lastModified()) {
+					log.info "compiling ${scriptFile.absolutePath} to ${scriptFile.absolutePath}.js"
+					CoffeeC coffeec = new CoffeeC(this.class.classLoader)
+					script = coffeec.compile scriptFile.text
+					compiledScriptFile.write script
+				} else
+					script = compiledScriptFile.text
+				
+				return script
+			}
+		} else {
+			log.warn "script uri $scriptUri not found in module lib ${this.folder.absolutePath}/lib"
+			return null
+		}
+	}
+
 	
 }

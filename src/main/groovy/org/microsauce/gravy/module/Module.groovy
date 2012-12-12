@@ -1,6 +1,7 @@
 package org.microsauce.gravy.module
 
 import groovy.transform.CompileStatic
+import groovy.util.logging.Log4j;
 
 import javax.servlet.DispatcherType
 import javax.servlet.Filter
@@ -14,7 +15,7 @@ import org.microsauce.gravy.context.ServiceFactory
 import org.microsauce.gravy.runtime.ErrorHandler
 import org.microsauce.gravy.runtime.GravyTemplateServlet
 
-
+@Log4j
 abstract class Module { 
 	
 	// TODO add viewUri - from config
@@ -41,23 +42,31 @@ abstract class Module {
 	
 	Module() {}
 	
-	Module(String name, File folder, ConfigObject moduleConfig, ConfigObject applicationConfig, Map bindings) {
-		// TODO classLoader = new ModuleClassLoader() // extends Rootloader
-		// TODO don't forget to add the merged config to the binding (grooyv)
-		this.serviceFactory = ServiceFactory.getFactory(this.class) // TODO verify
-		this.name = name
-		this.folder = folder
-		this.moduleConfig = moduleConfig
-		this.applicationConfig = applicationConfig
-		this.bindings = bindings
-	}
+//	Module(String name, File folder, ConfigObject moduleConfig, ConfigObject applicationConfig, Map bindings) {
+//		// TODO classLoader = new ModuleClassLoader() // extends Rootloader
+//		// TODO don't forget to add the merged config to the binding (grooyv)
+//		this.serviceFactory = ServiceFactory.getFactory(this.class) // TODO verify
+//		this.name = name
+//		this.folder = folder
+//		this.moduleConfig = moduleConfig
+//		this.applicationConfig = applicationConfig
+//		this.bindings = bindings
+//	}
 	
 	@CompileStatic
 	void load() {
 		GravyTemplateServlet.roots.addAll(viewRoots) 
 		
-		if (binding == null) binding = [:]
-		returnValue = doLoad(binding) // TODO: verify merge
+		try {
+			if (binding == null) binding = [:]
+			returnValue = doLoad(binding) // TODO: verify merge
+		}
+		catch ( all ) {
+			log.error "failed to load module: ${name}", all
+			all.printStackTrace()
+			throw all
+		}
+
 	}
 	
 	/**
@@ -73,11 +82,12 @@ abstract class Module {
 		if ( service ) {
 			Handler thisHandler = service.handlerFactory.makeHandler(rawHandler, scriptContext)
 			thisHandler.viewUri = viewUri
+			thisHandler.module = this
 			service.handlers[method] = thisHandler
 		} else {
 			Map<String, Object> methodHandler = [:]
 			methodHandler[method] = rawHandler
-			service = serviceFactory.makeEnterpriseService(scriptContext, uriPattern, methodHandler, dispatch, errorHandler, viewUri)
+			service = serviceFactory.makeEnterpriseService(scriptContext, uriPattern, methodHandler, dispatch, this)
 			service.errorHandler = errorHandler
 			service.module = this
 		}

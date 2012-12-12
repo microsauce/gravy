@@ -61,8 +61,8 @@ class ContextBuilder {
 	private Module instantiateModule(Context context, File modFolder, ConfigObject appConfig, String env, Boolean isApp) {
 		String modName = modFolder.name
 		log.info "instantiating module $modName"
-		File application = applicationScript(modFolder)
-		Matcher matcher = application.name =~ SCRIPT_NAME
+		File applicationScript = applicationScript(modFolder)
+		Matcher matcher = applicationScript.name =~ SCRIPT_NAME
 		matcher.find()
 	
 		String fileExtension = matcher.group(1)// [0][1]
@@ -70,7 +70,7 @@ class ContextBuilder {
 		if ( moduleFactory == null )
 			throw new Exception("unable to find module loader for file type ${fileExtension}.")
 			
-		moduleFactory.createModule(context, modFolder, appConfig, env, errorHandler, isApp)
+		moduleFactory.createModule(context, modFolder, applicationScript, appConfig, env, errorHandler, isApp)
 	}
 	
 	@CompileStatic

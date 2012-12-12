@@ -25,8 +25,14 @@ abstract class BaseEnterpriseProxy implements InvocationHandler {
 		
 		Object value = null
 		try {
-			Method targetMethod = target.class.getDeclaredMethod(method.name, method.parameterTypes)
-			value = targetMethod.invoke(target, args)
+			try {
+				Method targetMethod = target.class.getDeclaredMethod(method.name, method.parameterTypes)
+				value = targetMethod.invoke(target, args)
+			}
+			catch(NoSuchMethodException nsme) { // check the superclass (TODO make sure this is necessary)
+				Method targetMethod = target.class.superclass.getDeclaredMethod(method.name, method.parameterTypes)
+				value = targetMethod.invoke(target, args)
+			}
 		}
 		catch (NoSuchMethodException nsme) {
 			// check the handler class for method signature

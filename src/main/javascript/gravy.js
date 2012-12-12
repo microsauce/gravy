@@ -3,120 +3,103 @@ This script defines the Gravy JavaScript/CoffeeScript API
 
 Script bindings:
 
-'module'  - the calling module
-'isCoffee'
-'log'
-'out'
-//'coffeec' - bind the CoffeeScript compiler to the
- */
+'gravyModule'  	- the calling module
+'log'			- the application logger
+'out'			- the console PrintStream
 
-/*
- TODO create 'require' function:
-
- require('script.name')
- when js script: load('script.name')
- when coffee script: 
- compile coffee script
- load('script.name.js') - i.e. myScript.coffee -> myScript.coffee.js
  */
 
 /*
  Java imports
  */
-
-var DELETE, ERROR, FORWARD, GET, OPTIONS, POST, PUT, REQUEST, Route, attr, deserialize, doFilter, get, print, println, serialize;
-
-importPackage(javax.servlet.http);
-importPackage(javax.servlet);
-importPackage(java.util);
+importPackage(javax.servlet.http)
+importPackage(javax.servlet)
+importPackage(java.util)
+importPackage(java.io)
 
 /*
  * http methods
  */
 
-GET = 'get';
-POST = 'post';
-PUT = 'put';
-OPTIONS = 'post';
-DELETE = 'delete';
+var GET = 'get'
+var POST = 'post'
+var PUT = 'put'
+var OPTIONS = 'post'
+var DELETE = 'delete'
 
 /*
  * dispatch types
  */
 
-REQUEST = DispatcherType.REQUEST;
-FORWARD = DispatcherType.FORWARD;
-ERROR = DispatcherType.ERROR;
+var REQUEST = DispatcherType.REQUEST
+var FORWARD = DispatcherType.FORWARD
+var ERROR = DispatcherType.ERROR
 
 /*
- * utility functions
+ * documented utility functions
  */
 
-println = function(str) {
-	return out.println(str);
-};
+/*
+ * script loader
+ */
+var load = function(scriptUri) {
+	var script = gravyModule.load(scriptUri)
+	eval(script)
+}
 
-print = function(str) {
-	return out.print(str);
-};
+var require = function(scriptUri) {
+	load(scriptUri)
+}
 
-//serialize = function(obj) {
-//	return JSON.stringify(obj);
-//};
-//
-//deserialize = function(str) {
-//	return JSON.parse(str);
-//};
+var println = function(str) {
+	return out.println(str)
+}
 
-//attr = function(key, value) {
-//	var ret;
-//	if (value == null) {
-//		value = null;
-//	}
-//	ret = null;
-//	if (value === null) {
-//		ret = deserialize(getAttribute(key));
-//	} else {
-//		ret = value;
-//		this.setAttribute(key, serialize(value));
-//	}
-//	return ret;
-//};
+var print = function(str) {
+	return out.print(str)
+}
 
-doFilter = function() {
-	return this.chain.doFilter();
+/*
+ * undocumented utility functions/classes
+ */
+
+String.prototype.endsWith = function(suffix) {
+    return this.indexOf(suffix, this.length - suffix.length) !== -1
 };
 
 /*
- * forward = (uri) => // TODO
- * 
- * render = (viewUri, model) => @req.forward // TODO
+ * JSON -> obj
  */
+function reviver(key, value) {
+	if ( key.endsWith('Date') ) 
+		return new Date(intValue(value))
+	
+	return value
+}
 
 /*
- * monkey patch: request, response, session
+ * obj -> JSON
  */
-/*
- * println('44') println('httpservlet request prototype: '+
- * HttpServletRequest.prototype) HttpServletRequest.prototype.attr = attr;
- * println('5')
- * 
- * HttpServletRequest.prototype.forward = forward;
- * 
- * HttpServletRequest.prototype.chain = {}; println('6')
- * 
- * HttpServletRequest.prototype.doFilter = attr; println('7')
- * 
- * HttpServletResponse.prototype.render = {};
- * 
- * HttpServletResponse.prototype.req = {};
- * 
- * HttpServletResponse.prototype.out = {};
- * 
- * HttpServletSession.prototype.attr = attr;
- */
-/*
- */
+function replacer(key, value) {
+	if ( key.endsWith('Date') )
+		return value.getTime()
+	else return value
+}
+
+var addEnterpriseService = function(uriPattern, method, rawCallBack, dispatch) {
+	var dispatchList = new ArrayList()
+
+	if ( dispatch == null || dispatch.length == 0 ) {
+		dispatchList.add(REQUEST)
+		dispatchList.add(FORWARD)
+	} else {
+		for ( i = 0; i < dispatch.length; i++  ) {
+			dispatchList.add(dispatch[i])
+		}
+	}
+	
+	return gravyModule.addEnterpriseService(uriPattern, method, new JSHandler(rawCallBack), dispatchList)
+}
 
 var JSHandler = function(handler) {
 	
@@ -124,14 +107,14 @@ var JSHandler = function(handler) {
     
     this.invokeHandler = function(req, res, paramMap, paramList) {
 
-    	// add uri parameters to this
+    	// add uri parameters to 'this'
         var iterator = paramMap.keySet().iterator()
         while (iterator.hasNext()) {
             var key = iterator.next()
             this[key] = paramMap.get(key)
         }
 
-        // create the splat 
+        // create the splat array
         iterator = paramList.iterator()
         this.splat = []
         while (iterator.hasNext()) {
@@ -143,71 +126,84 @@ var JSHandler = function(handler) {
     }
 }
 
-var Route = function(uriPattern, method, handler) {
-	this.uriPattern = uriPattern
-	this.method = method
-	this.handler = handler
-	this.dispatch = [REQUEST, FORWARD]
-}
-
 /*
- * context functions
+ * public Gravy API
  */
 
 /*
  * define a 'get' request handler
  * 
- * Example: get '/hello/:name', (req, res) -> res.render '/greeting.html',
- * {name: req.name}
+ * Example: 
+ * get '/hello/:name', (req, res) -> 
+ * 		res.render '/greeting.html', {name: this.name}
+ * 
+ * get '/hello/:name', (req, res) -> 
+ * 		res.render '/greeting.html', {name: this.name}
+ * , [REQUEST]
  */
-
-get = function(uriPattern, callBack) {
-//	var route = new Route(uriPattern, new JSHandler(callBack))
-	var dispatch = new ArrayList()
-	dispatch.add(REQUEST)
-	dispatch.add(FORWARD)
-	return module.addEnterpriseService(uriPattern, GET, new JSHandler(callBack), dispatch)
-};
-
-post = function(uriPattern, callBack) {
-	var dispatch = new ArrayList()
-	dispatch.add(REQUEST)
-	dispatch.add(FORWARD)
-	return module.addEnterpriseService(uriPattern, POST, new JSHandler(callBack), dispatch)
-};
-
-var finalize = function() {
-	var dispatchList = new ArrayList()
-	var routes = module.routes
-	for ( i = 0; i < routes.length; i++ ) {
-		var route = routes[i]
-		if ( route.dispatch != null ) {
-			for ( j = 0; j < route.dispatch.length; j++ ) {
-				dispatchList.add(route.dispatch[j])
-			}
-		}
-		module.addEnterpriseService(route.uriPattern, route.method, route.handler, dispatchList)
-	}
+var get = function(uriPattern, callBack, dispatch) {
+	addEnterpriseService(uriPattern, GET, callBack, dispatch)
 }
 
 /*
- * post = (uriPattern, callBack) -> module.addRoute uriPattern, new
- * JSHandlerWrapper(callBack), POST
+ * define a 'post' request handler
  * 
- * put = (uriPattern, callBack) -> module.addRoute uriPattern, new
- * JSHandlerWrapper(callBack), PUT
+ * Example: 
+ * post '/hello/:name', (req, res) -> 
+ * 		res.render '/greeting.html', {name: this.name}
  * 
- * del = (uriPattern, callBack) -> // TODO is 'delete' a cs/js reserved word
- * module.addRoute uriPattern, new JSHandlerWrapper(callBack), DELETE
- * 
- * options = (uriPattern, callBack) -> module.addRoute uriPattern, new
- * JSHandlerWrapper(callBack), OPTIONS
- * 
- * route = (uriPattern, callBack) -> module.addRoute uriPattern, new
- * JSHandlerWrapper(callBack)
- * 
- * route = (uriPattern) -> new Route()
- * 
- * schedule = (cronString, callBack) -> module.addScheduledTask cronString, new
- * JSHandlerWrapper callBack
+ * post '/hello/:name', (req, res) -> 
+ * 		log.info "Hello #{@name}"
+ * 		res.render '/greeting.html', {name: this.name}
+ * , [REQUEST]
  */
+var post = function(uriPattern, callBack, dispatch) {
+	addEnterpriseService(uriPattern, POST, callBack, dispatch)
+}
+
+/*
+ * define a 'del' request handler
+ * 
+ * Example: 
+ * del '/hello/:name', (req, res) -> 
+ * 		res.render '/greeting.html', {name: this.name}
+ * 
+ * del '/hello/:name', (req, res) -> 
+ * 		res.render '/greeting.html', {name: this.name}
+ * , [REQUEST]
+ */
+var del = function(uriPattern, callBack, dispatch) {
+	addEnterpriseService(uriPattern, DELETE, callBack, dispatch)
+}
+
+/*
+ * define a 'options' request handler
+ * 
+ * Example: 
+ * options '/hello/:name', (req, res) -> 
+ * 		res.render '/greeting.html', {name: this.name}
+ * 
+ * options '/hello/:name', (req, res) -> 
+ * 		res.render '/greeting.html', {name: this.name}
+ * , [REQUEST]
+ */
+var options = function(uriPattern, callBack, dispatch) {
+	addEnterpriseService(uriPattern, OPTIONS, callBack, dispatch)
+}
+
+/*
+ * define a 'put' request handler
+ * 
+ * Example: 
+ * put '/hello/:name', (req, res) -> 
+ * 		res.render '/greeting.html', {name: this.name}
+ * 
+ * put '/hello/:name', (req, res) -> 
+ * 		res.render '/greeting.html', {name: this.name}
+ * , [REQUEST]
+ */
+var put = function(uriPattern, callBack, dispatch) {
+	addEnterpriseService(uriPattern, PUT, callBack, dispatch)
+}
+
+
