@@ -2,7 +2,7 @@
 Gravy
 ===
 
-Gravy is a dynamic server scripting framework for the Java enterprise.  Its design focuses on modularity and rapid development.
+Gravy is a Sinatra inspired dynamic server scripting framework for the Java enterprise.
 
 Groovy:
 
@@ -37,3 +37,4 @@ JavaScript:
 	$ export GRAVY_HOME=$PWD
 	$ PATH=$PATH:$GRAVY_HOME/bin
 
+## More to come . . .
