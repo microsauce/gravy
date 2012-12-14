@@ -6,6 +6,7 @@ Script bindings:
 'gravyModule'  	- the calling module
 'log'			- the application logger
 'out'			- the console PrintStream
+'config'        - a Java Properties object
 
  */
 
@@ -33,10 +34,10 @@ var DELETE = 'delete'
 
 var REQUEST = DispatcherType.REQUEST
 var FORWARD = DispatcherType.FORWARD
-var ERROR = DispatcherType.ERROR
+var ERROR   = DispatcherType.ERROR
 
 /*
- * documented utility functions
+ * documented utility/convenience functions
  */
 
 /*
@@ -51,10 +52,30 @@ var require = function(scriptUri) {
 	load(scriptUri)
 }
 
+//var date = function(format) {
+	// TODO
+//	if ( typeof format === "undefined"  ) {
+//		
+//	}
+//}
+
+/*
+ * retrieve a configuration value 
+ */
+var conf = function(key) {
+	return config.getProperty(key)
+}
+
+/*
+ * print a line to the console
+ */
 var println = function(str) {
 	return out.println(str)
 }
 
+/*
+ * print a string to the console
+ */
 var print = function(str) {
 	return out.print(str)
 }

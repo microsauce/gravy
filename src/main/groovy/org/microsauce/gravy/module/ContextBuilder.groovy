@@ -7,8 +7,6 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 import org.microsauce.gravy.context.Context
-import org.microsauce.gravy.runtime.ErrorHandler
-
 
 @Log4j
 class ContextBuilder {
@@ -19,18 +17,14 @@ class ContextBuilder {
 	Context context
 	File appRoot
 	String env = env
-	ErrorHandler errorHandler
-
 	
-	ContextBuilder(File appRoot, String env, ErrorHandler errorHandler) {
+	ContextBuilder(File appRoot, String env) {
 		context = new Context()
 		this.appRoot = appRoot
 		this.env = env
-		this.errorHandler = errorHandler
 	}
 	
-	@CompileStatic
-	Context build() {
+	@CompileStatic Context build() {
 		Module app = instantiateApplication()
 		application = app
 		Collection<Module> modules = instantiateModules(app.moduleConfig)
@@ -46,8 +40,7 @@ class ContextBuilder {
 	}
 
 	
-	@CompileStatic
-	private Collection<Module> instantiateModules(ConfigObject appConfig) {
+	@CompileStatic private Collection<Module> instantiateModules(ConfigObject appConfig) {
 		List<Module> modules = []
 		
 		for (modFolder in ContextBuilder.listModules(appRoot)) { 
@@ -70,7 +63,7 @@ class ContextBuilder {
 		if ( moduleFactory == null )
 			throw new Exception("unable to find module loader for file type ${fileExtension}.")
 			
-		moduleFactory.createModule(context, modFolder, applicationScript, appConfig, env, errorHandler, isApp)
+		moduleFactory.createModule(context, modFolder, applicationScript, appConfig, env, isApp)
 	}
 	
 	@CompileStatic

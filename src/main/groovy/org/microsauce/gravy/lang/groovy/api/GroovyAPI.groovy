@@ -29,22 +29,22 @@ class GroovyAPI {
 	static List<GroovyAPI.Route> ROUTES = []
 
 	static void get(String uriPattern, Closure handler) {
-		module.addEnterpriseService(uriPattern, GET, handler, [REQUEST])
+		module.addEnterpriseService(uriPattern, GET, handler, [REQUEST, FORWARD])
 	}
 	static void post(String uriPattern, Closure handler) {
-		module.addEnterpriseService(uriPattern, POST, handler, [REQUEST])
+		module.addEnterpriseService(uriPattern, POST, handler, [REQUEST, FORWARD])
 	}
 	static void put(String uriPattern, Closure handler) {
-		module.addEnterpriseService(uriPattern, PUT, handler, [REQUEST])		
+		module.addEnterpriseService(uriPattern, PUT, handler, [REQUEST, FORWARD])		
 	}
 	static void delete(String uriPattern, Closure handler) {
-		module.addEnterpriseService(uriPattern, DELETE, handler, [REQUEST])
+		module.addEnterpriseService(uriPattern, DELETE, handler, [REQUEST, FORWARD])
 	}
 	static void options(String uriPattern, Closure handler) {
-		module.addEnterpriseService(uriPattern, OPTIONS, handler, [REQUEST])
+		module.addEnterpriseService(uriPattern, OPTIONS, handler, [REQUEST, FORWARD])
 	}
 	static void route(String uriPattern, Closure handler) {
-		module.addEnterpriseService(uriPattern, DEFAULT, handler, [REQUEST])
+		module.addEnterpriseService(uriPattern, DEFAULT, handler, [REQUEST, FORWARD])
 	}
 	static GroovyAPI.Route route(String uriPattern) {
 		GroovyAPI.Route route = new GroovyAPI.Route()
@@ -130,7 +130,7 @@ class GroovyAPI {
 			}
 			else if (thisValue instanceof Closure) {
 				uri += (String)thisEntry.key
-				module.addEnterpriseService(uri.toString(), DEFAULT, thisValue, [REQUEST])
+				module.addEnterpriseService(uri.toString(), DEFAULT, thisValue, [REQUEST, FORWARD])
 			}
 		}
 	}

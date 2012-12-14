@@ -4,7 +4,6 @@ import groovy.transform.CompileStatic
 
 import java.lang.reflect.Proxy
 
-import javax.script.CompiledScript;
 import javax.servlet.FilterChain
 import javax.servlet.RequestDispatcher
 import javax.servlet.http.HttpServletRequest
@@ -13,16 +12,15 @@ import javax.servlet.http.HttpSession
 
 import org.microsauce.gravy.context.Handler
 import org.microsauce.gravy.context.HandlerBinding
-import org.microsauce.gravy.lang.coffeescript.CoffeeC;
 import org.microsauce.gravy.lang.patch.BaseEnterpriseProxy
+import org.microsauce.gravy.module.Module
 import org.mozilla.javascript.Context
-import org.mozilla.javascript.NativeFunction
 import org.mozilla.javascript.NativeJSON
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.ScriptableObject
 
+// TODO renderJSON
 
-// TODO put JSON attributes on the back burner
 
 class JSHandler extends Handler {
 
@@ -41,9 +39,9 @@ class JSHandler extends Handler {
 
 		Context ctx = org.mozilla.javascript.Context.enter() 
 		try {
-			JSHttpSession jsSess = patchSession(req, ctx, scope)
-			JSHttpServletRequest jsReq = patchRequest(req, res, jsSess, chain, ctx, scope)
-			JSHttpServletResponse jsRes = patchResponse(req, res)
+			JSHttpSession jsSess = patchSession(req, ctx, scope, module)
+			JSHttpServletRequest jsReq = patchRequest(req, res, jsSess, chain, ctx, scope, module)
+			JSHttpServletResponse jsRes = patchResponse(req, res, ctx, scope, module)
 			jsObject.callMethod(
 				jsObject, 
 				'invokeHandler', 
@@ -55,25 +53,25 @@ class JSHandler extends Handler {
 		}
 	}
 	
-	@CompileStatic JSHttpServletRequest patchRequest(HttpServletRequest req, HttpServletResponse res, JSHttpSession sess, FilterChain chain, Context ctx, ScriptableObject scope) {
+	@CompileStatic JSHttpServletRequest patchRequest(HttpServletRequest req, HttpServletResponse res, JSHttpSession sess, FilterChain chain, Context ctx, ScriptableObject scope, Module module) {
 		JSHttpServletRequest jsReq = (JSHttpServletRequest) Proxy.newProxyInstance(
 			this.class.getClassLoader(),
 			[JSHttpServletRequest.class] as Class[],
-			new JSRequestProxy(req, res, sess, chain, ctx, scope))
+			new JSRequestProxy(req, res, sess, chain, ctx, scope, module))
 		jsReq
 	}		
-	@CompileStatic JSHttpServletResponse patchResponse(HttpServletRequest req, HttpServletResponse res) {
+	@CompileStatic JSHttpServletResponse patchResponse(HttpServletRequest req, HttpServletResponse res, Context ctx, ScriptableObject scope, Module module) {
 		JSHttpServletResponse jsRes = (JSHttpServletResponse)Proxy.newProxyInstance(
 			this.class.getClassLoader(),
 			[JSHttpServletResponse.class] as Class[],
-			new JSResponseProxy(res, req, viewUri))
+			new JSResponseProxy(res, req, module.renderUri, ctx, scope, module))
 		return jsRes
 	}
-	@CompileStatic JSHttpSession patchSession(HttpServletRequest req, Context ctx, ScriptableObject scope) {
+	@CompileStatic JSHttpSession patchSession(HttpServletRequest req, Context ctx, ScriptableObject scope, Module module) {
 		JSHttpSession jsSess = (JSHttpSession)Proxy.newProxyInstance(
 			this.class.getClassLoader(),
 			[JSHttpSession.class] as Class[],
-			new JSSessionProxy(req.session, ctx, scope))
+			new JSSessionProxy(req.session, ctx, scope, module))
 		return jsSess
 	}
 
@@ -99,18 +97,37 @@ class JSHandler extends Handler {
 	class JSResponseProxy<T extends HttpServletResponse> extends BaseEnterpriseProxy {
 		
 		HttpServletRequest request
-		String viewUri
+		String renderUri
+		Context ctx
+		ScriptableObject scope
+		Module module
 		
-		JSResponseProxy(HttpServletResponse res, HttpServletRequest request, String viewUri) {
+		JSResponseProxy(HttpServletResponse res, HttpServletRequest request, String renderUri, Context ctx, ScriptableObject scope, Module module) {
 			super(res)
 			this.request = request
-			this.viewUri = viewUri
+			this.renderUri = renderUri
+			this.ctx = ctx
+			this.scope = scope
+			this.module = module
 		}
 		
 		@CompileStatic void render(String _viewUri, Object model) {
+println "render 1"			
 			request.setAttribute('_view', _viewUri)
-			request.setAttribute('_model', model) // TODO serialize as JSON first
-			RequestDispatcher dispatcher = request.getRequestDispatcher(viewUri)
+println "render 2"			
+			Object attrModel = model
+println "render 3 $module"			
+			if ( module.serializeAttributes ) {
+println "render 4"			
+				attrModel = NativeJSON.stringify(ctx, scope, model, null, null)
+			}
+println "render 5"			
+			request.setAttribute('_model', attrModel) // TODO serialize as JSON first
+println "render 6"			
+			request.setAttribute('_module', module)
+println "render 7"			
+			RequestDispatcher dispatcher = request.getRequestDispatcher(renderUri)
+println "render 8"			
 			dispatcher.forward(request, (T) target)
 		}
 		@CompileStatic void write(String output) {
@@ -126,21 +143,27 @@ class JSHandler extends Handler {
 		
 		Context ctx
 		ScriptableObject scope
+		Module module
 		
-		JSSessionProxy(Object target, Context ctx, ScriptableObject scope) {
+		JSSessionProxy(Object target, Context ctx, ScriptableObject scope, Module module) {
 			super(target)
 			this.ctx = ctx
 			this.scope = scope
+			this.module = module
 		}
 		
 		Object get(String key) {
-			String jsonString = (String) ((T)target).getAttribute(key)
-			NativeJSON.parse(ctx, scope, jsonString)
+			Object value = ((T)target).getAttribute(key)
+			if ( module.serializeAttributes )
+				value = NativeJSON.parse(ctx, scope, value)
+			value
 		}
 		
-		@CompileStatic 	void put(String key, Object value) {
-			Object jsonValue = NativeJSON.stringify(ctx, scope, value, null, null)
-			((T)target).setAttribute key, jsonValue
+		@CompileStatic void put(String key, Object value) {
+			Object attrValue = value
+			if ( module.serializeAttributes )
+				attrValue = NativeJSON.stringify(ctx, scope, value, null, null)
+			((T)target).setAttribute key, attrValue
 		}
 		
 	} 
@@ -152,26 +175,30 @@ class JSHandler extends Handler {
 		FilterChain chain
 		HttpServletResponse response
 		HttpSession session
+		Module module
 		
-		JSRequestProxy(Object target, HttpServletResponse res, HttpSession session, FilterChain chain, Context ctx, ScriptableObject scope) {
+		JSRequestProxy(Object target, HttpServletResponse res, HttpSession session, FilterChain chain, Context ctx, ScriptableObject scope, Module module) {
 			super(target)
 			this.response = res
 			this.session = session
 			this.chain = chain
 			this.ctx = ctx
 			this.scope = scope
+			this.module = module
 		}
 
-		// @CompileStatic //  TODO
 		Object get(String key) {
-			String jsonString = (String) ((T)target).getAttribute(key)
-			NativeJSON.parse(ctx, scope, jsonString)
+			Object value = ((T)target).getAttribute(key)
+			if ( module.serializeAttributes )
+				value = NativeJSON.parse(ctx, scope, value)
+			value
 		}
 		
-		@CompileStatic
-		void put(String key, Object value) {
-			Object jsonValue = NativeJSON.stringify(ctx, scope, value, null, null)
-			((T)target).setAttribute key, jsonValue
+		@CompileStatic void put(String key, Object value) {
+			Object attrValue = value
+			if ( module.serializeAttributes )
+				attrValue = NativeJSON.stringify(ctx, scope, value, null, null)
+			((T)target).setAttribute key, attrValue
 		}
 				
 		@CompileStatic void doFilter() {

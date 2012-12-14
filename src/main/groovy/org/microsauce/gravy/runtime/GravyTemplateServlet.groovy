@@ -27,8 +27,7 @@ abstract class GravyTemplateServlet extends HttpServlet {
 
 	protected abstract void render(String viewUri, Map model, PrintWriter printWriter)
 
-	@CompileStatic
-	public void service(HttpServletRequest req, HttpServletResponse res) {
+	@CompileStatic public void service(HttpServletRequest req, HttpServletResponse res) {
 		String viewUri = getViewUri(req)
 		Map model = getModel(req)
 		model << [req: req, res: res]
@@ -38,7 +37,7 @@ abstract class GravyTemplateServlet extends HttpServlet {
 		catch (Exception all) {
 			res.status = HttpServletResponse.SC_INTERNAL_SERVER_ERROR 
 			res.contentType = 'text/html'
-			res.writer << "<h1>500</h1><br/>Failed to render view $viewUri:<br/><pre>"
+			res.writer << "<h1>${HttpServletResponse.SC_INTERNAL_SERVER_ERROR}</h1><br/>Failed to render view $viewUri:<br/><pre>"
 			all.printStackTrace(res.writer)
 			res.writer << "</pre>"
 		}

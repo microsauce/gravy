@@ -9,6 +9,7 @@ import org.microsauce.gravy.module.Module
 import org.mozilla.javascript.ImporterTopLevel
 import org.mozilla.javascript.ScriptableObject
 
+
 @Log4j
 class JSModule extends Module {
 
@@ -27,6 +28,7 @@ class JSModule extends Module {
 			_scope.put('gravyModule', _scope, this)
 			_scope.put('out', _scope, System.out)
 			_scope.put('log', _scope, log)
+			_scope.put('config', _scope, config.toProperties())
 
 			// add module return values to the script scope (app only)
 			if ( binding ) {
@@ -48,15 +50,6 @@ class JSModule extends Module {
 			println applicationScript			
 			ctx.evaluateString(_scope, applicationScript, scriptFile.name, 1, null)
 
-			// TODO why do I assign the module property here ???
-			// assign the module to each route
-//			for ( service in context.enterpriseServices ) {
-//				service.module = this
-//			}
-//			
-//			for ( service in context.cronServices ) {
-//				service.module = this
-//			}			
 		}
 		finally {
 			ctx.exit()

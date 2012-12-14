@@ -5,10 +5,10 @@ import groovy.util.logging.Log4j
 
 import javax.servlet.Filter
 import javax.servlet.FilterChain
+import javax.servlet.RequestDispatcher
 import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 import org.microsauce.gravy.context.Context
 import org.microsauce.gravy.context.EnterpriseService
@@ -18,11 +18,11 @@ import org.microsauce.gravy.util.ServerUtils
 class RouteFilter implements Filter {
 
 	Context context
-	ErrorHandler errorHandler
+	String errorUri
 
-	RouteFilter(Context context, ErrorHandler errorHandler) {
+	RouteFilter(Context context, String errorUri) {
 		this.context = context
-		this.errorHandler = errorHandler
+		this.errorUri = errorUri
 	}
 
 	@CompileStatic
@@ -39,7 +39,9 @@ class RouteFilter implements Filter {
 			}
 			catch (Exception all) {
 				all.printStackTrace()
-				errorHandler.handleError HttpServletResponse.SC_INTERNAL_SERVER_ERROR, all.message, req, res, all 
+				Error error = new Error(all)
+				RequestDispatcher dispatcher = req.getRequestDispatcher(errorUri)
+				dispatcher.forward(request, res)
 			}
 		}
 	}
@@ -47,8 +49,7 @@ class RouteFilter implements Filter {
 	void destroy(){}
 	void init(javax.servlet.FilterConfig config){}
 
-	@CompileStatic
-	private FilterChain buildChain(FilterChain chain, ServletRequest req) {
+	@CompileStatic private FilterChain buildChain(FilterChain chain, ServletRequest req) {
 
 		HttpServletRequest _req = (HttpServletRequest)req
 		List<EnterpriseService> matchingRoutes = context.findService(

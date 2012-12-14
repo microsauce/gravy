@@ -68,8 +68,7 @@ class GravyBootstrapListener implements ServletContextListener {
 		String viewUri = config.gravy.viewUri ?: null
 		// TODO instantiate error handler here and pass it into:
 		// TODO ContextBuilder > ModuleFactory > ServiceFactory -> EnterpriseService -> HandlerFactory -> Handler
-		//ErrorHandler.initInstance(errorPage, viewUri)
-		ErrorHandler errorHandler = new ErrorHandler(errorPage, viewUri)
+
 
 		//
 		// configure resource paths
@@ -90,7 +89,7 @@ class GravyBootstrapListener implements ServletContextListener {
 		//
 		// instantiate and build the Application Context
 		//
-		ContextBuilder contextBuilder = new ContextBuilder(appRootFolder, environment, errorHandler)
+		ContextBuilder contextBuilder = new ContextBuilder(appRootFolder, environment)
 		contextBuilder.build()
 		Context context = contextBuilder.context
 		this.context = context
@@ -100,7 +99,7 @@ class GravyBootstrapListener implements ServletContextListener {
 			startSourceObserver app
 		}
 					
-		initEnterpriseRuntime context, resourceRoots, deployPath, sce, errorHandler
+		initEnterpriseRuntime context, resourceRoots, deployPath, sce, config.gravy.view.errorUri
 		initCronRuntime context
 		
 	}
@@ -131,7 +130,7 @@ class GravyBootstrapListener implements ServletContextListener {
 	}
 
 	
-	private void initEnterpriseRuntime(Context context, List<String> resourceRoots, String deployPath, ServletContextEvent sce, ErrorHandler errorHandler) {
+	private void initEnterpriseRuntime(Context context, List<String> resourceRoots, String deployPath, ServletContextEvent sce, String errorUri) {
 		ServletContext servletContext = sce.servletContext
 		int serialNumber = 0
 		context.servlets.each { servlet ->
@@ -152,7 +151,7 @@ class GravyBootstrapListener implements ServletContextListener {
 		}
 
 		addFilter('RouteFilter',new FilterWrapper([
-			filter: new RouteFilter(context, errorHandler),
+			filter: new RouteFilter(context, errorUri),
 			mapping : '/*',
 			dispatch: EnumSet.copyOf([DispatcherType.REQUEST, DispatcherType.FORWARD])]), servletContext) // TODO REVISIT
 //		addFilter('ControllerFilter',new FilterWrapper([

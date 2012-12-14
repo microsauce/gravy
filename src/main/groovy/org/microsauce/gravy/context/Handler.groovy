@@ -1,27 +1,28 @@
 package org.microsauce.gravy.context
 
 import groovy.transform.CompileStatic
+import groovy.util.logging.Log4j
 
 import java.util.regex.Pattern
 
 import javax.servlet.FilterChain
+import javax.servlet.RequestDispatcher
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 import org.microsauce.gravy.module.Module
-import org.microsauce.gravy.runtime.ErrorHandler
 
 /**
  * A request handler defined in an application script.
  * 
  * @author jboone
  */
+@Log4j
 abstract class Handler {
 	
 	// TODO add module reference here
 	Module module
-	ErrorHandler errorHandler 
-	String viewUri
+//	String viewUri
 	
 	abstract Object doExecute(HttpServletRequest req, HttpServletResponse res, FilterChain chain, HandlerBinding handlerBinding)
 	
@@ -34,10 +35,11 @@ abstract class Handler {
 			doExecute(req, res, chain, handlerBinding)
 		}
 		catch ( Throwable t ) {
-			errorHandler.handleError(
-				HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
-				"execution failed for uri ${req.getRequestURI()}", 
-				req, res, t)
+			org.microsauce.gravy.runtime.Error error = new org.microsauce.gravy.runtime.Error(t)
+			log.error "${error.errorCode} - ${error.errorMessage}", t
+			req.setAttribute("error", error)
+			RequestDispatcher dispatcher = req.getRequestDispatcher(module.errorUri)
+			dispatcher.forward(req, res)
 		}
 	}
 	

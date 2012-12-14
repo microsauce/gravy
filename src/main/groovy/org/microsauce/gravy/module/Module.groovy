@@ -12,26 +12,26 @@ import org.microsauce.gravy.context.CronService
 import org.microsauce.gravy.context.EnterpriseService
 import org.microsauce.gravy.context.Handler
 import org.microsauce.gravy.context.ServiceFactory
-import org.microsauce.gravy.runtime.ErrorHandler
 import org.microsauce.gravy.runtime.GravyTemplateServlet
 
 @Log4j
 abstract class Module { 
 	
-	// TODO add viewUri - from config
+	ConfigObject moduleConfig
+	ConfigObject applicationConfig
+	ConfigObject config // the effective config: moduleConfig.merge applicationConfig
+	
 	String name 
 	Boolean isApp
 	ClassLoader classLoader 
 	File folder 
 	File scriptFile
-	ConfigObject moduleConfig
-	ConfigObject applicationConfig
-	ConfigObject config // the effective config
 	ServiceFactory serviceFactory
 	Map<String, Map<String, Object>> rawServiceMap = [:]
-	String viewUri
+	String renderUri
 	List<String> viewRoots
-	ErrorHandler errorHandler 
+	String errorUri
+	boolean serializeAttributes // TODO global config option
 
 	Object returnValue
 	Map binding // used by the main app script only (mod1 ret val, mod2, etc)
@@ -42,31 +42,17 @@ abstract class Module {
 	
 	Module() {}
 	
-//	Module(String name, File folder, ConfigObject moduleConfig, ConfigObject applicationConfig, Map bindings) {
-//		// TODO classLoader = new ModuleClassLoader() // extends Rootloader
-//		// TODO don't forget to add the merged config to the binding (grooyv)
-//		this.serviceFactory = ServiceFactory.getFactory(this.class) // TODO verify
-//		this.name = name
-//		this.folder = folder
-//		this.moduleConfig = moduleConfig
-//		this.applicationConfig = applicationConfig
-//		this.bindings = bindings
-//	}
-	
-	@CompileStatic
-	void load() {
-		GravyTemplateServlet.roots.addAll(viewRoots) 
-		
+	@CompileStatic void load() {
+
 		try {
-			if (binding == null) binding = [:]
-			returnValue = doLoad(binding) // TODO: verify merge
+			if ( binding == null ) binding = [:]
+			returnValue = doLoad(binding) 
 		}
 		catch ( all ) {
 			log.error "failed to load module: ${name}", all
 			all.printStackTrace()
 			throw all
 		}
-
 	}
 	
 	/**
@@ -75,41 +61,42 @@ abstract class Module {
 	 */
 	abstract protected Object doLoad(Map binding)
 
-	@Override
-	@CompileStatic
-	public void addEnterpriseService(String uriPattern, String method, Object rawHandler, List<DispatcherType> dispatch) {
+	@CompileStatic public void addEnterpriseService(String uriPattern, String method, Object rawHandler, List<DispatcherType> dispatch) {
+		log.info "addEnterpriseService: uri: $uriPattern - method: $method - dispatch: $dispatch"
 		EnterpriseService service = context.findServiceByUriString(uriPattern)
 		if ( service ) {
 			Handler thisHandler = service.handlerFactory.makeHandler(rawHandler, scriptContext)
-			thisHandler.viewUri = viewUri
+//			thisHandler.viewUri = viewUri
 			thisHandler.module = this
 			service.handlers[method] = thisHandler
 		} else {
 			Map<String, Object> methodHandler = [:]
 			methodHandler[method] = rawHandler
 			service = serviceFactory.makeEnterpriseService(scriptContext, uriPattern, methodHandler, dispatch, this)
-			service.errorHandler = errorHandler
 			service.module = this
 		}
 		
 		context.addEnterpriseService(service)
 	}
 
-	@Override
-	public void addCronService(String cronPattern, Object rawHandler) {
+	@CompileStatic public void addCronService(String cronPattern, Object rawHandler) {
+		log.info "addCronService: cronPattern: $cronPattern"
 		CronService service = serviceFactory.makeCronService(scriptContext, cronPattern, rawHandler)
 		context.addCronService(service)
 	}
 	
-	public void addServlet(String mapping, HttpServlet servlet) {
+	@CompileStatic public void addServlet(String mapping, HttpServlet servlet) {
+		log.info "addServlet: mapping: $mapping"
 		context.addServlet(mapping, servlet)
 	}
 	
-	public void addFilter(String uriPatter, Filter servlet) {
-		context.addFilter(uriPatter, servlet)
+	@CompileStatic public void addFilter(String uriPattern, Filter servlet) {
+		log.info "addFilter: uriPattern: $uriPattern"
+		context.addFilter(uriPattern, servlet)
 	}
 
-	public void addFilter(String uriPatter, List<DispatcherType> dispatch, Filter servlet) {
-		context.addFilter(uriPatter, servlet)
+	@CompileStatic public void addFilter(String uriPattern, List<DispatcherType> dispatch, Filter servlet) {
+		log.info "addFilter: uriPattern: $uriPattern - dispatch: $dispatch"
+		context.addFilter(uriPattern, servlet)
 	}
 }

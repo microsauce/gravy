@@ -1,11 +1,32 @@
 
-import org.microsauce.gravy.runtime.gstring.GStringTemplateServlet
+import org.microsauce.gravy.template.gstring.GStringTemplateEngine
 
-def runMode = config.gstring.mode ?: 'prod'
+
 def appRoot = config.appRoot
-def documentRoot =  appRoot+'/WEB-INF/view'
-def viewUri = config.gravy.viewUri ?: '/view/gstring'
+def documentRoot =  config.gravy.documentRoot ?: appRoot+'/WEB-INF/view'
+def serviceUri = config.serviceUri ?: '/view/gstring' 
+def engines = [:]
 
-def viewServlet = new GStringTemplateServlet(documentRoot, runMode)
-servlet(viewUri, viewServlet)
+//
+// lazy load a template engine instance for each module
+//
+def templateEngine = { moduleName ->
+	def engine = engines[moduleName]
+	if ( !engine ) {
+		engine = new GStringTemplateEngine()
+		engine.mode = config.runMode ?: 'prod'
+		engine.documentRoot = documentRoot+'/'+moduleName
+		engines[moduleName] = engine
+	}
+	engine
+}
 
+route serviceUri, {
+	def model = req.get '_model'
+	def viewUri = req.getAttribute '_view' 	// not serialized
+	def module = req.getAttribute '_module'	// not serialized
+	def moduleName = module.name
+	
+	out << templateEngine(module.name).render(viewUri, model)
+	out.flush()
+}

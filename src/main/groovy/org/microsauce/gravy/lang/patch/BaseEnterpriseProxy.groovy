@@ -20,7 +20,7 @@ abstract class BaseEnterpriseProxy implements InvocationHandler {
 	}
 	
 	@CompileStatic
-	public Object invoke(final Object   proxy, final Method method,
+	public Object invoke(final Object proxy, final Method method,
 		final Object[] args) throws Throwable {
 		
 		Object value = null

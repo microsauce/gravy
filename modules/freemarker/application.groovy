@@ -1,37 +1,39 @@
 
 import freemarker.template.*
+import freemarker.cache.*
 import groovy.util.logging.Log4j
 import groovy.transform.CompileStatic
 
-class FreemarkerServlet extends GravyTemplateServlet {
+def appRoot = config.appRoot
+def documentRoot =  config.gravy.documentRoot ?: appRoot+'/WEB-INF/view'
+def serviceUri = config.serviceUri ?: '/view/freemarker'
+def engines = [:]
 
-	private Configuration templateEngine
-
-	FreemarkerServlet(documentRoot, runMode) {
-		super(documentRoot, runMode)
-
-        templateEngine = new Configuration()
-        templateEngine.setDirectoryForTemplateLoading(
-            new File(documentRoot))
-        templateEngine.setObjectWrapper(
-        	new DefaultObjectWrapper())
+//
+// lazy load a template engine instance for each module
+//
+def templateEngine = { moduleName ->
+	def engine = engines[moduleName]
+	if ( !engine ) {
+		def templateLoader = new FileTemplateLoader(new File(documentRoot+'/'+moduleName), true)
+		engine = new Configuration()
+		engine.setDirectoryForTemplateLoading(
+			new File(documentRoot))
+		engine.setObjectWrapper(
+			new DefaultObjectWrapper())
+		engine.setTemplateLoader(templateLoader)
 	}
-
-	@CompileStatic
-	void render(String viewUri, Map model, PrintWriter printWriter) {
-		Template temp = templateEngine.getTemplate(viewUri)
-
-        temp.process(model, printWriter)
-        printWriter.flush()
-	}
-
+	engine
 }
 
-def runMode = config.freemarker.mode ?: 'prod'
-def appRoot = config.appRoot
-def documentRoot =  appRoot+'/WEB-INF/view'
-def viewUri = config.gravy.viewUri ?: '/view/freemarker'
+route serviceUri, {
+	def model = req.get '_model'
+	def viewUri = req.getAttribute '_view' 	// not serialized
+	def module = req.getAttribute '_module'	// not serialized
+	def moduleName = module.name
 
-def viewServlet = new FreemarkerServlet(documentRoot, runMode)
-servlet(viewUri, viewServlet)
+	Template temp = templateEngine(module.name).getTemplate(viewUri)
+	temp.process(model, out)
+	out.flush()
+}
 

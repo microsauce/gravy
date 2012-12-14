@@ -17,7 +17,7 @@ class ModuleScriptDecorator extends ScriptDecorator {
 		super.decorate(script)
 
 		extractModule script.name
-		script.classLoader = getClassLoader()
+//		script.classLoader = getClassLoader()
 
 		def (moduleFolder, moduleUri) = getModuleFolder(script.name, config.appRoot)
 		script.sourceUri = moduleUri+"${SLASH}application.groovy"

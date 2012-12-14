@@ -7,7 +7,7 @@ import javax.servlet.*
 import org.microsauce.gravy.module.config.Config;
 
 
-
+// TODO move this code to GroovyModule
 class GravyDecorator {
 
 	private static conf = Config.getInstance().get()
