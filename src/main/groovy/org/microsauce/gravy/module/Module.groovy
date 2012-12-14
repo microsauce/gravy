@@ -12,7 +12,7 @@ import org.microsauce.gravy.context.CronService
 import org.microsauce.gravy.context.EnterpriseService
 import org.microsauce.gravy.context.Handler
 import org.microsauce.gravy.context.ServiceFactory
-import org.microsauce.gravy.runtime.GravyTemplateServlet
+
 
 @Log4j
 abstract class Module { 

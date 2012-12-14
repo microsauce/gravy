@@ -1,5 +1,6 @@
-/*
-This script defines the Gravy JavaScript/CoffeeScript API
+/*******************************************************
+
+This script defines the Gravy JavaScript API
 
 Script bindings:
 
@@ -8,15 +9,20 @@ Script bindings:
 'out'			- the console PrintStream
 'config'        - a Java Properties object
 
- */
+*******************************************************/
 
 /*
  Java imports
  */
+
 importPackage(javax.servlet.http)
 importPackage(javax.servlet)
 importPackage(java.util)
 importPackage(java.io)
+
+/********************************************************
+ * documented variables
+ ********************************************************/
 
 /*
  * http methods
@@ -35,10 +41,11 @@ var DELETE = 'delete'
 var REQUEST = DispatcherType.REQUEST
 var FORWARD = DispatcherType.FORWARD
 var ERROR   = DispatcherType.ERROR
+var INCLUDE = DispatcherType.INCLUDE
 
-/*
+/********************************************************
  * documented utility/convenience functions
- */
+ *******************************************************/
 
 /*
  * script loader
@@ -46,10 +53,6 @@ var ERROR   = DispatcherType.ERROR
 var load = function(scriptUri) {
 	var script = gravyModule.load(scriptUri)
 	eval(script)
-}
-
-var require = function(scriptUri) {
-	load(scriptUri)
 }
 
 //var date = function(format) {
@@ -80,32 +83,33 @@ var print = function(str) {
 	return out.print(str)
 }
 
-/*
+/*******************************************************
  * undocumented utility functions/classes
- */
+ ******************************************************/
 
 String.prototype.endsWith = function(suffix) {
     return this.indexOf(suffix, this.length - suffix.length) !== -1
 };
 
-/*
- * JSON -> obj
- */
-function reviver(key, value) {
-	if ( key.endsWith('Date') ) 
-		return new Date(intValue(value))
-	
-	return value
-}
-
-/*
- * obj -> JSON
- */
-function replacer(key, value) {
-	if ( key.endsWith('Date') )
-		return value.getTime()
-	else return value
-}
+//
+///*
+// * JSON -> obj
+// */
+//function reviver(key, value) {
+//	if ( key.endsWith('Date') ) 
+//		return new Date(intValue(value))
+//	
+//	return value
+//}
+//
+///*
+// * obj -> JSON
+// */
+//function replacer(key, value) {
+//	if ( key.endsWith('Date') )
+//		return value.getTime()
+//	else return value
+//}
 
 var addEnterpriseService = function(uriPattern, method, rawCallBack, dispatch) {
 	var dispatchList = new ArrayList()
@@ -147,19 +151,19 @@ var JSHandler = function(handler) {
     }
 }
 
-/*
- * public Gravy API
- */
+/********************************************************
+ * documented service functions
+ *******************************************************/
 
 /*
  * define a 'get' request handler
  * 
  * Example: 
  * get '/hello/:name', (req, res) -> 
- * 		res.render '/greeting.html', {name: this.name}
+ * 		res.render '/greeting.html', {name: @name}
  * 
  * get '/hello/:name', (req, res) -> 
- * 		res.render '/greeting.html', {name: this.name}
+ * 		res.render '/greeting.html', {name: @name}
  * , [REQUEST]
  */
 var get = function(uriPattern, callBack, dispatch) {
@@ -171,11 +175,11 @@ var get = function(uriPattern, callBack, dispatch) {
  * 
  * Example: 
  * post '/hello/:name', (req, res) -> 
- * 		res.render '/greeting.html', {name: this.name}
+ * 		res.render '/greeting.html', {name: @name}
  * 
  * post '/hello/:name', (req, res) -> 
  * 		log.info "Hello #{@name}"
- * 		res.render '/greeting.html', {name: this.name}
+ * 		res.render '/greeting.html', {name: @name}
  * , [REQUEST]
  */
 var post = function(uriPattern, callBack, dispatch) {
@@ -187,10 +191,10 @@ var post = function(uriPattern, callBack, dispatch) {
  * 
  * Example: 
  * del '/hello/:name', (req, res) -> 
- * 		res.render '/greeting.html', {name: this.name}
+ * 		res.render '/greeting.html', {name: @name}
  * 
  * del '/hello/:name', (req, res) -> 
- * 		res.render '/greeting.html', {name: this.name}
+ * 		res.render '/greeting.html', {name: @name}
  * , [REQUEST]
  */
 var del = function(uriPattern, callBack, dispatch) {
@@ -202,10 +206,10 @@ var del = function(uriPattern, callBack, dispatch) {
  * 
  * Example: 
  * options '/hello/:name', (req, res) -> 
- * 		res.render '/greeting.html', {name: this.name}
+ * 		res.render '/greeting.html', {name: @name}
  * 
  * options '/hello/:name', (req, res) -> 
- * 		res.render '/greeting.html', {name: this.name}
+ * 		res.render '/greeting.html', {name: @name}
  * , [REQUEST]
  */
 var options = function(uriPattern, callBack, dispatch) {

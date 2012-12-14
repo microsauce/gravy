@@ -15,10 +15,11 @@ def engines = [:]
 def templateEngine = { moduleName ->
 	def engine = engines[moduleName]
 	if ( !engine ) {
+		// the second argument tells the loader to follow symlinks (necessary in dev mode)
 		def templateLoader = new FileTemplateLoader(new File(documentRoot+'/'+moduleName), true)
 		engine = new Configuration()
-		engine.setDirectoryForTemplateLoading(
-			new File(documentRoot))
+//		engine.setDirectoryForTemplateLoading(
+//			new File(documentRoot))
 		engine.setObjectWrapper(
 			new DefaultObjectWrapper())
 		engine.setTemplateLoader(templateLoader)

@@ -66,8 +66,6 @@ class GravyBootstrapListener implements ServletContextListener {
 		//
 		String errorPage = config.gravy.errorPage ?: null
 		String viewUri = config.gravy.viewUri ?: null
-		// TODO instantiate error handler here and pass it into:
-		// TODO ContextBuilder > ModuleFactory > ServiceFactory -> EnterpriseService -> HandlerFactory -> Handler
 
 
 		//
@@ -82,8 +80,6 @@ class GravyBootstrapListener implements ServletContextListener {
 			if ( new File(moduleResoursesFolder).exists() )
 				resourceRoots << moduleResoursesFolder
 			String moduleViewFolder = "${deployPath}/WEB-INF/view/${moduleName}".toString()
-			if (new File(moduleViewFolder).exists() )
-				GravyTemplateServlet.roots << moduleViewFolder // deployPath+'/WEB-INF/view/'+mod
 		}
 
 		//
