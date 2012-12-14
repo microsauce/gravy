@@ -19,9 +19,6 @@ import org.mozilla.javascript.NativeJSON
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.ScriptableObject
 
-// TODO renderJSON
-
-
 class JSHandler extends Handler {
 
 	ScriptableObject scope 
@@ -33,8 +30,7 @@ class JSHandler extends Handler {
 	}
 	
 	@Override
-	@CompileStatic
-	public Object doExecute(HttpServletRequest req, HttpServletResponse res,
+	@CompileStatic public Object doExecute(HttpServletRequest req, HttpServletResponse res,
 			FilterChain chain, HandlerBinding handlerBinding) {
 
 		Context ctx = org.mozilla.javascript.Context.enter() 
@@ -80,7 +76,7 @@ class JSHandler extends Handler {
 		void put(String key, Object value)
 		void doFilter()
 		void forward(String uri)
-		HttpSession session() // get the patched session
+		JSHttpSession session() // get the patched session
 	}
 	
 	@CompileStatic interface JSHttpSession extends HttpSession {
@@ -112,22 +108,14 @@ class JSHandler extends Handler {
 		}
 		
 		@CompileStatic void render(String _viewUri, Object model) {
-println "render 1"			
 			request.setAttribute('_view', _viewUri)
-println "render 2"			
 			Object attrModel = model
-println "render 3 $module"			
 			if ( module.serializeAttributes ) {
-println "render 4"			
 				attrModel = NativeJSON.stringify(ctx, scope, model, null, null)
 			}
-println "render 5"			
-			request.setAttribute('_model', attrModel) // TODO serialize as JSON first
-println "render 6"			
+			request.setAttribute('_model', attrModel) 
 			request.setAttribute('_module', module)
-println "render 7"			
 			RequestDispatcher dispatcher = request.getRequestDispatcher(renderUri)
-println "render 8"			
 			dispatcher.forward(request, (T) target)
 		}
 		@CompileStatic void write(String output) {
@@ -135,6 +123,11 @@ println "render 8"
 		}
 		@CompileStatic void redirect(String url) {
 			((T) target).sendRedirect(url)
+		}
+		@CompileStatic void renderJson(Object model) {
+			((T) target).contentType = 'application/json'
+			((T) target).writer << NativeJSON.stringify(ctx, scope, model, null, null)
+			((T) target).writer.flush()
 		}
 
 	}
