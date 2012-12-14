@@ -20,16 +20,15 @@ import org.microsauce.gravy.module.Module
 @Log4j
 abstract class Handler {
 	
-	// TODO add module reference here
 	Module module
-//	String viewUri
 	
 	abstract Object doExecute(HttpServletRequest req, HttpServletResponse res, FilterChain chain, HandlerBinding handlerBinding)
+	abstract Object doExecute(Object ... params)
 	
 	@CompileStatic
 	Object execute(HttpServletRequest req, HttpServletResponse res, FilterChain chain, Pattern uriPattern, List<String> params) {
-		prepareRequest(req)
-		prepareResponse(res)
+//		prepareRequest(req)
+//		prepareResponse(res)
 		HandlerBinding handlerBinding = new HandlerBinding(req, res, uriPattern, params)
 		try {
 			doExecute(req, res, chain, handlerBinding)
@@ -43,11 +42,15 @@ abstract class Handler {
 		}
 	}
 	
-	// TODO is this too restricting (abstract) ???
-	private void prepareRequest(HttpServletRequest req) {}
-	
-	private void prepareResponse(HttpServletResponse res) {
-		res.contentType = 'text/html'
+	@CompileStatic Object execute() {
+		doExecute([] as Object[])
 	}
+	
+	// TODO is this too restricting (abstract) ???
+//	private void prepareRequest(HttpServletRequest req) {}
+//	
+//	private void prepareResponse(HttpServletResponse res) {
+//		res.contentType = 'text/html'
+//	}
 
 }

@@ -12,6 +12,8 @@ import org.apache.log4j.*
 import org.microsauce.gravy.*
 import org.microsauce.gravy.app.*
 import org.microsauce.gravy.context.Context
+import org.microsauce.gravy.context.CronService
+import org.microsauce.gravy.context.Handler
 import org.microsauce.gravy.dev.observer.BuildSourceModHandler
 import org.microsauce.gravy.dev.observer.JNotifySourceModObserver
 import org.microsauce.gravy.dev.observer.RedeploySourceModHandler
@@ -36,7 +38,6 @@ class GravyBootstrapListener implements ServletContextListener {
 		log.info 'Shutdown complete.'
 	}
 
-//	@CompileStatic
 	void contextInitialized(ServletContextEvent sce) {
 		log.info('building application context . . .')
 		def servletContext = sce.servletContext
@@ -99,11 +100,15 @@ class GravyBootstrapListener implements ServletContextListener {
 		
 	}
 
-	private void initCronRuntime(Context context) {
+	@CompileStatic private void initCronRuntime(Context context) {
 		if ( context.cronServices ) {
 			context.cronScheduler = new Scheduler()
-			context.cronServices.each { task ->
-				context.cronScheduler.schedule(task.cronString, task.action as Runnable)
+			context.cronServices.each { CronService service ->
+				Closure runnable = { 
+					Handler handler = service.handlers['default']
+					handler.execute()
+				}
+				context.cronScheduler.schedule(service.cronString, runnable as Runnable)
 			}
 
 			context.cronScheduler.start()
@@ -114,7 +119,7 @@ class GravyBootstrapListener implements ServletContextListener {
 	private void startSourceObserver(Module app) {
 		Map binding = app.binding
 		String projectFolder = System.getProperty('user.dir')
-		def sourceObserver = new JNotifySourceModObserver(projectFolder) //app.folder.absolutePath)
+		def sourceObserver = new JNotifySourceModObserver(projectFolder) 
 		sourceObserver.addScriptHandler(new RedeploySourceModHandler(app))
 
 		sourceObserver.addCompiledSourceHandler(new BuildSourceModHandler())
@@ -148,11 +153,7 @@ class GravyBootstrapListener implements ServletContextListener {
 		addFilter('RouteFilter',new FilterWrapper([
 			filter: new RouteFilter(context, errorUri),
 			mapping : '/*',
-			dispatch: EnumSet.copyOf([DispatcherType.REQUEST, DispatcherType.FORWARD])]), servletContext) // TODO REVISIT
-//		addFilter('ControllerFilter',new FilterWrapper([
-//			filter: new ControllerFilter(),
-//			mapping : '/*',
-//			dispatch: EnumSet.copyOf([DispatcherType.REQUEST, DispatcherType.FORWARD])]), context)
+			dispatch: EnumSet.copyOf([DispatcherType.REQUEST, DispatcherType.FORWARD])]), servletContext) 
 		addFilter('GravyResourceFilter',new FilterWrapper([
 			filter: new GravyResourceFilter(resourceRoots, deployPath),
 			mapping : '/*',

@@ -44,7 +44,8 @@ class ContextBuilder {
 		List<Module> modules = []
 		
 		for (modFolder in ContextBuilder.listModules(appRoot)) { 
-			modules << instantiateModule(context, modFolder, appConfig, env, false)
+			Module module = instantiateModule(context, modFolder, appConfig, env, false) 
+			if ( module ) modules << module
 		}
 
 		modules

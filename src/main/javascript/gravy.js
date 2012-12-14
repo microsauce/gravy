@@ -133,21 +133,32 @@ var JSHandler = function(handler) {
     this.invokeHandler = function(req, res, paramMap, paramList) {
 
     	// add uri parameters to 'this'
-        var iterator = paramMap.keySet().iterator()
-        while (iterator.hasNext()) {
-            var key = iterator.next()
-            this[key] = paramMap.get(key)
-        }
-
+    	if ( paramMap != null ) {
+	        var iterator = paramMap.keySet().iterator()
+	        while (iterator.hasNext()) {
+	            var key = iterator.next()
+	            this[key] = paramMap.get(key)
+	        }
+    	}
+    	
         // create the splat array
-        iterator = paramList.iterator()
-        this.splat = []
-        while (iterator.hasNext()) {
-            var next = iterator.next()
-            this.splat.push(next)
-        }
+    	if ( paramList != null ) {
+	        var iterator = paramList.iterator()
+	        this.splat = []
+	        while (iterator.hasNext()) {
+	            var next = iterator.next()
+	            this.splat.push(next)
+	        }
+    	}
 
-        this.handler.apply(this, [req, res])
+    	// build the parameter array
+    	var params = new Array()
+    	if ( req != null && res != null) {
+    		params.push(req)
+    		params.push(res)
+    	}
+    		
+        this.handler.apply(this, params)
     }
 }
 
@@ -229,6 +240,13 @@ var options = function(uriPattern, callBack, dispatch) {
  */
 var put = function(uriPattern, callBack, dispatch) {
 	addEnterpriseService(uriPattern, PUT, callBack, dispatch)
+}
+
+/*
+ * 
+ */
+var schedule = function(cronString, callBack) {
+	gravyModule.addCronService(cronString, new JSHandler(callBack))
 }
 
 

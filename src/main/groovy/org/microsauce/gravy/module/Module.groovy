@@ -66,7 +66,6 @@ abstract class Module {
 		EnterpriseService service = context.findServiceByUriString(uriPattern)
 		if ( service ) {
 			Handler thisHandler = service.handlerFactory.makeHandler(rawHandler, scriptContext)
-//			thisHandler.viewUri = viewUri
 			thisHandler.module = this
 			service.handlers[method] = thisHandler
 		} else {

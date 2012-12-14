@@ -41,28 +41,9 @@ class GroovyHandler extends Handler {
 		closure.call(_paramList.length == 1 ? _paramList[0] : _paramList)
 	}
 
-//	@CompileStatic
-//	private Binding groovyBinding(HttpServletRequest req, HttpServletResponse res) {
-//		Map binding = [:]
-//		// TODO what todo with this ? auto-bind as 'form' ???
-////		if ( this. ) {
-////			def className = classBinding.name
-////			def contextName = className.substring(0,1).toLowerCase() + className.substring(1)
-////			def classBindingInstance = Mapper.getInstance().bindRequest( classBinding, req )
-////
-////			binding[contextName] = classBindingInstance
-////		}
-//
-//		binding.req = req
-//		binding.res = res
-//		binding.out = res.writer
-//		binding.sess = req.session
-//
-//		binding as Binding
-//	}
-
-	// TODO refactor this into GroovyModule
-	@CompileStatic
-	private void bindAndRouteRequest(EnterpriseService route, ServletRequest req, ServletResponse res) {
+	@CompileStatic public Object doExecute(Object ... params) {
+		Closure closure = (Closure)actionClosure.clone()
+		closure.call(params)		
 	}
+		
 }

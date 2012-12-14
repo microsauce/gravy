@@ -38,15 +38,18 @@ class JSHandler extends Handler {
 			JSHttpSession jsSess = patchSession(req, ctx, scope, module)
 			JSHttpServletRequest jsReq = patchRequest(req, res, jsSess, chain, ctx, scope, module)
 			JSHttpServletResponse jsRes = patchResponse(req, res, ctx, scope, module)
-			jsObject.callMethod(
-				jsObject, 
-				'invokeHandler', 
-				[jsReq, jsRes, handlerBinding.paramMap, handlerBinding.paramList] as Object[] 
-			) 
+			doExecute([jsReq, jsRes, handlerBinding.paramMap, handlerBinding.paramList] as Object[])
 		}
 		finally {
 			ctx.exit()
 		}
+	}
+			
+	@CompileStatic public Object doExecute(Object ... params) {
+		jsObject.callMethod(
+			jsObject, 'invokeHandler', params
+		)
+
 	}
 	
 	@CompileStatic JSHttpServletRequest patchRequest(HttpServletRequest req, HttpServletResponse res, JSHttpSession sess, FilterChain chain, Context ctx, ScriptableObject scope, Module module) {

@@ -59,6 +59,11 @@ abstract class ModuleFactory {
 	@CompileStatic
 	Module createModule(Context context, File moduleFolder, File appScript, ConfigObject appConfig, String env, Boolean isApp) {
 
+		//
+		// disable a module without un-installing/deleting it
+		//
+		if ( appConfig && ((ConfigObject)appConfig[moduleFolder.name]).disabled == true ) return null
+		
 		// create classloader and load module class		
 		ClassLoader cl = createModuleClassLoader(moduleFolder)
 		Class moduleClass = cl.loadClass(moduleClassName())
@@ -84,7 +89,6 @@ abstract class ModuleFactory {
 		ConfigObject gravyConfig = (ConfigObject)module.config.gravy
 		ConfigObject gravyViewConfig = (ConfigObject) gravyConfig.view
 		module.renderUri = gravyViewConfig.renderUri
-println "${module.name} renderUri - ${module.renderUri}"		
 		module.applicationConfig = appConfig
 		module.errorUri = gravyViewConfig.errorUri
 		module.serializeAttributes = gravyConfig.serializeAttributes
