@@ -1,7 +1,7 @@
 package org.microsauce.gravy.module
 
 import groovy.transform.CompileStatic
-import groovy.util.logging.Log4j;
+import groovy.util.logging.Log4j
 
 import javax.servlet.DispatcherType
 import javax.servlet.Filter
@@ -11,6 +11,7 @@ import org.microsauce.gravy.context.Context
 import org.microsauce.gravy.context.CronService
 import org.microsauce.gravy.context.EnterpriseService
 import org.microsauce.gravy.context.Handler
+import org.microsauce.gravy.context.HandlerFactory
 import org.microsauce.gravy.context.ServiceFactory
 
 
@@ -65,13 +66,13 @@ abstract class Module {
 		log.info "addEnterpriseService: uri: $uriPattern - method: $method - dispatch: $dispatch"
 		EnterpriseService service = context.findServiceByUriString(uriPattern)
 		if ( service ) {
-			Handler thisHandler = service.handlerFactory.makeHandler(rawHandler, scriptContext)
+			Handler thisHandler = HandlerFactory.getHandlerFactory(this.class).makeHandler(rawHandler, scriptContext)//service.handlerFactory.makeHandler(rawHandler, scriptContext)
 			thisHandler.module = this
 			service.handlers[method] = thisHandler
 		} else {
 			Map<String, Object> methodHandler = [:]
 			methodHandler[method] = rawHandler
-			service = serviceFactory.makeEnterpriseService(scriptContext, uriPattern, methodHandler, dispatch, this)
+			service = serviceFactory.makeEnterpriseService(scriptContext, uriPattern, methodHandler, dispatch)
 			service.module = this
 		}
 		

@@ -25,7 +25,6 @@ abstract class ModuleFactory {
 	}
 	
 	@CompileStatic 	static ConfigObject loadModuleConfig(File moduleFolder, String env) {
-		// TODO decide whether or not to locate the config file in the config folder or in the root module folder
 		File configFolder = new File(moduleFolder, 'conf')
 		File configFile = new File(configFolder, 'config.groovy')
 		ConfigObject modConfig = null
@@ -94,7 +93,7 @@ abstract class ModuleFactory {
 		module.serializeAttributes = gravyConfig.serializeAttributes
 
 		module.scriptFile = appScript
-		module.serviceFactory = ServiceFactory.getFactory(module.class)
+		module.serviceFactory = new ServiceFactory(module)
 
 		module
 	}

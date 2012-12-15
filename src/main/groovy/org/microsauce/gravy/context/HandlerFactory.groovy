@@ -1,9 +1,9 @@
 package org.microsauce.gravy.context
-// TODO delete this
+
 import org.microsauce.gravy.context.groovy.GroovyHandlerFactory
-import org.microsauce.gravy.context.groovy.GroovyServiceFactory
 import org.microsauce.gravy.context.javascript.JSHandlerFactory
-import org.microsauce.gravy.context.javascript.JSServiceFactory
+import org.microsauce.gravy.module.groovy.GroovyModule
+import org.microsauce.gravy.module.javascript.JSModule
 
 abstract class HandlerFactory {
 	
@@ -11,12 +11,12 @@ abstract class HandlerFactory {
 	
 	static {
 		HANDLER_FACTORIES = [:]
-		HANDLER_FACTORIES[GroovyServiceFactory.class] = new GroovyHandlerFactory()
-		HANDLER_FACTORIES[JSServiceFactory.class] = new JSHandlerFactory()
+		HANDLER_FACTORIES[GroovyModule.class] = new GroovyHandlerFactory()
+		HANDLER_FACTORIES[JSModule.class] = new JSHandlerFactory()
 	}
 	
-	static HandlerFactory getHandlerFactory(Class serviceFactory) {
-		HANDLER_FACTORIES[serviceFactory]
+	static HandlerFactory getHandlerFactory(Class moduleClass) {
+		HANDLER_FACTORIES[moduleClass]
 	}
 	
 	abstract Handler makeHandler(Object rawHandler, Object scriptContext)

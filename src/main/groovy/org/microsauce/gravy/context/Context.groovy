@@ -11,7 +11,6 @@ import javax.servlet.http.HttpServlet
 import org.microsauce.gravy.runtime.FilterWrapper
 import org.microsauce.gravy.runtime.ServletWrapper
 
-// TODO implement 'add servlet / filter methods
 
 /**
  * 
@@ -92,17 +91,6 @@ class Context {
 		}
 		
 		retService
-	}
-	
-	// TODO delete this
-	@CompileStatic
-	void complete() { 
-		log.info 'completing application context'
-//		makeControllers(root.entrySet(), new StringBuilder())
-
-		if (cronScheduler) cronScheduler.start()
-		log.info 'application context is complete'
-
 	}
 
 }

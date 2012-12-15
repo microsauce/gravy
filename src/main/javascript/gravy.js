@@ -243,7 +243,11 @@ var put = function(uriPattern, callBack, dispatch) {
 }
 
 /*
+ * schedule a handler on a cron timer
  * 
+ * Example:
+ * schedule '* * * * * ', ->
+ * 		println "Another minute bit the dust"
  */
 var schedule = function(cronString, callBack) {
 	gravyModule.addCronService(cronString, new JSHandler(callBack))
