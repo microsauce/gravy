@@ -8,6 +8,7 @@ Script bindings:
 'log'			- the application logger
 'out'			- the console PrintStream
 'config'        - a Java Properties object
+'util'			- a utility class
 
 *******************************************************/
 
@@ -67,6 +68,10 @@ var load = function(scriptUri) {
  */
 var conf = function(key) {
 	return config.getProperty(key)
+}
+
+var readFile = function(filePath) {
+	util.readFileAsString(filePath)
 }
 
 /*

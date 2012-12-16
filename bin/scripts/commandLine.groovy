@@ -138,7 +138,7 @@ if (commandLine.hasOption('assemble')) {
 if (commandLine.hasOption('test')) {
 	def configObject = getConfigObject()
 
-	def lifecycle = new Lifecycle(getConfigObject) //new Lifecycle(getConfig())
+	def lifecycle = new Lifecycle(getConfigObject()) //new Lifecycle(getConfig())
 	lifecycle.test()
 	System.exit(0)
 }

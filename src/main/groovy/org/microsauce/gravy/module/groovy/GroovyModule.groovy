@@ -1,13 +1,15 @@
 package org.microsauce.gravy.module.groovy
 
 import groovy.json.JsonBuilder
-import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic
+
+import java.util.regex.Pattern
 
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpSession
 
 import org.microsauce.gravy.context.Context
+import org.microsauce.gravy.json.GravyJsonSlurper
 import org.microsauce.gravy.lang.groovy.api.GroovyAPI
 import org.microsauce.gravy.lang.groovy.script.Script
 import org.microsauce.gravy.lang.groovy.script.ScriptDecorator
@@ -16,6 +18,8 @@ import org.microsauce.gravy.module.Module
 
 class GroovyModule extends Module { // TODO pull code in from ScriptUtils,  
 
+	Pattern datePattern = ~/[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}/
+	
 	@CompileStatic protected Object doLoad(Map binding) {
 		patchEnterpriseRuntime()
 		// TODO for now use the 'old' groovy script utilities
@@ -91,7 +95,17 @@ class GroovyModule extends Module { // TODO pull code in from ScriptUtils,
 		def get = { key ->
 			def value = delegate.getAttribute(key)
 			if ( serializeAttributes ) {
-				value = new JsonSlurper().parseText(value)
+				value = new GravyJsonSlurper().parseText(value) { k, val ->
+					def retValue = val
+					if ( val instanceof String && val.length() >= 19) {
+						def substr = val.substring(0,19)
+					
+						if ( substr ==~ datePattern ) {
+							retValue = Date.parse("yyyy-MM-dd'T'HH:mm:ss", substr)
+						}
+					}
+					retValue
+				}
 			}
 			value
 		}
@@ -101,7 +115,7 @@ class GroovyModule extends Module { // TODO pull code in from ScriptUtils,
 				attrValue = new JsonBuilder(value).toString()
 			}
 			
-			delegate.setAttribute(key, value)			
+			delegate.setAttribute(key, attrValue)			
 		}
 		HttpServletRequest.metaClass.get = get
 		HttpSession.metaClass.get = get

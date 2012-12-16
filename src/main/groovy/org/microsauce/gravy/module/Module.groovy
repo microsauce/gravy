@@ -28,11 +28,9 @@ abstract class Module {
 	File folder 
 	File scriptFile
 	ServiceFactory serviceFactory
-	Map<String, Map<String, Object>> rawServiceMap = [:]
 	String renderUri
-	List<String> viewRoots
 	String errorUri
-	boolean serializeAttributes // TODO global config option
+	boolean serializeAttributes 
 
 	Object returnValue
 	Map binding // used by the main app script only (mod1 ret val, mod2, etc)
@@ -44,7 +42,6 @@ abstract class Module {
 	Module() {}
 	
 	@CompileStatic void load() {
-
 		try {
 			if ( binding == null ) binding = [:]
 			returnValue = doLoad(binding) 

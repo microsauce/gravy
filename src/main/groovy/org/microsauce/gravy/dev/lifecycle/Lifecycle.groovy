@@ -202,7 +202,7 @@ class Lifecycle {
 		println '========================================================================='
 
 		def classLoader = testClassLoader()
-		def testerClass = classLoader.loadClass('org.microsauce.gravy.dev.Tester')
+		def testerClass = classLoader.loadClass('org.microsauce.gravy.dev.lifecycle.Tester')
 		def tester = testerClass.newInstance()
 		tester.runTests(projectBasedir)
 	}

@@ -6,6 +6,7 @@ import groovy.util.logging.Log4j
 import org.microsauce.gravy.context.Context
 import org.microsauce.gravy.lang.coffeescript.CoffeeC
 import org.microsauce.gravy.module.Module
+import org.microsauce.gravy.util.Util
 import org.mozilla.javascript.ImporterTopLevel
 import org.mozilla.javascript.ScriptableObject
 
@@ -13,6 +14,8 @@ import org.mozilla.javascript.ScriptableObject
 @Log4j
 class JSModule extends Module {
 
+	Util util = new Util()
+	
 	@Override
 	@CompileStatic
 	protected Object doLoad(Map<String, Object> binding) {
@@ -28,6 +31,7 @@ class JSModule extends Module {
 			_scope.put('gravyModule', _scope, this)
 			_scope.put('out', _scope, System.out)
 			_scope.put('log', _scope, log)
+			_scope.put('util', _scope, util)
 			_scope.put('config', _scope, config.toProperties())
 
 			// add module return values to the script scope (app only)
