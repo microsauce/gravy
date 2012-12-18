@@ -2,7 +2,7 @@
 Gravy
 ===
 
-Gravy is a Sinatra inspired dynamic server scripting framework for the Java enterprise.
+Gravy is a dynamic server scripting framework for the Java enterprise.  
 
 Groovy:
 

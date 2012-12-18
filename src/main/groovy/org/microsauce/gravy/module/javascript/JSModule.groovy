@@ -48,10 +48,18 @@ class JSModule extends Module {
 			
 			// read and evaluate application.js
 			String applicationScript = load(scriptFile.name, folder)
-			println '========================================================================='
-			println '= compiled coffee script (application.coffee.js)                        ='
-			println '========================================================================='
-			println applicationScript			
+			if ( scriptFile.name.endsWith('.coffee') ) {
+				println ''
+				println '========================================================================='
+				println '= compiled coffee script (application.coffee.js)                        ='
+				println '========================================================================='
+				println ''
+				int lineNumber = 1
+				applicationScript.eachLine { String line ->
+					println "${lineNumber++}: $line"
+				}
+				println ''
+			}			
 			ctx.evaluateString(_scope, applicationScript, scriptFile.name, 1, null)
 
 		}

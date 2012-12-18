@@ -15,6 +15,7 @@ import org.microsauce.gravy.context.HandlerBinding
 import org.microsauce.gravy.lang.patch.BaseEnterpriseProxy
 import org.microsauce.gravy.module.Module
 import org.mozilla.javascript.Context
+import org.mozilla.javascript.NativeFunction
 import org.mozilla.javascript.NativeJSON
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.ScriptableObject
@@ -23,10 +24,12 @@ class JSHandler extends Handler {
 
 	ScriptableObject scope 
 	NativeObject jsObject
+	NativeFunction parseJson
 	
 	JSHandler(NativeObject jsObject, ScriptableObject scope) {
 		this.jsObject = jsObject
 		this.scope = scope
+		this.parseJson =  scope.get('parseJson', scope)
 	}
 	
 	@Override
@@ -56,7 +59,7 @@ class JSHandler extends Handler {
 		JSHttpServletRequest jsReq = (JSHttpServletRequest) Proxy.newProxyInstance(
 			this.class.getClassLoader(),
 			[JSHttpServletRequest.class] as Class[],
-			new JSRequestProxy(req, res, sess, chain, ctx, scope, module))
+			new JSRequestProxy(req, res, sess, chain, ctx, scope, module, parseJson))
 		jsReq
 	}		
 	@CompileStatic JSHttpServletResponse patchResponse(HttpServletRequest req, HttpServletResponse res, Context ctx, ScriptableObject scope, Module module) {
@@ -172,8 +175,9 @@ class JSHandler extends Handler {
 		HttpServletResponse response
 		HttpSession session
 		Module module
+		NativeFunction parseJson
 		
-		JSRequestProxy(Object target, HttpServletResponse res, HttpSession session, FilterChain chain, Context ctx, ScriptableObject scope, Module module) {
+		JSRequestProxy(Object target, HttpServletResponse res, HttpSession session, FilterChain chain, Context ctx, ScriptableObject scope, Module module, NativeFunction parseJson) {
 			super(target)
 			this.response = res
 			this.session = session
@@ -181,12 +185,14 @@ class JSHandler extends Handler {
 			this.ctx = ctx
 			this.scope = scope
 			this.module = module
+			this.parseJson = parseJson
 		}
 
-		Object get(String key) {
+		@CompileStatic Object get(String key) {
 			Object value = ((T)target).getAttribute(key)
-			if ( module.serializeAttributes )
-				value = NativeJSON.parse(ctx, scope, value)
+			if ( module.serializeAttributes ) {
+				value = parseJson.call(ctx, scope, scope, [value] as Object[])
+			}
 			value
 		}
 		

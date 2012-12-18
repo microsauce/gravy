@@ -16,13 +16,10 @@ import org.microsauce.gravy.lang.groovy.script.ScriptDecorator
 import org.microsauce.gravy.lang.groovy.script.ScriptUtils
 import org.microsauce.gravy.module.Module
 
-class GroovyModule extends Module { // TODO pull code in from ScriptUtils,  
+class GroovyModule extends Module {   
 
-	Pattern datePattern = ~/[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}/
-	
 	@CompileStatic protected Object doLoad(Map binding) {
 		patchEnterpriseRuntime()
-		// TODO for now use the 'old' groovy script utilities
 		ConfigObject root = new ConfigObject()
 		binding.root = root
 		binding.config = config
@@ -30,7 +27,6 @@ class GroovyModule extends Module { // TODO pull code in from ScriptUtils,
 		// create, initialize, and execute the script
 		Script script = new Script()
 		script.binding.putAll(binding) 
-//		script.config = config 			// TODO why is this necessary ??? 
 		script.classLoader = classLoader
 		script.name = name
 		script.sourceUri = scriptFile.absolutePath
@@ -43,9 +39,7 @@ class GroovyModule extends Module { // TODO pull code in from ScriptUtils,
 		addClosure script.binding
 		GroovyAPI.module = this
 
-		Object _return = ScriptUtils.run script
-		
-		_return 
+		ScriptUtils.run script
 	}
 
 	void addClosure(Map binding) {
@@ -57,6 +51,8 @@ class GroovyModule extends Module { // TODO pull code in from ScriptUtils,
 		}
 	}
 	
+	private Pattern datePattern = ~/[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}/
+
 	private void patchEnterpriseRuntime() {
 		//
 		// TODO the following Binding.metaClass assignments are a workaround
