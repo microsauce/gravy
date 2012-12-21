@@ -3,7 +3,7 @@ package org.microsauce.gravy.util
 import groovy.transform.CompileStatic;
 
 /**
- * this class will be used primarily to bring some grooviness to the JS
+ * this class will be used primarily to provide IO functionality to JS
  * 
  * @author jboone
  *

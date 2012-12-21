@@ -22,7 +22,7 @@ importPackage(java.util)
 importPackage(java.io)
 
 /********************************************************
- * documented variables
+ * undocumented global variables
  ********************************************************/
 
 /*
@@ -35,6 +35,10 @@ var PUT = 'put'
 var OPTIONS = 'post'
 var DELETE = 'delete'
 
+/********************************************************
+ * documented global variables
+ ********************************************************/
+	
 /*
  * dispatch types
  */
@@ -116,7 +120,6 @@ function parseJson(jsonText) {
 
 var addEnterpriseService = function(uriPattern, method, rawCallBack, dispatch) {
 	var dispatchList = new ArrayList()
-
 	if ( dispatch == null || dispatch.length == 0 ) {
 		dispatchList.add(REQUEST)
 		dispatchList.add(FORWARD)
@@ -133,7 +136,7 @@ var JSHandler = function(handler) {
 	
     this.handler = handler
     
-    this.invokeHandler = function(req, res, paramMap, paramList) {
+    this.invokeHandler = function(req, res, paramMap, paramList, objectBinding) {
 
     	// add uri parameters to 'this'
     	if ( paramMap != null ) {
@@ -156,11 +159,19 @@ var JSHandler = function(handler) {
 
     	// build the parameter array
     	var params = new Array()
-    	if ( req != null && res != null) {
+    	if ( req != null && res != null ) {
     		params.push(req)
     		params.push(res)
     	}
     		
+    	if ( objectBinding != null ) {
+	        var iterator = objectBinding.keySet().iterator()
+	        while (iterator.hasNext()) {
+	            var key = iterator.next()
+	            this[key] = objectBinding.get(key)
+	        }
+    	}
+    	
         this.handler.apply(this, params)
     }
 }
@@ -246,11 +257,26 @@ var put = function(uriPattern, callBack, dispatch) {
 }
 
 /*
+ * define a catch-all request handler
+ * 
+ * Example: 
+ * route '/hello/:name', (req, res) -> 
+ * 		res.render '/greeting.html', {name: this.name}
+ * 
+ * route '/hello/:name', (req, res) -> 
+ * 		res.render '/greeting.html', {name: this.name}
+ * , [REQUEST]
+ */
+var route = function(uriPattern, callBack, dispatch) {
+	addEnterpriseService(uriPattern, 'default', callBack, dispatch)
+}
+
+/*
  * schedule a handler on a cron timer
  * 
  * Example:
  * schedule '* * * * * ', ->
- * 		println "Another minute bit the dust"
+ * 		println "Another minute bites the dust"
  */
 var schedule = function(cronString, callBack) {
 	gravyModule.addCronService(cronString, new JSHandler(callBack))

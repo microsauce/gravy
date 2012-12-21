@@ -48,18 +48,6 @@ class JSModule extends Module {
 			
 			// read and evaluate application.js
 			String applicationScript = load(scriptFile.name, folder)
-			if ( scriptFile.name.endsWith('.coffee') ) {
-				println ''
-				println '========================================================================='
-				println '= compiled coffee script (application.coffee.js)                        ='
-				println '========================================================================='
-				println ''
-				int lineNumber = 1
-				applicationScript.eachLine { String line ->
-					println "${lineNumber++}: $line"
-				}
-				println ''
-			}			
 			ctx.evaluateString(_scope, applicationScript, scriptFile.name, 1, null)
 
 		}
@@ -89,6 +77,18 @@ class JSModule extends Module {
 					log.info "compiling ${scriptFile.absolutePath} to ${scriptFile.absolutePath}.js"
 					CoffeeC coffeec = new CoffeeC(this.class.classLoader)
 					script = coffeec.compile scriptFile.text
+
+					println ''
+					println '========================================================================='
+					println " compiled coffee script: (${compiledScriptFile.name})"
+					println '========================================================================='
+					println ''
+					int lineNumber = 1
+					script.eachLine { String line ->
+						println "${lineNumber++}: $line"
+					}
+					println ''
+		
 					compiledScriptFile.write script
 				} else
 					script = compiledScriptFile.text

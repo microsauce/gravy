@@ -18,8 +18,6 @@ def templateEngine = { moduleName ->
 		// the second argument tells the loader to follow symlinks (necessary in dev mode)
 		def templateLoader = new FileTemplateLoader(new File(documentRoot+'/'+moduleName), true)
 		engine = new Configuration()
-//		engine.setDirectoryForTemplateLoading(
-//			new File(documentRoot))
 		engine.setObjectWrapper(
 			new DefaultObjectWrapper())
 		engine.setTemplateLoader(templateLoader)
@@ -32,6 +30,7 @@ route serviceUri, {
 	def viewUri = req.getAttribute '_view' 	// not serialized
 	def module = req.getAttribute '_module'	// not serialized
 	def moduleName = module.name
+	res.contentType = 'text/html'
 
 	Template temp = templateEngine(module.name).getTemplate(viewUri)
 	temp.process(model, out)

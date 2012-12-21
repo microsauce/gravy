@@ -27,8 +27,6 @@ abstract class Handler {
 	
 	@CompileStatic
 	Object execute(HttpServletRequest req, HttpServletResponse res, FilterChain chain, Pattern uriPattern, List<String> params) {
-//		prepareRequest(req)
-//		prepareResponse(res)
 		HandlerBinding handlerBinding = new HandlerBinding(req, res, uriPattern, params)
 		try {
 			doExecute(req, res, chain, handlerBinding)
@@ -46,11 +44,4 @@ abstract class Handler {
 		doExecute([] as Object[])
 	}
 	
-	// TODO is this too restricting (abstract) ???
-//	private void prepareRequest(HttpServletRequest req) {}
-//	
-//	private void prepareResponse(HttpServletResponse res) {
-//		res.contentType = 'text/html'
-//	}
-
 }

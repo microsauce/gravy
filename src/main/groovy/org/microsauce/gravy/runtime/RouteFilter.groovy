@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletRequest
 
 import org.microsauce.gravy.context.Context
 import org.microsauce.gravy.context.EnterpriseService
-import org.microsauce.gravy.util.ServerUtils
 
 @Log4j
 class RouteFilter implements Filter {
@@ -53,12 +52,21 @@ class RouteFilter implements Filter {
 
 		HttpServletRequest _req = (HttpServletRequest)req
 		List<EnterpriseService> matchingRoutes = context.findService(
-			ServerUtils.getUri((HttpServletRequest)req), _req.dispatcherType)
+			getUri((HttpServletRequest)req), _req.dispatcherType)
 		FilterChain routeChain = null
-		if (matchingRoutes.size() >0) 
+		if ( matchingRoutes.size() > 0 ) 
 			routeChain = new RouteChain(chain, matchingRoutes)
 		
 		routeChain
+	}
+	
+	@CompileStatic String getUri(HttpServletRequest req) {
+		String uri
+		if ( req.getContextPath() != '/' )
+			uri = req.requestURI.substring(req.contextPath.length())
+		else uri = req.requestURI
+
+		uri
 	}
 
 }

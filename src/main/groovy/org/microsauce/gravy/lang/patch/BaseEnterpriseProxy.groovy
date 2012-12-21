@@ -22,21 +22,13 @@ abstract class BaseEnterpriseProxy implements InvocationHandler {
 	@CompileStatic
 	public Object invoke(final Object proxy, final Method method,
 		final Object[] args) throws Throwable {
-		
 		Object value = null
 		try {
-			try {
-				Method targetMethod = target.class.getDeclaredMethod(method.name, method.parameterTypes)
-				value = targetMethod.invoke(target, args)
-			}
-			catch(NoSuchMethodException nsme) { // check the superclass (TODO make sure this is necessary)
-				Method targetMethod = target.class.superclass.getDeclaredMethod(method.name, method.parameterTypes)
-				value = targetMethod.invoke(target, args)
-			}
+			Method targetMethod = target.class.getMethod(method.name, method.parameterTypes)
+			value = targetMethod.invoke(target, args)
 		}
-		catch (NoSuchMethodException nsme) {
-			// check the handler class for method signature
-			Method targetMethod = this.class.getDeclaredMethod(method.name, method.parameterTypes)
+		catch(NoSuchMethodException nsme) { 
+			Method targetMethod = this.class.getMethod(method.name, method.parameterTypes)
 			value = targetMethod.invoke(this, args)
 		}
 

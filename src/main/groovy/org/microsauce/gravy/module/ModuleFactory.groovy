@@ -1,8 +1,8 @@
 package org.microsauce.gravy.module
 
 import groovy.transform.CompileStatic
-import groovy.util.logging.Log4j
 
+import org.apache.log4j.Logger
 import org.codehaus.groovy.tools.LoaderConfiguration
 import org.codehaus.groovy.tools.RootLoader
 import org.microsauce.gravy.context.Context
@@ -10,9 +10,10 @@ import org.microsauce.gravy.context.ServiceFactory
 import org.microsauce.gravy.module.groovy.GroovyModuleFactory
 import org.microsauce.gravy.module.javascript.JSModuleFactory
 
-//@Log4j // TODO for some reason I get compile errors with this annotation
 abstract class ModuleFactory {
 
+	Logger log = Logger.getLogger(ModuleFactory.class) // the @Log4j annotation causes compile errors in this class
+	
 	static Map FACTORY_TYPES = [
 		'groovy' : GroovyModuleFactory.class,
 		'js' :  JSModuleFactory.class,
@@ -63,28 +64,28 @@ abstract class ModuleFactory {
 		//
 		if ( appConfig && ((ConfigObject)appConfig[moduleFolder.name]).disabled == true ) return null
 		
-		// create classloader and load module class		
+		// create module classloader and instantiate the module object		
 		ClassLoader cl = createModuleClassLoader(moduleFolder)
 		Class moduleClass = cl.loadClass(moduleClassName())
 		Module module = (Module) moduleClass.newInstance()
 		
-		// initialize module
+		// load module configuration
 		module.moduleConfig = loadModuleConfig(moduleFolder, env)
-		if ( appConfig != null && appConfig[moduleFolder.name] instanceof ConfigObject ) {
+		if ( appConfig != null && appConfig[moduleFolder.name] instanceof ConfigObject )
 			module.config = module.moduleConfig.merge((ConfigObject)appConfig[moduleFolder.name])
-		}	
-		else
-			module.config = module.moduleConfig
+		else module.config = module.moduleConfig
 			
-		// non-config values
+		// non-config properties
 		module.context = context
 		module.name = moduleFolder.name
 		module.scriptFile = new File(moduleScriptName())
 		module.isApp = isApp
 		module.classLoader = cl
 		module.folder = moduleFolder
-		
-		// config values
+		module.scriptFile = appScript
+		module.serviceFactory = new ServiceFactory(module)
+
+		// config properties
 		ConfigObject gravyConfig = (ConfigObject)module.config.gravy
 		ConfigObject gravyViewConfig = (ConfigObject) gravyConfig.view
 		module.renderUri = gravyViewConfig.renderUri
@@ -92,14 +93,12 @@ abstract class ModuleFactory {
 		module.errorUri = gravyViewConfig.errorUri
 		module.serializeAttributes = gravyConfig.serializeAttributes
 
-		module.scriptFile = appScript
-		module.serviceFactory = new ServiceFactory(module)
-
 		module
 	}
 	
 	@CompileStatic private ClassLoader createModuleClassLoader(File moduleFolder) {
 
+		log.info "initialize ${moduleFolder.name} classloader . . ."
 		List<URL> classpath = []
 		LoaderConfiguration loaderConf = new LoaderConfiguration()
 		
@@ -111,7 +110,7 @@ abstract class ModuleFactory {
 		File modLib = new File(moduleFolder, 'lib')
 		if ( modLib.exists() ) {
 			modLib.eachFile { File thisLib ->
-				println "adding ${thisLib.absolutePath} to classpath"
+				log.info "\tadding ${thisLib.absolutePath} to classpath"
 				loaderConf.addFile thisLib
 			}
 		}

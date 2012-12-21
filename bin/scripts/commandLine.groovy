@@ -41,13 +41,13 @@ war           - bundle your application as a web archive [appName].war in the ta
 create        - create a new application
 list-mods	  - list available core modules
 install-mod   - install a core module in this application
-mod-ify	      - build this appliction as module jar
+mod-ify	      - package this appliction as module jar
 
  Flags:
 =++++++=
 env           - specify the execution environment ('dev' by default)
 conf          - configure an application property on the command line, overriding config.groovy
-skip-tests    - for the lazy
+skip-tests    - for the impatient
 
 
 '''
@@ -123,14 +123,12 @@ if (commandLine.hasOption('mod-ify')) {
 // Goals
 //
 if (commandLine.hasOption('war')) {
-//	def conf =new ConfigSlurper().parse(new File('./conf/config.groovy').toURL())
 	def name = commandLine.optionValue('name')
 	def lifecycle = new Lifecycle(getConfigObject())
 	lifecycle.war(name, commandLine.hasOption('skip-test'))
 	System.exit(0)
 }
 if (commandLine.hasOption('assemble')) {
-//	def conf =new ConfigSlurper().parse(new File('./conf/config.groovy').toURL())
 	def lifecycle = new Lifecycle(getConfigObject())
 	lifecycle.assemble()
 	System.exit(0)

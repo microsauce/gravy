@@ -15,7 +15,6 @@ import org.microsauce.gravy.context.Context
 import org.microsauce.gravy.context.EnterpriseService
 import org.microsauce.gravy.context.Handler
 import org.microsauce.gravy.context.groovy.ActionUtils
-import org.microsauce.gravy.util.ServerUtils
 
 class RouteChain implements FilterChain {
 

@@ -8,18 +8,16 @@ import java.util.regex.Pattern
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-import org.microsauce.gravy.util.ServerUtils
-
 
 class HandlerBinding {
 
 	Pattern uriPattern
 	String requestUri
 	
-	Map<String, Object> binding = [:]	// base binding: req object, res object, chain
 	Map<String, String> paramMap = [:]	// uri named parameter map
 	List<String> paramList = []			// complete uri parameter value list
 	List<String> splat	= []			// wild card 'splat' list
+	String json							// a json payload
 	
 	HandlerBinding(HttpServletRequest req, HttpServletResponse res, Pattern uriPattern, List<String> params) {
 		init(req, res, uriPattern, params)
@@ -27,20 +25,13 @@ class HandlerBinding {
 	
 	@CompileStatic
 	void init(HttpServletRequest req, HttpServletResponse res, Pattern uriPattern, List<String> paramNames) {
-		// TODO what todo with this ? auto-bind as 'form' ???
-		//		if ( this. ) {
-		//			def className = classBinding.name
-		//			def contextName = className.substring(0,1).toLowerCase() + className.substring(1)
-		//			def classBindingInstance = Mapper.getInstance().bindRequest( classBinding, req )
-		//
-		//			binding[contextName] = classBindingInstance
-		//		}
 		
 		this.requestUri = req.requestURI
 		this.uriPattern = uriPattern
 		
+		json = readJsonPayload(req)
+		
 		Matcher matches =  requestUri =~ uriPattern
-		binding = [:]
 		Integer ndx = 1
 		splat = []
 		if ( paramNames.size() > 0 ) {
@@ -66,10 +57,14 @@ class HandlerBinding {
 			}
 		}
 
-		binding.route = uriPattern.toString()
-		binding.chain = this
-		binding << ServerUtils.buildContext(req, res, null)
-
+	}
+	
+	@CompileStatic private String readJsonPayload(HttpServletRequest req) {
+		String json = null
+		if ( req.contentType && req.contentType.startsWith('application/json') ) {
+			json = req.inputStream.getText('UTF-8')
+		}
+		json
 	}
 	
 }

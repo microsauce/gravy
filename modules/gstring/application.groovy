@@ -26,6 +26,7 @@ route serviceUri, {
 	def viewUri = req.getAttribute '_view' 	// not serialized
 	def module = req.getAttribute '_module'	// not serialized
 	def moduleName = module.name
+	res.contentType = 'text/html'
 	
 	out << templateEngine(module.name).render(viewUri, model)
 	out.flush()
