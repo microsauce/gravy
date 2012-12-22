@@ -57,7 +57,7 @@ class Context {
 	 * (prior to re-building the application context).
 	 */
 	@CompileStatic
-	void clearAppliationServices() {
+	void clearApplicationServices() {
 		clearAppServices enterpriseServices
 		clearAppServices cronServices
 	}

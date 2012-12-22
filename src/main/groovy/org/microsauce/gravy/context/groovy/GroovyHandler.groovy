@@ -127,11 +127,11 @@ class GroovyHandler extends Handler {
 			this.reviver = reviver
 		}
 
-		String stringify(Object object) {
+		@CompileStatic String stringify(Object object) {
 			new JsonBuilder(object).toString()
 		}
 		
-		Object parse(String serializedObject) {
+		@CompileStatic Object parse(String serializedObject) {
 			new GravyJsonSlurper().parseText(serializedObject, reviver)
 		}
 		
@@ -147,11 +147,11 @@ class GroovyHandler extends Handler {
 			this.reviver = reviver
 		}
 
-		String stringify(Object object) {
+		@CompileStatic String stringify(Object object) {
 			new JsonBuilder(object).toString()
 		}
 		
-		Object parse(String serializedObject) {
+		@CompileStatic Object parse(String serializedObject) {
 			new GravyJsonSlurper().parseText(serializedObject, reviver)
 		}
 

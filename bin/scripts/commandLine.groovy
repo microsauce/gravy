@@ -24,31 +24,36 @@ def commandLine = new CommandLine(args, subCommands)
 commandLine.defaultCommand = 'run'
 def command = commandLine.command
 if (commandLine.hasOption('help')) {
-	def help = '''gravy [clean|resolve|compile|test|run|war] [env dev|prod|other] [conf propertyName=propertyValue]
+	def help = '''
+gravy [clean|resolve|compile|test|assemble|run|war] [env dev|prod|other] [conf propertyName=propertyValue]
 
  Lifecycle Goals:
 =++++++++++++++++=
 clean         - delete all build products
 resolve       - resolve dependencies (libraries and modules)
 compile       - compile all Java and Groovy sources (output to target/classes) - depends on clean
-test          - execute all test scripts defined in src/test/groovy - depends on compile
+test          - execute test scripts - defined in src/test/(groovy|javascript) - depends on compile
 assemble      - assemble the application - depends on test / compile
 run           - run your Gravy application in dev mode (this is the default goal) - depends on assemble
-war           - bundle your application as a web archive [appName].war in the target folder - depends on test
+war           - package your application as a web archive [appName].war in the target folder - depends on assemble
 
  Tools:
 =++++++=
-create        - create a new application
-list-mods	  - list available core modules
-install-mod   - install a core module in this application
-mod-ify	      - package this appliction as module jar
+*create-gv [app-name]    - create a new Groovy application
+*create-js [app-name]    - create a new JavaScript application
+*create-cs [app-name]    - create a new CoffeeScript application
+*sample [app-name]       - create a sample application
+
+list-mods               - list available core modules
+install-mod [mod-name]  - install a core module in this application
+mod-ify	                - package this application as module jar
+jar-mod [mod-name]      - package the named module as a jar
 
  Flags:
 =++++++=
 env           - specify the execution environment ('dev' by default)
 conf          - configure an application property on the command line, overriding config.groovy
 skip-tests    - for the impatient
-
 
 '''
 	println help
@@ -136,7 +141,7 @@ if (commandLine.hasOption('assemble')) {
 if (commandLine.hasOption('test')) {
 	def configObject = getConfigObject()
 
-	def lifecycle = new Lifecycle(getConfigObject()) //new Lifecycle(getConfig())
+	def lifecycle = new Lifecycle(getConfigObject()) 
 	lifecycle.test()
 	System.exit(0)
 }

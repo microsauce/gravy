@@ -118,7 +118,7 @@ function parseJson(jsonText) {
 	return JSON.parse(jsonText, reviver)
 }
 
-var addEnterpriseService = function(uriPattern, method, rawCallBack, dispatch) {
+var addEnterpriseService = function(uriPattern, method, callBack, dispatch) {
 	var dispatchList = new ArrayList()
 	if ( dispatch == null || dispatch.length == 0 ) {
 		dispatchList.add(REQUEST)
@@ -129,7 +129,12 @@ var addEnterpriseService = function(uriPattern, method, rawCallBack, dispatch) {
 		}
 	}
 	
-	return gravyModule.addEnterpriseService(uriPattern, method, new JSHandler(rawCallBack), dispatchList)
+	return gravyModule.addEnterpriseService(uriPattern, method, callBack, dispatchList)
+}
+
+var executeHandler = function(callBack, req, res, paramMap, paramList, objectBinding) {
+	var jsHandler = new JSHandler(callBack)
+	jsHandler.invokeHandler(req, res, paramMap, paramList, objectBinding)
 }
 
 var JSHandler = function(handler) {
@@ -279,7 +284,7 @@ var route = function(uriPattern, callBack, dispatch) {
  * 		println "Another minute bites the dust"
  */
 var schedule = function(cronString, callBack) {
-	gravyModule.addCronService(cronString, new JSHandler(callBack))
+	gravyModule.addCronService(cronString, callBack)
 }
 
 

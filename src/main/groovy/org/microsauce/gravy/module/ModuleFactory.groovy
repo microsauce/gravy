@@ -12,7 +12,7 @@ import org.microsauce.gravy.module.javascript.JSModuleFactory
 
 abstract class ModuleFactory {
 
-	Logger log = Logger.getLogger(ModuleFactory.class) // the @Log4j annotation causes compile errors in this class
+	Logger log = Logger.getLogger(ModuleFactory.class) 
 	
 	static Map FACTORY_TYPES = [
 		'groovy' : GroovyModuleFactory.class,

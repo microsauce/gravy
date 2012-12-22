@@ -21,13 +21,8 @@ class RedeploySourceModHandler implements SourceModHandler {
 	@CompileStatic
 	void handle() { 
 		try {
-			app.context.clearAppliationServices()	
+			app.context.clearApplicationServices()
 			app.load()
-//			app.reset()
-//			Script script = new Script([name: 'app', sourceUri:"${config.appRoot}${SLASH}WEB-INF${SLASH}modules${SLASH}app${SLASH}application.groovy"])
-//			new ModuleScriptDecorator(config, app).decorate(script)
-//			ScriptUtils.run(script) 
-//			app.complete()
 		}
 		catch(all) {
 			all.printStackTrace()

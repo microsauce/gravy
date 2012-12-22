@@ -27,16 +27,33 @@ import org.mozilla.javascript.ScriptableObject
 class JSHandler extends Handler {
 
 	ScriptableObject scope 
-	NativeObject jsObject
+	NativeFunction callBack
+	
 	NativeFunction parseJson
+	NativeFunction executeHandler
 	Context ctx
 	
-	JSHandler(NativeObject jsObject, ScriptableObject scope) {
-		this.jsObject = jsObject
+	JSHandler(NativeFunction callBack, ScriptableObject scope) {
+		this.callBack = callBack
 		this.scope = scope
 		this.parseJson =  scope.get('parseJson', scope)
+		this.executeHandler = scope.get('executeHandler', scope)
 	}
 	
+	@Override
+	@CompileStatic public Object doExecute(Object ... params) {
+		ctx = org.mozilla.javascript.Context.enter()
+		def allParams = []
+		allParams << callBack
+		allParams.addAll(params)
+		try {
+			executeHandler.call(ctx, scope, scope, allParams as Object[])
+		}
+		finally {
+			ctx.exit()
+		}
+	}
+
 	@Override
 	@CompileStatic public Object doExecute(HttpServletRequest req, HttpServletResponse res,
 			FilterChain chain, HandlerBinding handlerBinding) {
@@ -47,22 +64,15 @@ class JSHandler extends Handler {
 			if ( handlerBinding.json ) { 
 				objectBinding = [:] 
 				objectBinding.json = parseJson.call(ctx, scope, scope, [handlerBinding.json] as Object[])
-
 			}
 			GravyHttpSession jsSess = patchSession(req, module) 
 			GravyHttpServletRequest jsReq = patchRequest(req, res, jsSess, chain, module) 
 			GravyHttpServletResponse jsRes = patchResponse(req, res, module)
-			doExecute([jsReq, jsRes, handlerBinding.paramMap, handlerBinding.paramList, objectBinding] as Object[])
+			executeHandler.call(ctx, scope, scope, [callBack, jsReq, jsRes, handlerBinding.paramMap, handlerBinding.paramList, objectBinding] as Object[])
 		}
 		finally {
 			ctx.exit()
 		}
-	}
-			
-	@CompileStatic public Object doExecute(Object ... params) {
-		jsObject.callMethod(
-			jsObject, 'invokeHandler', params
-		)
 	}
 	
 	@CompileStatic GravyHttpServletRequest patchRequest(HttpServletRequest req, HttpServletResponse res, GravyHttpSession sess, FilterChain chain, Module module) {
