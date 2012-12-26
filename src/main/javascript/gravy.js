@@ -29,11 +29,11 @@ importPackage(java.io)
  * http methods
  */
 
-var GET = 'get'
-var POST = 'post'
-var PUT = 'put'
+var GET  	= 'get'
+var POST 	= 'post'
+var PUT 	= 'put'
 var OPTIONS = 'post'
-var DELETE = 'delete'
+var DELETE 	= 'delete'
 
 /********************************************************
  * documented global variables
@@ -51,48 +51,6 @@ var INCLUDE = DispatcherType.INCLUDE
 /********************************************************
  * documented utility/convenience functions
  *******************************************************/
-
-/*
- * script loader - loads JavaScripts and CoffeeScripts
- */
-var load = function(scriptUri) {
-	var script = gravyModule.load(scriptUri)
-	eval(script)
-}
-
-/*
- * retrieve a configuration value 
- */
-var conf = function(key) {
-	return config.getProperty(key)
-}
-
-var readFile = function(filePath) {
-	util.readFileAsString(filePath)
-}
-
-/*
- * print a line to the console
- */
-var println = function(str) {
-	return out.println(str)
-}
-
-/*
- * print a string to the console
- */
-var print = function(str) {
-	return out.print(str)
-}
-
-/*******************************************************
- * undocumented utility functions/classes
- ******************************************************/
-
-String.prototype.endsWith = function(suffix) {
-    return this.indexOf(suffix, this.length - suffix.length) !== -1
-};
-
 
 /*
  * JSON -> obj
@@ -286,5 +244,3 @@ var route = function(uriPattern, callBack, dispatch) {
 var schedule = function(cronString, callBack) {
 	gravyModule.addCronService(cronString, callBack)
 }
-
-

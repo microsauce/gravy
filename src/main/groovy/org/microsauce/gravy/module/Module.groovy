@@ -63,7 +63,7 @@ abstract class Module {
 		log.info "addEnterpriseService: uri: $uriPattern - method: $method - dispatch: $dispatch"
 		EnterpriseService service = context.findServiceByUriString(uriPattern)
 		if ( service ) {
-			Handler thisHandler = HandlerFactory.getHandlerFactory(this.class).makeHandler(rawHandler, scriptContext)//service.handlerFactory.makeHandler(rawHandler, scriptContext)
+			Handler thisHandler = HandlerFactory.getHandlerFactory(this.class).makeHandler(rawHandler, scriptContext)
 			thisHandler.module = this
 			service.handlers[method] = thisHandler
 		} else {

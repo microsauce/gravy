@@ -16,6 +16,7 @@ import org.microsauce.gravy.lang.groovy.script.ScriptDecorator
 import org.microsauce.gravy.lang.groovy.script.ScriptUtils
 import org.microsauce.gravy.module.Module
 
+
 class GroovyModule extends Module {   
 
 	@CompileStatic protected Object doLoad(Map binding) {

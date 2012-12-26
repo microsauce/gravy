@@ -1,15 +1,13 @@
 package org.microsauce.gravy.dev.lifecycle
 
-import groovy.util.GroovyTestSuite
-import junit.framework.Test
-import junit.textui.TestRunner
-import org.codehaus.groovy.runtime.ScriptTestAdapter
-import groovy.io.FileType
 import java.nio.file.*
 import java.nio.file.attribute.*
-import org.microsauce.gravy.dev.DevUtils
-import org.microsauce.gravy.dev.lifecycle.DependencyResolver
+
 import org.codehaus.groovy.tools.RootLoader
+import org.microsauce.gravy.dev.DevUtils
+import org.microsauce.gravy.lang.javascript.JSRunner
+import org.microsauce.gravy.lang.javascript.TestJSRunner
+import org.microsauce.gravy.util.Util
 
 class Lifecycle {
 
@@ -198,13 +196,30 @@ class Lifecycle {
 		compile()
 
 		println '========================================================================='
-		println '= execute test scripts                                                  ='
+		println '= execute groovy test scripts                                           ='
 		println '========================================================================='
 
 		def classLoader = testClassLoader()
 		def testerClass = classLoader.loadClass('org.microsauce.gravy.dev.lifecycle.Tester')
 		def tester = testerClass.newInstance()
 		tester.runTests(projectBasedir)
+		
+		println '========================================================================='
+		println '= execute js test scripts                                               ='
+		println '========================================================================='
+		
+		def jsScriptRoot = new File(projectBasedir, '/src/test/javascript')
+		JSRunner testRunner = new TestJSRunner([jsScriptRoot, new File(projectBasedir, '/scripts')], null)
+		jsScriptRoot.eachFileRecurse { thisFile ->
+			if ( thisFile.isFile() && !thisFile.name.endsWith('.coffee.js') ) {
+				def offset = thisFile.absolutePath - jsScriptRoot.absolutePath
+				testRunner.run(offset, [
+					out : System.out,
+					util : new Util(testRunner),
+					exports : testRunner.scriptContext
+				])
+			}
+		}
 	}
 
 	private ClassLoader testClassLoader() {
@@ -360,8 +375,6 @@ class Lifecycle {
 		def webInfMod = deployFolder+'/WEB-INF/modules/'+modName
 		folder webInfMod
 
-//		def appScriptPath = modPath+'/application.groovy'
-//		if ( exists(appScriptPath) ) link webInfMod+'/application.groovy', appScriptPath
 		new File(modPath).eachFile { file ->
 			if ( file.name.startsWith('application.') ) {
 				link webInfMod+'/'+file.name, file.absolutePath
