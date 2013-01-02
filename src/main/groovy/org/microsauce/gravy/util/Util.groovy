@@ -23,6 +23,10 @@ class Util {
 		runner.run(scriptUri, null)
 	}
 	
+	@CompileStatic public Object require(String scriptUri) {
+		runner.require(scriptUri)
+	}
+	
 	@CompileStatic String readFileAsString(String path) {
 		new File(path).text
 	}

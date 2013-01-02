@@ -8,12 +8,10 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import javax.servlet.http.HttpSession
 
+import org.microsauce.gravy.lang.object.CommonObject
+import org.microsauce.gravy.lang.object.GravyType
 import org.microsauce.gravy.lang.patch.BaseEnterpriseProxy
 import org.microsauce.gravy.module.Module
-import org.mozilla.javascript.Context
-import org.mozilla.javascript.NativeFunction
-import org.mozilla.javascript.NativeJSON
-import org.mozilla.javascript.ScriptableObject
 
 abstract class GravyRequestProxy<T extends HttpServletRequest> extends BaseEnterpriseProxy {
 	
@@ -31,18 +29,13 @@ abstract class GravyRequestProxy<T extends HttpServletRequest> extends BaseEnter
 	}
 
 	@CompileStatic Object get(String key) {
-		Object value = ((T)target).getAttribute(key)
-		if ( module.serializeAttributes && value != null) {
-			value = parse((String)value) 
-		}
-		value
+		CommonObject obj = (CommonObject)((T)target).getAttribute(key)
+		obj.value(context())
 	}
 	
 	@CompileStatic void put(String key, Object value) {
-		Object attrValue = value
-		if ( module.serializeAttributes )
-			attrValue = stringify(value) 
-		((T)target).setAttribute key, attrValue
+		CommonObject obj = new CommonObject(value, context())
+		((T)target).setAttribute key, obj
 	}
 			
 	@CompileStatic void next() {
@@ -56,9 +49,7 @@ abstract class GravyRequestProxy<T extends HttpServletRequest> extends BaseEnter
 	 	session
 	} 
 
-	protected abstract String stringify(Object object)
+	protected abstract GravyType context();
 	
-	protected abstract Object parse(String serializedObject)
-
 }
 

@@ -6,7 +6,7 @@ import java.nio.file.attribute.*
 import org.codehaus.groovy.tools.RootLoader
 import org.microsauce.gravy.dev.DevUtils
 import org.microsauce.gravy.lang.javascript.JSRunner
-import org.microsauce.gravy.lang.javascript.TestJSRunner
+import org.microsauce.gravy.lang.javascript.CoreJSRunner
 import org.microsauce.gravy.util.Util
 
 class Lifecycle {
@@ -209,14 +209,14 @@ class Lifecycle {
 		println '========================================================================='
 		
 		def jsScriptRoot = new File(projectBasedir, '/src/test/javascript')
-		JSRunner testRunner = new TestJSRunner([jsScriptRoot, new File(projectBasedir, '/scripts')], null)
+		JSRunner testRunner = new CoreJSRunner([jsScriptRoot, new File(projectBasedir, '/scripts')])
 		jsScriptRoot.eachFileRecurse { thisFile ->
 			if ( thisFile.isFile() && !thisFile.name.endsWith('.coffee.js') ) {
 				def offset = thisFile.absolutePath - jsScriptRoot.absolutePath
 				testRunner.run(offset, [
 					out : System.out,
 					util : new Util(testRunner),
-					exports : testRunner.scriptContext
+					exports : testRunner.global
 				])
 			}
 		}

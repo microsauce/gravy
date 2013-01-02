@@ -21,18 +21,18 @@ class JSModule extends Module {
 	protected Object doLoad(Map<String, Object> binding) {
 		
 		Object returnValue = null
-		JSRunner jsRunner = new GravyJSRunner([this.folder, new File(folder, '/scripts')] as List<File>, null)
+		JSRunner jsRunner = new GravyJSRunner([this.folder, new File(folder, '/scripts')] as List<File>)
 		util = new Util(jsRunner)
 		
-		if (!scriptContext) scriptContext = jsRunner.scriptContext 
+		if (!scriptContext) scriptContext = jsRunner.global 
 		Map<String, Object> jsBinding = [:]
 		jsBinding.gravyModule = this
 		jsBinding.out = System.out
 		jsBinding.log = log
 		jsBinding.util = util
 		jsBinding.config = config.toProperties()
-		jsBinding.exports = scriptContext
 
+		// TODO modify this -- moving to a module 'exports' concept
 		// add module exports to the script scope (app only)
 		if ( binding ) {
 			binding.each { String key, Object value ->

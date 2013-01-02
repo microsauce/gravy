@@ -4,11 +4,10 @@ import groovy.transform.CompileStatic
 
 import javax.servlet.http.HttpSession
 
+import org.microsauce.gravy.lang.object.CommonObject
+import org.microsauce.gravy.lang.object.GravyType
 import org.microsauce.gravy.lang.patch.BaseEnterpriseProxy
 import org.microsauce.gravy.module.Module
-import org.mozilla.javascript.Context
-import org.mozilla.javascript.NativeJSON
-import org.mozilla.javascript.ScriptableObject
 
 abstract class GravySessionProxy<T extends HttpSession> extends BaseEnterpriseProxy {
 	
@@ -19,23 +18,17 @@ abstract class GravySessionProxy<T extends HttpSession> extends BaseEnterprisePr
 		this.module = module
 	}
 	
-	Object get(String key) {
-		Object value = ((T)target).getAttribute(key)
-		if ( module.serializeAttributes )
-			value = parse(value) 
-		value
+	@CompileStatic Object get(String key) {
+		CommonObject obj = (CommonObject)((T)target).getAttribute(key)
+		obj.value(context())
 	}
 	
 	@CompileStatic void put(String key, Object value) {
-		Object attrValue = value
-		if ( module.serializeAttributes )
-			attrValue = stringify(value) 
-		((T)target).setAttribute key, attrValue
+		CommonObject obj = new CommonObject(value, context())
+		((T)target).setAttribute key, obj
 	}
 	
-	protected abstract String stringify(Object object)
-	
-	protected abstract Object parse(String serializedObject)
+	protected abstract GravyType context();
 
 } 
 

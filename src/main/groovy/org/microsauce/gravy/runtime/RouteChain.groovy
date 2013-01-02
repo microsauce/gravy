@@ -40,9 +40,9 @@ class RouteChain implements FilterChain {
 			try {
 				handler.execute((HttpServletRequest)req, (HttpServletResponse)res, serverChain, route.uriPattern, route.params)
 			}
-catch(Throwable t) {
-	t.printStackTrace()				
-}
+			catch(Throwable t) {
+				t.printStackTrace()				
+			}
 			finally {
 				if ( !res.committed )
 					res.writer.flush()

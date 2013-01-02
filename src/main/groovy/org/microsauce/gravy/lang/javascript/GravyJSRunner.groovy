@@ -6,8 +6,8 @@ import org.mozilla.javascript.ScriptableObject
 
 class GravyJSRunner extends JSRunner {
 	
-	public GravyJSRunner(List<File> roots, ScriptableObject scope) {
-		super(roots, scope)
+	public GravyJSRunner(List<File> roots) {
+		super(roots)
 	}
 
 	@CompileStatic String[] getCoreScripts() {

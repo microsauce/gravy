@@ -1,9 +1,7 @@
 package org.microsauce.gravy.context.groovy
 
-import groovy.json.JsonBuilder
 import groovy.transform.CompileStatic
 
-import java.util.regex.Pattern
 import java.lang.reflect.Proxy
 
 import javax.servlet.FilterChain
@@ -13,7 +11,8 @@ import javax.servlet.http.HttpSession
 
 import org.microsauce.gravy.context.Handler
 import org.microsauce.gravy.context.HandlerBinding
-import org.microsauce.gravy.json.GravyJsonSlurper
+import org.microsauce.gravy.lang.object.CommonObject
+import org.microsauce.gravy.lang.object.GravyType
 import org.microsauce.gravy.module.Module
 import org.microsauce.gravy.runtime.patch.GravyHttpServletRequest
 import org.microsauce.gravy.runtime.patch.GravyHttpServletResponse
@@ -25,17 +24,6 @@ import org.microsauce.gravy.runtime.patch.GravySessionProxy
 class GroovyHandler extends Handler {
 
 	private Closure closure
-	private Closure jsonReviver = { k, val ->
-		def retValue = val
-		if ( val instanceof String && val.length() >= 19) {
-			def substr = val.substring(0,19)
-
-			if ( substr ==~ datePattern ) {
-				retValue = Date.parse("yyyy-MM-dd'T'HH:mm:ss", substr)
-			}
-		}
-		retValue
-	}
 
 	GroovyHandler(Closure closure) {
 		this.closure = closure
@@ -46,21 +34,22 @@ class GroovyHandler extends Handler {
 		FilterChain chain, HandlerBinding handlerBinding) {
 		
 		Object jsonObject = null
-		if ( handlerBinding.json ) jsonObject = new GravyJsonSlurper().parseText(handlerBinding.json, jsonReviver)
+		if ( handlerBinding.json ) 
+			jsonObject = new CommonObject(handlerBinding.json, GravyType.GROOVY).toNative()
 		
 		// patch the JEE runtime
 		GravyHttpSession gSess = (GravyHttpSession)Proxy.newProxyInstance(
 			this.class.getClassLoader(),
 			[GravyHttpSession.class] as Class[],
-			new GroovySessionProxy(req.session, module, jsonReviver)) 
+			new GroovySessionProxy(req.session, module)) 
 		GravyHttpServletRequest gReq =  (GravyHttpServletRequest) Proxy.newProxyInstance(
 			this.class.getClassLoader(),
 			[GravyHttpServletRequest.class] as Class[],
-			new GroovyRequestProxy(req, res, gSess, chain, module, jsonReviver))
+			new GroovyRequestProxy(req, res, gSess, chain, module))
 		GravyHttpServletResponse gRes = (GravyHttpServletResponse)Proxy.newProxyInstance(
 			this.class.getClassLoader(),
 			[GravyHttpServletResponse.class] as Class[],
-			new GroovyResponseProxy(res, req, module.renderUri, module, jsonReviver))
+			new GroovyResponseProxy(res, req, module.renderUri, module))
 		
 		// add the jee runtime to the closure binding
 		Map binding = [:]
@@ -96,64 +85,35 @@ class GroovyHandler extends Handler {
 		closure.call(params)		
 	}
 	
-	private Pattern datePattern = ~/[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}/
-	
 	class GroovyResponseProxy<T extends HttpServletResponse> extends GravyResponseProxy {
 		
-		Closure reviver
-		
 		GroovyResponseProxy(HttpServletResponse res,
-				HttpServletRequest request, String renderUri, Module module, Closure reviver) {
+				HttpServletRequest request, String renderUri, Module module) {
 			super(res, request, renderUri, module)
-			this.reviver = reviver
 		}
 
-		@CompileStatic String stringify(Object object) {
-			new JsonBuilder(object).toString()
-		}
-		
-		@CompileStatic Object parse(String serializedObject) {
-			new GravyJsonSlurper().parseText(serializedObject, reviver)
-		}
+		@CompileStatic GravyType context() { GravyType.GROOVY }
 			
 	}
 	
 	class GroovySessionProxy<T extends HttpSession> extends GravySessionProxy {
 		
-		Closure reviver
-		
-		public GroovySessionProxy(Object target, Module module, Closure reviver) {
+		public GroovySessionProxy(Object target, Module module) {
 			super(target, module)
-			this.reviver = reviver
-		}
-
-		@CompileStatic String stringify(Object object) {
-			new JsonBuilder(object).toString()
 		}
 		
-		@CompileStatic Object parse(String serializedObject) {
-			new GravyJsonSlurper().parseText(serializedObject, reviver)
-		}
+		@CompileStatic GravyType context() { GravyType.GROOVY }
 		
 	}
 	
 	class GroovyRequestProxy<T extends HttpServletRequest> extends GravyRequestProxy {
 		
-		Closure reviver
-		
 		public GroovyRequestProxy(Object target, HttpServletResponse res,
-				HttpSession session, FilterChain chain, Module module, Closure reviver) {
+				HttpSession session, FilterChain chain, Module module) {
 			super(target, res, session, chain, module)
-			this.reviver = reviver
 		}
 
-		@CompileStatic String stringify(Object object) {
-			new JsonBuilder(object).toString()
-		}
-		
-		@CompileStatic Object parse(String serializedObject) {
-			new GravyJsonSlurper().parseText(serializedObject, reviver)
-		}
+		@CompileStatic GravyType context() { GravyType.GROOVY }
 
 	}
 

@@ -40,6 +40,10 @@ abstract class Handler {
 		}
 	}
 	
+	@CompileStatic Object execute(Object ... parms) {
+		doExecute(parms)
+	}
+	
 	@CompileStatic Object execute() {
 		doExecute([] as Object[])
 	}

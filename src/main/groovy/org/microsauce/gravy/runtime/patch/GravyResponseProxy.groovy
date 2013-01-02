@@ -6,11 +6,10 @@ import javax.servlet.RequestDispatcher
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
+import org.microsauce.gravy.lang.object.CommonObject
+import org.microsauce.gravy.lang.object.GravyType;
 import org.microsauce.gravy.lang.patch.BaseEnterpriseProxy
 import org.microsauce.gravy.module.Module
-import org.mozilla.javascript.Context
-import org.mozilla.javascript.NativeJSON
-import org.mozilla.javascript.ScriptableObject
 
 abstract class GravyResponseProxy<T extends HttpServletResponse> extends BaseEnterpriseProxy {
 	
@@ -28,10 +27,7 @@ abstract class GravyResponseProxy<T extends HttpServletResponse> extends BaseEnt
 	@CompileStatic void render(String _viewUri, Object model) {
 		request.setAttribute('_view', _viewUri)
 		Object attrModel = model
-		if ( module.serializeAttributes ) {
-			attrModel = stringify(model) 
-		}
-		request.setAttribute('_model', attrModel) 
+		request.setAttribute('_model', new CommonObject(model, context())) 
 		request.setAttribute('_module', module)
 		RequestDispatcher dispatcher = request.getRequestDispatcher(renderUri)
 		((T) target).contentType = 'text/html'
@@ -45,13 +41,11 @@ abstract class GravyResponseProxy<T extends HttpServletResponse> extends BaseEnt
 	}
 	@CompileStatic void renderJson(Object model) {
 		((T) target).contentType = 'application/json'
-		((T) target).writer << stringify(model) 
+		((T) target).writer << new CommonObject(model, context()).toString() 
 		((T) target).writer.flush()
 	}
 	
-	protected abstract String stringify(Object object) 
-	
-	protected abstract Object parse(String serializedObject)
+	protected abstract GravyType context();
 	
 }
 

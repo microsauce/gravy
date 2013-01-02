@@ -11,6 +11,8 @@ import javax.servlet.http.HttpSession
 
 import org.microsauce.gravy.context.Handler
 import org.microsauce.gravy.context.HandlerBinding
+import org.microsauce.gravy.lang.object.CommonObject
+import org.microsauce.gravy.lang.object.GravyType
 import org.microsauce.gravy.module.Module
 import org.microsauce.gravy.runtime.patch.GravyHttpServletRequest
 import org.microsauce.gravy.runtime.patch.GravyHttpServletResponse
@@ -20,8 +22,6 @@ import org.microsauce.gravy.runtime.patch.GravyResponseProxy
 import org.microsauce.gravy.runtime.patch.GravySessionProxy
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeFunction
-import org.mozilla.javascript.NativeJSON
-import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.ScriptableObject
 
 class JSHandler extends Handler {
@@ -63,7 +63,7 @@ class JSHandler extends Handler {
 			Map<String, Object> objectBinding = null
 			if ( handlerBinding.json ) { 
 				objectBinding = [:] 
-				objectBinding.json = parseJson.call(ctx, scope, scope, [handlerBinding.json] as Object[])
+				objectBinding.json = new CommonObject(handlerBinding.json, GravyType.JAVASCRIPT).toNative()//parseJson.call(ctx, scope, scope, [handlerBinding.json] as Object[])
 			}
 			GravyHttpSession jsSess = patchSession(req, module) 
 			GravyHttpServletRequest jsReq = patchRequest(req, res, jsSess, chain, module) 
@@ -79,96 +79,58 @@ class JSHandler extends Handler {
 		GravyHttpServletRequest jsReq = (GravyHttpServletRequest) Proxy.newProxyInstance(
 			this.class.getClassLoader(),
 			[GravyHttpServletRequest.class] as Class[],
-			new JSRequestProxy(req, res, sess, chain, module, ctx, scope, parseJson))
+			new JSRequestProxy(req, res, sess, chain, module))
 		jsReq
 	}
 	@CompileStatic GravyHttpServletResponse patchResponse(HttpServletRequest req, HttpServletResponse res, Module module) {
 		GravyHttpServletResponse jsRes = (GravyHttpServletResponse)Proxy.newProxyInstance(
 			this.class.getClassLoader(),
 			[GravyHttpServletResponse.class] as Class[],
-			new JSResponseProxy(res, req, module.renderUri, module, ctx, scope, parseJson))
+			new JSResponseProxy(res, req, module.renderUri, module))
 		return jsRes
 	}
 	@CompileStatic GravyHttpSession patchSession(HttpServletRequest req, Module module) {
 		GravyHttpSession jsSess = (GravyHttpSession)Proxy.newProxyInstance(
 			this.class.getClassLoader(),
 			[GravyHttpSession.class] as Class[],
-			new JSSessionProxy(req.session, module, ctx, scope, parseJson))
+			new JSSessionProxy(req.session, module))
 		return jsSess
 	}
 
 	class JSResponseProxy<T extends HttpServletResponse> extends GravyResponseProxy {
 
-		Context ctx
-		ScriptableObject scope
-		NativeFunction parseJson
-		
 		JSResponseProxy(HttpServletResponse res,
-				HttpServletRequest request, String renderUri, Module module,
-				Context ctx, ScriptableObject scope, NativeFunction parseJson) {
+				HttpServletRequest request, String renderUri, Module module) {
 			super(res, request, renderUri, module)
-			this.ctx = ctx
-			this.scope = scope
-			this.parseJson = parseJson
 		}
-
-		@CompileStatic String stringify(Object object) {
-			NativeJSON.stringify(ctx, scope, object, null, null)
+				
+		@CompileStatic GravyType context() {
+			GravyType.JAVASCRIPT
 		}
-		
-		@CompileStatic Object parse(String serializedObject) {
-			parseJson.call(ctx, scope, scope, [serializedObject] as Object[])
-		}
-
 	}
 	
 	class JSSessionProxy<T extends HttpSession> extends GravySessionProxy {
 		
-		Context ctx
-		ScriptableObject scope
-		NativeFunction parseJson
-		
-		public JSSessionProxy(Object target, Module module, 
-			Context ctx, ScriptableObject scope, NativeFunction parseJson) {
+		public JSSessionProxy(Object target, Module module) {
 			super(target, module);
-			this.ctx = ctx
-			this.scope = scope
-			this.parseJson = parseJson
 		}
 
-		@CompileStatic String stringify(Object object) {
-			NativeJSON.stringify(ctx, scope, object, null, null)
+		@CompileStatic GravyType context() {
+			GravyType.JAVASCRIPT
 		}
-		
-		@CompileStatic Object parse(String serializedObject) {
-			parseJson.call(ctx, scope, scope, [serializedObject] as Object[])
-		}
-		
+
 	} 
 	
 	class JSRequestProxy<T extends HttpServletRequest> extends GravyRequestProxy {
 		
-		Context ctx
-		ScriptableObject scope
-		NativeFunction parseJson
-		
 		public JSRequestProxy(Object target, HttpServletResponse res,
-				HttpSession session, FilterChain chain, Module module, 
-				Context ctx, ScriptableObject scope, NativeFunction parseJson) {
+				HttpSession session, FilterChain chain, Module module) {
 			super(target, res, session, chain, module)
-			this.ctx = ctx
-			this.scope = scope
-			this.parseJson = parseJson
 		}
-
-		@CompileStatic String stringify(Object object) {
-			NativeJSON.stringify(ctx, scope, object, null, null)
+				
+		@CompileStatic GravyType context() {
+			GravyType.JAVASCRIPT
 		}
-		
-		@CompileStatic Object parse(String serializedObject) {
-			parseJson.call(ctx, scope, scope, [serializedObject] as Object[])
-		}
-
 	}
 	
 }

@@ -4,10 +4,10 @@ import groovy.transform.CompileStatic
 
 import org.mozilla.javascript.ScriptableObject
 
-class TestJSRunner extends JSRunner {
+class CoreJSRunner extends JSRunner {
 	
-	public TestJSRunner(List<File> roots, ScriptableObject scope) {
-		super(roots, scope)
+	public CoreJSRunner(List<File> roots) {
+		super(roots)
 	}
 
 	@CompileStatic String[] getCoreScripts() {

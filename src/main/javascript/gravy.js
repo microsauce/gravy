@@ -48,34 +48,6 @@ var FORWARD = DispatcherType.FORWARD
 var ERROR   = DispatcherType.ERROR
 var INCLUDE = DispatcherType.INCLUDE
 
-/********************************************************
- * documented utility/convenience functions
- *******************************************************/
-
-/*
- * JSON -> obj
- */
-var datePatternJS = new RegExp('[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z')
-var datePatternJV = new RegExp('[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\+[0-9]{4}')
-function reviver(key, value) {
-    if (typeof(value)=='string') {
-        if ( datePatternJS.test(value) ) {
-            return new Date(Date.parse(value))
-        }
-        else if ( datePatternJV.test(value) ) {
-            var jsValue = value.replace(/\\+[0-9]{4}/g, '.000Z')
-            return new Date(Date.parse(jsValue))
-        }
-    }
-    
-    return value
-}
-
-
-function parseJson(jsonText) {
-	return JSON.parse(jsonText, reviver)
-}
-
 var addEnterpriseService = function(uriPattern, method, callBack, dispatch) {
 	var dispatchList = new ArrayList()
 	if ( dispatch == null || dispatch.length == 0 ) {

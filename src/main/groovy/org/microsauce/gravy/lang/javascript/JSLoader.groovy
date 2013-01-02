@@ -14,7 +14,8 @@ class JSLoader {
 		this.roots = roots
 	}
 	
-	@CompileStatic public String load(String scriptUri) {
+	// TODO static compilation breaks line numbering below 
+	public String load(String scriptUri) {
 		for ( File thisRoot in roots ) {
 			log.info "loading script $scriptUri from script root ${thisRoot.name}"
 			File scriptFile = new File(thisRoot, scriptUri)
@@ -35,9 +36,9 @@ class JSLoader {
 						println " compiled coffee script: (${compiledScriptFile.name})"
 						println '========================================================================='
 						println ''
-						int lineNumber = 1
+						int lnNbr = 1
 						script.eachLine { String line ->
-							println "${lineNumber++}: $line"
+							println "${lnNbr++}: $line"
 						}
 						println ''
 			

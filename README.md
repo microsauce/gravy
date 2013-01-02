@@ -2,8 +2,8 @@
 Gravy
 ===
 
-Gravy is a framework for developing dynamic web applications on the Java enterprise (the 
-meat-and-potatoes).  
+Gravy is a framework for rapid development of web applications in Groovy, JavaScript, or CoffeeScript 
+on the Java Enterprise (a.k.a the meat-and-potatoes).  
 
 Hello Groovy:
 
@@ -42,8 +42,8 @@ Hello CoffeeScript:
 
 A Gravy application can be as simple as a single script (application.groovy|js|coffee), but most Gravy 
 applications will also employ modules, views (templates), static content (images, css, js), Java and 
-Groovy sources, and custom configuration. To create an example application which demonstrates each of 
-these additional conponents run the following command:
+Groovy sources, and custom configuration. To create a sample application which demonstrates each of 
+these additional components run the following command:
 
 	$ gravy create [app-name] sample
 
@@ -60,7 +60,7 @@ is as follows:
 	    |   |                                classpath
 	    |   |_ test 
 	    |       |_ groovy                  - groovy test scripts
-	    |       |_ javascript*             - js test scripts
+	    |       |_ javascript              - javascript/coffeescript test scripts
 	    |- view                            - view templates
 	    |- conf                            - configuration (config.groovy)
 	    |- webroot                         - static resources (html, css, js, images, etc)
@@ -68,7 +68,7 @@ is as follows:
 	    |       |_ web.xml                 - the application deployment descriptor, for most
 	    |
 	    |- scripts                         - groovy sub-scripts/JS libraries
-	    |- modules                         - application modules ()
+	    |- modules                         - application modules
 	    |_ lib                             - application jar files
 
 To run your new Gravy app execute the gravy command:

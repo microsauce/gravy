@@ -24,6 +24,7 @@ class Context {
 
 	List<EnterpriseService> enterpriseServices = []
 	List<CronService> cronServices = []
+	Map<String, Handler> exports = [:]
 
 	List<ServletWrapper> servlets = []
 	List<Filter> filters = []
