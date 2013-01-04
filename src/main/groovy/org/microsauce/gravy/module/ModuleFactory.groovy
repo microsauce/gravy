@@ -62,7 +62,8 @@ abstract class ModuleFactory {
 		//
 		// disable a module without un-installing/deleting it
 		//
-		if ( appConfig && ((ConfigObject)appConfig[moduleFolder.name]).disabled == true ) return null
+println "moduleFolder: $moduleFolder -"
+		if ( appConfig && ((ConfigObject)appConfig[moduleFolder.name]).disabled ) return null
 		
 		// create module classloader and instantiate the module object		
 		ClassLoader cl = createModuleClassLoader(moduleFolder)

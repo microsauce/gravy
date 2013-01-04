@@ -34,9 +34,11 @@ class GroovyHandler extends Handler {
 		FilterChain chain, HandlerBinding handlerBinding) {
 		
 		Object jsonObject = null
-		if ( handlerBinding.json ) 
-			jsonObject = new CommonObject(handlerBinding.json, GravyType.GROOVY).toNative()
-		
+		if ( handlerBinding.json ) {
+			CommonObject json = new CommonObject(null, GravyType.GROOVY)
+			json.serializedRepresentation = handlerBinding.json
+			jsonObject = json.toNative()
+		}
 		// patch the JEE runtime
 		GravyHttpSession gSess = (GravyHttpSession)Proxy.newProxyInstance(
 			this.class.getClassLoader(),
@@ -80,8 +82,13 @@ class GroovyHandler extends Handler {
 		closure.call(_paramList.length == 1 ? _paramList[0] : _paramList)
 	}
 
-	@CompileStatic public Object doExecute(Object ... params) {
+	@CompileStatic protected GravyType context() {
+		GravyType.GROOVY
+	}
+		
+	@CompileStatic public Object doExecute(Object params) {
 		Closure closure = (Closure)closure.clone()
+println "params: $params - ${params.class}"		
 		closure.call(params)		
 	}
 	

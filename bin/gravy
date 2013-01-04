@@ -46,4 +46,4 @@ do
   	cp="$cp$separator$f"
 done
 
-$JAVA_HOME/bin/java -cp $cp:$GRAVY_HOME/lib/log4j-1.2.16.jar:$GRAVY_HOME/lib/gravy.jar org.codehaus.groovy.tools.GroovyStarter --classpath $cp --main groovy.ui.GroovyMain $GRAVY_HOME/bin/scripts/commandLine.groovy "$@"
+$JAVA_HOME/bin/java -cp $GRAVY_HOME/lib/gravy.jar:$cp:$GRAVY_HOME/lib/log4j-1.2.16.jar org.codehaus.groovy.tools.GroovyStarter --classpath $cp --main groovy.ui.GroovyMain $GRAVY_HOME/bin/scripts/commandLine.groovy "$@"

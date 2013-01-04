@@ -20,6 +20,8 @@ importPackage(javax.servlet.http)
 importPackage(javax.servlet)
 importPackage(java.util)
 importPackage(java.io)
+importPackage(org.microsauce.gravy.context.javascript)
+importPackage(org.microsauce.gravy.lang.object)
 
 /********************************************************
  * undocumented global variables
@@ -215,4 +217,56 @@ var route = function(uriPattern, callBack, dispatch) {
  */
 var schedule = function(cronString, callBack) {
 	gravyModule.addCronService(cronString, callBack)
+}
+
+/**
+ * undocumented export functions
+ */
+
+var commonObj = function(nativeObj) {
+println("common objectify: "+nativeObj)	
+	if ( nativeObj != null ) { 
+		return new CommonObject(nativeObj, GravyType.JAVASCRIPT)
+	} return null
+}
+
+/*
+ * called by the 'app' module
+ */
+var prepareImports = function(allImports, scope) {
+	var iterator = allImports.entrySet().iterator()
+	while ( iterator.hasNext() ) {
+		var thisModuleExports = iterator.next()
+		var moduleName = thisModuleExports.getKey()
+		var moduleExports = thisModuleExports.getValue()
+		var thisExportIterator = moduleExports.entrySet().iterator()
+		while ( thisExportIterator.hasNext() ) {
+			var keyValue = thisExportIterator.next()
+			var exp = keyValue.getKey()
+			var thisHandler = keyValue.getValue()
+			if ( scope[moduleName] == null ) scope[moduleName] = new Object()
+			scope[moduleName][exp] = function(parm1,parm2,parm3,parm4,parm5,parm6,parm7) {
+				return thisHandler.call(
+					commonObj(parm1),
+					commonObj(parm2),
+					commonObj(parm3),
+					commonObj(parm4),
+					commonObj(parm5),
+					commonObj(parm6),
+					commonObj(parm7)
+				)
+			}
+		}
+	}
+}
+
+var prepareExports = function(exports) { 
+	var preparedExports = new HashMap()
+	for (exp in exports) {
+		if ( typeof(exp) == 'function' ) {
+			var handler = new JSHandler(exports[exp], this) // TODO verify 'this'
+			preparedExports.put(exp, handler)
+		}
+	}
+	return preparedExports
 }

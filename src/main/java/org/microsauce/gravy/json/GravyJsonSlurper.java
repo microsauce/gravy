@@ -48,6 +48,7 @@ public class GravyJsonSlurper {
      * @return a data structure of lists and maps
      */
     public Object parseText(String text, Closure reviver) {
+System.out.println("GravyJsonSlurper: text: " + text);    	
         if (text == null || text.length() == 0) {
             throw new IllegalArgumentException("The JSON input text should neither be null nor empty.");
         }
@@ -62,27 +63,40 @@ public class GravyJsonSlurper {
      * @return a data structure of lists and maps
      */
     public Object parse(Reader reader, Closure reviver) {
+System.out.println("1");    	
         Object content;
+System.out.println("2");    	
 
         JsonLexer lexer = new JsonLexer(reader);
+System.out.println("3");    	
 
         JsonToken token = lexer.nextToken();
+System.out.println("4 - token: " + token);    	
         if (token.getType() == OPEN_CURLY) {
+System.out.println("5");    	
             content = parseObject(lexer, reviver);
         } else if (token.getType() == OPEN_BRACKET) {
+System.out.println("6");    	
             content = parseArray(lexer, reviver);
         } else if (token.getType().ordinal() >= NULL.ordinal()) { // scalar values
+System.out.println("7");    	
         	// TODO test this: will it break anything
         	Object value = token.getValue();
+System.out.println("7.1");    	
         	if ( reviver != null ) {
+System.out.println("7.2");    	
         		List params = new ArrayList();
+System.out.println("7.3");    	
         		params.add(null);
+System.out.println("7.4");    	
         		params.add(token.getValue());
             	value = reviver.call(params);
         	}
+System.out.println("7.5");    	
             content = value;
 
         } else {
+System.out.println("8");    	
             throw new JsonException(
                     "A JSON payload should start with " + OPEN_CURLY.getLabel() +
                     " or " + OPEN_BRACKET.getLabel() + ".\n" +

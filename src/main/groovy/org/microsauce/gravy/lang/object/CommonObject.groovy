@@ -25,19 +25,26 @@ class CommonObject {
 		this.stringer = Stringer.getInstance();  
 	}
 	
-	CommonObject(String serializedRepresentation, GravyType nativeType) {
-		this.nativeType = nativeType;
-		nativeRepresentations = new HashMap<String, Object>();
-		this.stringer = Stringer.getInstance(); 
-		this.serializedRepresentation = serializedRepresentation
-	}
+//	CommonObject(String serializedRepresentation, GravyType nativeType) {
+//		this.nativeType = nativeType;
+//		nativeRepresentations = new HashMap<String, Object>();
+//		this.stringer = Stringer.getInstance(); 
+//		this.serializedRepresentation = serializedRepresentation
+//	}
 	
 	@CompileStatic Object value(GravyType context) {
+println "retrieve CommonObject value for context ${context.type} - native type ${nativeType.type}"		
 		Object nativeObj = nativeRepresentations.get(context.type);
-		if ( nativeObj ) return nativeObj;
-		else if ( serializedRepresentation )
+		if ( nativeObj ) {
+println "value 2"			
+			return nativeObj;
+		}
+		else if ( serializedRepresentation ) {
+println "value 3: $serializedRepresentation"			
 			return stringer.parse(serializedRepresentation, context);
+		}
 		else {
+println "value 4"			
 			nativeObj = stringer.parse(this.toString(), context);
 			nativeRepresentations.put(context.type, nativeObj);
 			return nativeObj;
@@ -50,6 +57,7 @@ class CommonObject {
 				nativeRepresentations.get(nativeType.type), nativeType)
 		}
 		
+println "serializedRepresentation: $serializedRepresentation"			
 		serializedRepresentation
 	}
 	

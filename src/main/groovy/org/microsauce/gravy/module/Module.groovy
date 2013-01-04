@@ -32,8 +32,9 @@ abstract class Module {
 	String errorUri
 	boolean serializeAttributes 
 
-	Object returnValue
-	Map binding // used by the main app script only (mod1 ret val, mod2, etc)
+	Object returnValue // TODO refactor this as 'exports'
+	Map binding // TODO is this property used - delete 
+		// used by the main app script only (mod1 ret val, mod2, etc)
 	
 	// pass these into the scripting environment
 	Context context //

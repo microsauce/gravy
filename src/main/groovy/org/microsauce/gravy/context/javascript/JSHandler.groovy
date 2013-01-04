@@ -22,6 +22,7 @@ import org.microsauce.gravy.runtime.patch.GravyResponseProxy
 import org.microsauce.gravy.runtime.patch.GravySessionProxy
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeFunction
+import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.ScriptableObject
 
 class JSHandler extends Handler {
@@ -41,7 +42,7 @@ class JSHandler extends Handler {
 	}
 	
 	@Override
-	@CompileStatic public Object doExecute(Object ... params) {
+	@CompileStatic public Object doExecute(Object params) {
 		ctx = org.mozilla.javascript.Context.enter()
 		def allParams = []
 		allParams << callBack
@@ -63,7 +64,9 @@ class JSHandler extends Handler {
 			Map<String, Object> objectBinding = null
 			if ( handlerBinding.json ) { 
 				objectBinding = [:] 
-				objectBinding.json = new CommonObject(handlerBinding.json, GravyType.JAVASCRIPT).toNative()//parseJson.call(ctx, scope, scope, [handlerBinding.json] as Object[])
+				CommonObject json = new CommonObject(null, GravyType.JAVASCRIPT)
+				json.serializedRepresentation = handlerBinding.json
+				objectBinding.json = json.toNative()
 			}
 			GravyHttpSession jsSess = patchSession(req, module) 
 			GravyHttpServletRequest jsReq = patchRequest(req, res, jsSess, chain, module) 
@@ -75,6 +78,10 @@ class JSHandler extends Handler {
 		}
 	}
 	
+	@CompileStatic protected GravyType context() {
+		GravyType.JAVASCRIPT
+	}
+			
 	@CompileStatic GravyHttpServletRequest patchRequest(HttpServletRequest req, HttpServletResponse res, GravyHttpSession sess, FilterChain chain, Module module) {
 		GravyHttpServletRequest jsReq = (GravyHttpServletRequest) Proxy.newProxyInstance(
 			this.class.getClassLoader(),
