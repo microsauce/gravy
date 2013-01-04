@@ -11,7 +11,7 @@ class RegExUtils {
 	@CompileStatic
 	static List<String> parametersInOrder(String uriPattern) {
 		LinkedHashMap<Integer,String> parameters = new LinkedHashMap<Integer,String>() 
-		String namedParmPattern=':([a-zA-Z]+)'
+		String namedParmPattern=':([a-zA-Z0-9]+)'
 		String wildCardPattern='(\\*)'
 		Pattern[] patterns = [Pattern.compile(namedParmPattern), Pattern.compile(wildCardPattern)]
 
@@ -41,9 +41,9 @@ class RegExUtils {
 	@CompileStatic
 	static Map<String,Object> parseRoute(String uriExpression) {
 		uriExpression = escapedUriPattern uriExpression
-		String optionalNamedParamPattern = '(.\\?:([a-zA-Z]+)\\?)'
+		String optionalNamedParamPattern = '(.\\?:([a-zA-Z0-9]+)\\?)'
 		String optionalReplacementPattern = '.{0,1}(.*)'
-		String namedParmPattern = ':([a-zA-Z]+)'
+		String namedParmPattern = ':([a-zA-Z0-9]+)'
 		String wildCardPattern = '(\\*)'
 		String replacementPattern = '(.+)'
 
