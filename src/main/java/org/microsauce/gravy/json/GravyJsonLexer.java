@@ -13,11 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package groovy.json;
+package org.microsauce.gravy.json;
 
-import static groovy.json.JsonTokenType.*;
-
+import static groovy.json.JsonTokenType.FALSE;
+import static groovy.json.JsonTokenType.NUMBER;
+import static groovy.json.JsonTokenType.OPEN_CURLY;
+import static groovy.json.JsonTokenType.STRING;
+import static groovy.json.JsonTokenType.startingWith;
 import groovy.io.LineColumnReader;
+import groovy.json.JsonException;
+import groovy.json.JsonToken;
+import groovy.json.JsonTokenType;
+import groovy.json.StringEscapeUtils;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -30,7 +37,7 @@ import java.util.regex.Pattern;
  * @author Guillaume Laforge
  * @since 1.8.0
  */
-public class JsonLexer implements Iterator<JsonToken> {
+public class GravyJsonLexer implements Iterator<JsonToken> {
     private static final char SPACE    = ' ';
     private static final char DOT      = '.';
     private static final char MINUS    = '-';
@@ -63,7 +70,7 @@ public class JsonLexer implements Iterator<JsonToken> {
      *
      * @param reader underlying reader
      */
-    public JsonLexer(Reader reader) {
+    public GravyJsonLexer(Reader reader) {
         this.reader = reader instanceof LineColumnReader ? (LineColumnReader)reader : new LineColumnReader(reader);
     }
 
@@ -72,9 +79,7 @@ public class JsonLexer implements Iterator<JsonToken> {
      */
     public JsonToken nextToken() {
         try {
-System.out.println("JsonLexer.nextToken");        	
             int firstIntRead = skipWhitespace();
-System.out.println("firstIntRead: " + firstIntRead);        	
             if (firstIntRead == -1) return null;
 
             char firstChar = (char) firstIntRead;
@@ -129,7 +134,10 @@ System.out.println("firstIntRead: " + firstIntRead);
                 for (;;) {
                     reader.mark(1);
                     int read = reader.read();
-                    if (read == -1) return null;
+                    if (read == -1) {
+                    	token.setText(currentContent.toString());
+                    	return token;
+                    }
                     char lastCharRead = (char) read;
 
                     if (lastCharRead >= ZERO && lastCharRead <= NINE ||

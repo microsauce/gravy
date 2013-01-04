@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project default="jar" name="gravy" basedir=".">
-	<property name="env" value="local"/>
-	<property environment='env' />
-	<property file="${conf.env.dir}/application.properties"/>
 
-	<!-- classpath needed to compile and build the application -->
 	<path id="build.classpath">
 		<fileset dir="lib">
 			<include name="**/*.jar"/>
@@ -16,28 +12,22 @@
 	<target name="init" depends="clean">
 		<mkdir dir="${basedir}/target/classes" />
 	</target>
-
-	<target name="compileGroovy" depends="init,compileJava"
-			description="Compile Groovy sources">
-
+	
+	<target name="jointCompile" depends="init"
+			description="Joint compile Java/Groovy sources">
 		<taskdef name="groovyc" classname="org.codehaus.groovy.ant.Groovyc">
 			<classpath refid="build.classpath"/>
 		</taskdef>
 
-		<groovyc destdir="${basedir}/target/classes" srcdir="${basedir}/src/main/groovy" listfiles="true">
+		<groovyc destdir="${basedir}/target/classes" 
+			srcdir="${basedir}/src/main/java:${basedir}/src/main/groovy" 
+			listfiles="true">
 			<classpath refid="build.classpath"/>
+			<javac source="1.7" target="1.7" />
 		</groovyc>
 	</target>
-
-	<target name="compileJava" depends="init"
-			description="Compile java sources">
-		<javac destdir="${basedir}/target/classes"
-				classpathref="build.classpath" deprecation="off" >
-			<src path="${basedir}/src/main/java"/>
-		</javac>
-	</target>
-
-	<target name="javaScript" depends="compileGroovy">
+	
+	<target name="javaScript" depends="jointCompile">
 	    <copy todir="${basedir}/target/classes">
 	    	<fileset dir="${basedir}/src/main/javascript">
 	    		<include name="*/**"/>
@@ -45,7 +35,7 @@
 	    </copy>
 	</target>
 	
-	<target name="jar" depends="compileGroovy,compileJava,javaScript"> 
+	<target name="jar" depends="jointCompile,javaScript"> 
 		<jar destfile="${basedir}/lib/gravy.jar"
 			basedir="${basedir}/target/classes" />
 	</target>
@@ -54,4 +44,5 @@
 		<delete dir="${basedir}/target/classes" failonerror="false"/>
 		<delete file="${basedir}/lib/gravy.jar" failonerror="false"/>
 	</target>
+	
 </project>

@@ -224,7 +224,6 @@ var schedule = function(cronString, callBack) {
  */
 
 var commonObj = function(nativeObj) {
-println("common objectify: "+nativeObj)	
 	if ( nativeObj != null ) { 
 		return new CommonObject(nativeObj, GravyType.JAVASCRIPT)
 	} return null

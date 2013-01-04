@@ -16,7 +16,7 @@ import org.mozilla.javascript.ScriptableObject
 
 @Log4j
 class JSModule extends Module {
-// TODO prepare imports and exports
+
 	Util util
 	JSLoader jsModuleLoader
 	JSRunner jsRunner
@@ -24,12 +24,11 @@ class JSModule extends Module {
 	@Override
 	@CompileStatic
 	protected Object doLoad(Map<String, Handler> imports) {
-		
 		Object returnValue = null
 		jsRunner = new GravyJSRunner([this.folder, new File(folder, '/scripts')] as List<File>)
 		util = new Util(jsRunner)
-		
-		if (!scriptContext) scriptContext = jsRunner.global
+
+		scriptContext = jsRunner.global
 
 		Map<String, Object> jsBinding = [:]
 		jsBinding.gravyModule = this

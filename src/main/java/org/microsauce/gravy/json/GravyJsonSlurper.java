@@ -14,6 +14,7 @@ import groovy.json.JsonLexer;
 import groovy.json.JsonToken;
 import groovy.lang.Closure;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -48,7 +49,6 @@ public class GravyJsonSlurper {
      * @return a data structure of lists and maps
      */
     public Object parseText(String text, Closure reviver) {
-System.out.println("GravyJsonSlurper: text: " + text);    	
         if (text == null || text.length() == 0) {
             throw new IllegalArgumentException("The JSON input text should neither be null nor empty.");
         }
@@ -63,40 +63,26 @@ System.out.println("GravyJsonSlurper: text: " + text);
      * @return a data structure of lists and maps
      */
     public Object parse(Reader reader, Closure reviver) {
-System.out.println("1");    	
-        Object content;
-System.out.println("2");    	
+        Object content = null;
 
-        JsonLexer lexer = new JsonLexer(reader);
-System.out.println("3");    	
-
+        GravyJsonLexer lexer = new GravyJsonLexer(reader);
         JsonToken token = lexer.nextToken();
-System.out.println("4 - token: " + token);    	
+        
         if (token.getType() == OPEN_CURLY) {
-System.out.println("5");    	
             content = parseObject(lexer, reviver);
         } else if (token.getType() == OPEN_BRACKET) {
-System.out.println("6");    	
             content = parseArray(lexer, reviver);
-        } else if (token.getType().ordinal() >= NULL.ordinal()) { // scalar values
-System.out.println("7");    	
-        	// TODO test this: will it break anything
+        } else if (token.getType().ordinal() >= NULL.ordinal()) { 
         	Object value = token.getValue();
-System.out.println("7.1");    	
         	if ( reviver != null ) {
-System.out.println("7.2");    	
         		List params = new ArrayList();
-System.out.println("7.3");    	
         		params.add(null);
-System.out.println("7.4");    	
         		params.add(token.getValue());
             	value = reviver.call(params);
         	}
-System.out.println("7.5");    	
             content = value;
 
         } else {
-System.out.println("8");    	
             throw new JsonException(
                     "A JSON payload should start with " + OPEN_CURLY.getLabel() +
                     " or " + OPEN_BRACKET.getLabel() + ".\n" +
@@ -115,7 +101,7 @@ System.out.println("8");
      * @param lexer the lexer
      * @return a list of JSON values
      */
-    private List parseArray(JsonLexer lexer, Closure reviver) {
+    private List parseArray(GravyJsonLexer lexer, Closure reviver) {
         List content = new ArrayList();
 
         JsonToken currentToken;
@@ -190,7 +176,7 @@ System.out.println("8");
      * @param lexer the lexer
      * @return a Map representing a JSON object
      */
-    private Map parseObject(JsonLexer lexer, Closure reviver) {
+    private Map parseObject(GravyJsonLexer lexer, Closure reviver) {
         Map content = new HashMap();
 
         JsonToken previousToken = null;

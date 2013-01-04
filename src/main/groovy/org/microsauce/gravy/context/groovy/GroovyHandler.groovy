@@ -88,7 +88,6 @@ class GroovyHandler extends Handler {
 		
 	@CompileStatic public Object doExecute(Object params) {
 		Closure closure = (Closure)closure.clone()
-println "params: $params - ${params.class}"		
 		closure.call(params)		
 	}
 	
