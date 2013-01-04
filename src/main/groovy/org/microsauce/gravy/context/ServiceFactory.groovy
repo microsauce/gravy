@@ -20,7 +20,6 @@ class ServiceFactory {
 		this.module = module
 	}
 		
-	@Override
 	@CompileStatic public EnterpriseService makeEnterpriseService(Object scriptContext, String uriPattern, Map<String, Object> methodHandlers, List<DispatcherType> dispatch) { 
 
 		EnterpriseService service = new EnterpriseService()

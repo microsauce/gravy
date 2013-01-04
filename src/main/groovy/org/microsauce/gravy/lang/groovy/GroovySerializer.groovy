@@ -2,9 +2,7 @@ package org.microsauce.gravy.lang.groovy;
 
 import groovy.json.JsonBuilder
 import groovy.transform.CompileStatic
-
 import java.util.regex.Pattern
-
 import org.microsauce.gravy.json.GravyJsonSlurper
 import org.microsauce.gravy.lang.object.Serializer
 
@@ -14,7 +12,6 @@ public class GroovySerializer implements Serializer  {
 	GravyJsonSlurper jsonSlurper = new GravyJsonSlurper()
 	
 	Closure jsonReviver = { k, val ->
-println "reviver: key: $k - value: $val"		
 		def retValue = val
 		if ( val instanceof String && val.length() >= 19) {
 			def substr = val.substring(0,19)
@@ -27,7 +24,6 @@ println "reviver: key: $k - value: $val"
 	}
 	
 	@CompileStatic public Object parse(String string) {
-println "GroovySerializer parse string: $string "		
 		jsonSlurper.parseText(string, jsonReviver)
 	}
 
