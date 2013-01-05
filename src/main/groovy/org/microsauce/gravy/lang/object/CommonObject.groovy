@@ -55,7 +55,6 @@ class CommonObject {
 			nativeObj = stringer.parse(serializedRepresentation, nativeType)
 			nativeRepresentations.put(nativeType.type, nativeObj)
 		}
-		
 		nativeObj
 	}
 }

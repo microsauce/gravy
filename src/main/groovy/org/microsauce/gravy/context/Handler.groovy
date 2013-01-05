@@ -26,7 +26,7 @@ abstract class Handler {
 	
 	abstract Object doExecute(HttpServletRequest req, HttpServletResponse res, FilterChain chain, HandlerBinding handlerBinding)
 	abstract Object doExecute(Object params)
-	// TODO serialize the return value
+
 	@CompileStatic public Object call( 
 		CommonObject parm1,
 		CommonObject parm2,
@@ -35,7 +35,7 @@ abstract class Handler {
 		CommonObject parm5,
 		CommonObject parm6,
 		CommonObject parm7) {
-		
+
 		List parms = new ArrayList()
 		Object np7 = nativeObj(parm7)
 		if (np7) parms.add(0, np7)
@@ -52,7 +52,6 @@ abstract class Handler {
 		Object np1 = nativeObj(parm1)
 		if (np1) parms.add(0, np1)
 		
-//		doExecute(parms.toArray(new Object[parms.size()]))
 		new CommonObject(doExecute(parms), context()).toNative()
 	}
 		

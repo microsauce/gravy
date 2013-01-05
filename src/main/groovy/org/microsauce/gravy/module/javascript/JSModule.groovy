@@ -40,7 +40,8 @@ class JSModule extends Module {
 		// add module exports to the script scope (app only)
 		if ( imports ) prepareImports(imports)
 
-		ScriptableObject exports = (ScriptableObject)jsRunner.run(scriptFile.name, jsBinding) // this returns the exports object a native JS object
+		ScriptableObject exports = (ScriptableObject)jsRunner.run(scriptFile.name, jsBinding)
+		
 		prepareExports exports
 	}
 

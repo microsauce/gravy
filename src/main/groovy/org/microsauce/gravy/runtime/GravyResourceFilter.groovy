@@ -16,8 +16,8 @@ import org.microsauce.gravy.runtime.resolver.ResourceResolver
 
 class GravyResourceFilter implements Filter { 
 
-	static final Pattern jspPattern = ~/.*\.jsp/
-	static final Pattern resourcePattern = ~/.*\.[a-zA-Z0-9]+/
+//	static final Pattern jspPattern = ~/.*\.jsp/
+//	static final Pattern resourcePattern = ~/.*\.[a-zA-Z0-9]+/
 
 	ResourceResolver resolver
 
@@ -31,15 +31,17 @@ class GravyResourceFilter implements Filter {
 		HttpServletRequest req = (HttpServletRequest) request
 		HttpServletResponse res = (HttpServletResponse) response
 		String uri = req.requestURI
-		if ( uri ==~ jspPattern ) {
+/*		if ( uri ==~ jspPattern ) {
 			String realUri = resolver.realUri uri
 			RequestDispatcher dispatcher = req.getRequestDispatcher realUri
 			dispatcher.forward(request, response)
-		} else if ( uri ==~ resourcePattern ) {
+		} else*/ 
+		// TODO this filter is the last 'native' filter in the chain, at this
+//		if ( uri ==~ resourcePattern ) {
 			// handle static resources
 			res.outputStream.write resolver.retrieve(uri)
 			res.outputStream.flush()
-		} else chain.doFilter request, response
+	//	} else chain.doFilter request, response
 
 	}
 

@@ -44,11 +44,8 @@ class JSHandler extends Handler {
 	@Override
 	@CompileStatic public Object doExecute(Object params) {
 		ctx = org.mozilla.javascript.Context.enter()
-		def allParams = []
-		allParams << callBack
-		allParams.addAll(params)
 		try {
-			executeHandler.call(ctx, scope, scope, allParams as Object[])
+			return callBack.call(ctx, scope, scope, params as Object[])
 		}
 		finally {
 			ctx.exit()

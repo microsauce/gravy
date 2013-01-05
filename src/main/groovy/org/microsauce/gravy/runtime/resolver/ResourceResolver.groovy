@@ -6,7 +6,7 @@ import groovy.util.logging.Log4j
 @Log4j
 class ResourceResolver {
 
-	static final short READ_INDICATOR = -1
+//	static final short READ_INDICATOR = -1
 
 	Map<String,RealPath> resolvedPaths = [:]	// uri - real path
 	Map<String,String> resolvedUris = [:]		// uri - real path

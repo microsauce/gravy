@@ -65,11 +65,11 @@ var addEnterpriseService = function(uriPattern, method, callBack, dispatch) {
 }
 
 var executeHandler = function(callBack, req, res, paramMap, paramList, objectBinding) {
-	var jsHandler = new JSHandler(callBack)
+	var jsHandler = new NativeJSHandler(callBack)
 	jsHandler.invokeHandler(req, res, paramMap, paramList, objectBinding)
 }
 
-var JSHandler = function(handler) {
+var NativeJSHandler = function(handler) {
 	
     this.handler = handler
     
@@ -233,9 +233,9 @@ var commonObj = function(nativeObj) {
  * called by the 'app' module
  */
 var prepareImports = function(allImports, scope) {
-	var iterator = allImports.entrySet().iterator()
-	while ( iterator.hasNext() ) {
-		var thisModuleExports = iterator.next()
+	var moduleIterator = allImports.entrySet().iterator()
+	while ( moduleIterator.hasNext() ) {
+		var thisModuleExports = moduleIterator.next()
 		var moduleName = thisModuleExports.getKey()
 		var moduleExports = thisModuleExports.getValue()
 		var thisExportIterator = moduleExports.entrySet().iterator()
@@ -245,6 +245,7 @@ var prepareImports = function(allImports, scope) {
 			var thisHandler = keyValue.getValue()
 			if ( scope[moduleName] == null ) scope[moduleName] = new Object()
 			scope[moduleName][exp] = function(parm1,parm2,parm3,parm4,parm5,parm6,parm7) {
+println("parm1: " + parm1 + " parm2: " + parm2)				
 				return thisHandler.call(
 					commonObj(parm1),
 					commonObj(parm2),
@@ -259,10 +260,10 @@ var prepareImports = function(allImports, scope) {
 	}
 }
 
-var prepareExports = function(exports) { 
+var prepareExports = function(exports) {
 	var preparedExports = new HashMap()
 	for (exp in exports) {
-		if ( typeof(exp) == 'function' ) {
+		if ( Object.prototype.toString.call( exports[exp] ) == '[object Function]' ) {
 			var handler = new JSHandler(exports[exp], this) // TODO verify 'this'
 			preparedExports.put(exp, handler)
 		}

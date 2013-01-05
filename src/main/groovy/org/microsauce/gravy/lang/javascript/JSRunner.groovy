@@ -51,12 +51,10 @@ abstract class JSRunner {
 				Scriptable moduleScope = ctx.newObject(global)
 				moduleScope.setParentScope(global)
 				jsScope = moduleScope
-				
-				exports = ctx.newObject(moduleScope)
 			} else {
 				jsScope = global
-				exports = global
 			}
+			exports = ctx.newObject(global)
 			
 			if ( binding ) {
 				binding.each { String key, Object value ->
