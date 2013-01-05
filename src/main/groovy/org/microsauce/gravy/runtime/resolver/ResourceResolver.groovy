@@ -3,14 +3,16 @@ package org.microsauce.gravy.runtime.resolver
 import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j
 
+import java.util.concurrent.ConcurrentHashMap
+
 @Log4j
 class ResourceResolver {
 
 //	static final short READ_INDICATOR = -1
 
-	Map<String,RealPath> resolvedPaths = [:]	// uri - real path
-	Map<String,String> resolvedUris = [:]		// uri - real path
-	Map<String,byte[]> cachedFiles = [:] 		// real path - file content // TODO 
+	Map<String,RealPath> resolvedPaths = new ConcurrentHashMap()	// uri - real path
+	Map<String,String> resolvedUris = new ConcurrentHashMap()		// uri - real path
+	Map<String,byte[]> cachedFiles = new ConcurrentHashMap() 		// real path - file content // TODO 
 	List<String> roots = []
 	List<CacheConstraints> constraints = []
 	String basedir

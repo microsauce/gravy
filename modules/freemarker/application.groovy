@@ -1,13 +1,13 @@
 
-import freemarker.template.*
+
 import freemarker.cache.*
-import groovy.util.logging.Log4j
-import groovy.transform.CompileStatic
+import freemarker.template.*
+import java.util.concurrent.ConcurrentHashMap
 
 def appRoot = config.appRoot
 def documentRoot =  config.gravy.documentRoot ?: appRoot+'/WEB-INF/view'
 def serviceUri = config.serviceUri ?: '/view/freemarker'
-def engines = [:]
+def engines = new ConncurrentHashMap()
 
 //
 // lazy load a template engine instance for each module
