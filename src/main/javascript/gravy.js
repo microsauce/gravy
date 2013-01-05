@@ -232,31 +232,34 @@ var commonObj = function(nativeObj) {
 /*
  * called by the 'app' module
  */
+var Imports = function(importMap) {
+	var exportIterator = importMap.entrySet().iterator()
+	while ( exportIterator.hasNext() ) {
+		var keyValue = exportIterator.next()
+		var exp = keyValue.getKey()
+		this.handler = keyValue.getValue()
+		this[exp] = function(parm1,parm2,parm3,parm4,parm5,parm6,parm7) {
+			return this.handler.call(
+				commonObj(parm1),
+				commonObj(parm2),
+				commonObj(parm3),
+				commonObj(parm4),
+				commonObj(parm5),
+				commonObj(parm6),
+				commonObj(parm7)
+			)
+		}
+	}
+
+}
+
 var prepareImports = function(allImports, scope) {
 	var moduleIterator = allImports.entrySet().iterator()
 	while ( moduleIterator.hasNext() ) {
 		var thisModuleExports = moduleIterator.next()
 		var moduleName = thisModuleExports.getKey()
-		var moduleExports = thisModuleExports.getValue()
-		var thisExportIterator = moduleExports.entrySet().iterator()
-		while ( thisExportIterator.hasNext() ) {
-			var keyValue = thisExportIterator.next()
-			var exp = keyValue.getKey()
-			var thisHandler = keyValue.getValue()
-			if ( scope[moduleName] == null ) scope[moduleName] = new Object()
-			scope[moduleName][exp] = function(parm1,parm2,parm3,parm4,parm5,parm6,parm7) {
-println("parm1: " + parm1 + " parm2: " + parm2)				
-				return thisHandler.call(
-					commonObj(parm1),
-					commonObj(parm2),
-					commonObj(parm3),
-					commonObj(parm4),
-					commonObj(parm5),
-					commonObj(parm6),
-					commonObj(parm7)
-				)
-			}
-		}
+		var moduleImports = thisModuleExports.getValue()
+		scope[moduleName] = new Imports(moduleImports)
 	}
 }
 

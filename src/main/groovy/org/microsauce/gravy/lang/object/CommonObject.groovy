@@ -51,7 +51,7 @@ class CommonObject {
 	
 	@CompileStatic Object toNative() {
 		Object nativeObj = nativeRepresentations.get(nativeType.type)
-		if ( !nativeObj ) {
+		if ( !nativeRepresentations.containsKey(nativeType.type) ) {
 			nativeObj = stringer.parse(serializedRepresentation, nativeType)
 			nativeRepresentations.put(nativeType.type, nativeObj)
 		}

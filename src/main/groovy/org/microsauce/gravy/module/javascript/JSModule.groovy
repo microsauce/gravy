@@ -32,9 +32,9 @@ class JSModule extends Module {
 
 		Map<String, Object> jsBinding = [:]
 		jsBinding.gravyModule = this
-		jsBinding.out = System.out
-		jsBinding.log = log
-		jsBinding.util = util
+//		jsBinding.out = System.out
+//		jsBinding.log = log
+//		jsBinding.util = util
 		jsBinding.config = config.toProperties()
 
 		// add module exports to the script scope (app only)

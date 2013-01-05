@@ -51,8 +51,9 @@ abstract class Handler {
 		if (np2) parms.add(0, np2)
 		Object np1 = nativeObj(parm1)
 		if (np1) parms.add(0, np1)
-		
-		new CommonObject(doExecute(parms), context()).toNative()
+		Object result = doExecute(parms)
+println "result: $result"		
+		new CommonObject(result, context()).toNative()
 	}
 		
 	@CompileStatic private Object nativeObj(CommonObject obj) {

@@ -3,10 +3,10 @@ package org.microsauce.gravy.lang.javascript
 import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j
 
+import org.microsauce.gravy.util.Util
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ImporterTopLevel
 import org.mozilla.javascript.Scriptable
-import org.mozilla.javascript.ScriptableObject
 
 @Log4j
 abstract class JSRunner {
@@ -22,6 +22,10 @@ abstract class JSRunner {
 		try {
 			ctx = org.mozilla.javascript.Context.enter()
 			global = new ImporterTopLevel(ctx)
+			global.put('out', global, System.out)
+			global.put('log', global, log)
+			global.put('util', global, new Util(this))
+	
 			loadCoreScripts ctx, global
 		}
 		finally {
