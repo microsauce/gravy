@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap
 def appRoot = config.appRoot
 def documentRoot =  config.gravy.documentRoot ?: appRoot+'/WEB-INF/view'
 def serviceUri = config.serviceUri ?: '/view/freemarker'
-def engines = new ConncurrentHashMap()
+def engines = new ConcurrentHashMap()
 
 //
 // lazy load a template engine instance for each module

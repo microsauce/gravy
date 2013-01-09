@@ -18,7 +18,7 @@ class GroovyModule extends Module {
 
 	@CompileStatic protected Object doLoad(Map imports) {
 		ConfigObject root = new ConfigObject()
-		Map exports = [:]
+		Map services = [:]
 		Map binding = [:]
 		binding.root = root
 		binding.config = config
@@ -27,7 +27,7 @@ class GroovyModule extends Module {
 		Script script = new Script()
 		script.binding.putAll(prepareImports(imports)) 
 		script.binding.putAll(binding)
-		script.binding.exports = exports
+		script.binding.services = services
 		script.classLoader = classLoader
 		script.name = name
 		script.sourceUri = scriptFile.absolutePath
@@ -41,7 +41,7 @@ class GroovyModule extends Module {
 		GroovyAPI.module = this
 
 		ScriptUtils.run script
-		prepareExports exports
+		prepareExports services
 	}
 
 	@CompileStatic Map<String, GroovyHandler> prepareExports(Map exports) {

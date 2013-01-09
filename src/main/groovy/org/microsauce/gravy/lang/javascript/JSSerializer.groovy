@@ -7,17 +7,26 @@ import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeFunction
 import org.mozilla.javascript.NativeJSON
 import org.mozilla.javascript.ScriptableObject
+import org.mozilla.javascript.tools.shell.Global
 
 class JSSerializer implements Serializer {
 
+	static JSSerializer instance
+	
+	static JSSerializer getInstance() {
+		instance
+	}
+	
+	static void initInstance(Global global) {
+		instance = new JSSerializer()
+		instance.scope = global
+		instance.parseJson = global.get('parseJson', global)
+	}
+	
 	ScriptableObject scope;
 	NativeFunction parseJson;
 	
-	JSSerializer() {
-		JSRunner jsRunner = new CoreJSRunner(null)
-		scope = jsRunner.global
-		parseJson = (NativeFunction)scope.get('parseJson', scope)
-	}
+	JSSerializer() {}
 	
 	@CompileStatic public Object parse(String string) {
 		Context currentCtx = Context.getCurrentContext()

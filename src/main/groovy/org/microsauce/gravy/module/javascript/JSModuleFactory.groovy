@@ -1,10 +1,9 @@
 package org.microsauce.gravy.module.javascript
 
-import groovy.transform.CompileStatic;
+import groovy.transform.CompileStatic
 
-import java.io.File;
-
-import org.microsauce.gravy.module.Module;
+import org.microsauce.gravy.lang.javascript.JSRunner
+import org.microsauce.gravy.module.Module
 import org.microsauce.gravy.module.ModuleFactory
 
 class JSModuleFactory extends ModuleFactory {
@@ -20,6 +19,5 @@ class JSModuleFactory extends ModuleFactory {
 	public String moduleScriptName() {
 		'application.js'
 	}
-
 
 }

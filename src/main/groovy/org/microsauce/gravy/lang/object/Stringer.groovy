@@ -20,7 +20,7 @@ class Stringer {
 	private Stringer() {
 		serializers = new HashMap<String, Serializer>();
 		serializers.put(GravyType.GROOVY.type, new GroovySerializer());
-		serializers.put(GravyType.JAVASCRIPT.type, new JSSerializer());
+		serializers.put(GravyType.JAVASCRIPT.type, JSSerializer.getInstance());
 	}
 	
 	@CompileStatic Object parse(String string, GravyType context) {

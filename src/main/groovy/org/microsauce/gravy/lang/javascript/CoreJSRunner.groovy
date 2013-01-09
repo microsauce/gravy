@@ -11,7 +11,7 @@ class CoreJSRunner extends JSRunner {
 	}
 
 	@CompileStatic String[] getCoreScripts() {
-		['core.js']
+		['coffee-module-loader.js','core.js']
 	}
 	
 }

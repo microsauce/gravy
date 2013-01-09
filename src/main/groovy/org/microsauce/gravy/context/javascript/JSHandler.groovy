@@ -44,6 +44,7 @@ class JSHandler extends Handler {
 	@Override
 	@CompileStatic public Object doExecute(Object params) {
 		ctx = org.mozilla.javascript.Context.enter()
+		ctx.setLanguageVersion(Context.VERSION_1_8)
 		try {
 			return callBack.call(ctx, scope, scope, params as Object[])
 		}

@@ -3,90 +3,85 @@ package org.microsauce.gravy.lang.javascript
 import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j
 
-import org.microsauce.gravy.util.Util
 import org.mozilla.javascript.Context
-import org.mozilla.javascript.ImporterTopLevel
 import org.mozilla.javascript.Scriptable
+import org.mozilla.javascript.tools.shell.Global
+import org.ringojs.engine.RhinoEngine
+import org.ringojs.engine.RingoConfig
+import org.ringojs.repository.FileRepository
+import org.ringojs.repository.Repository
+import org.ringojs.repository.ZipRepository
 
 @Log4j
-abstract class JSRunner {
+abstract class JSRunner { 
 	
+	RhinoEngine engine 
+	Global global
 	List<File> roots
-	JSLoader jsLoader
-	Scriptable global
 	
 	JSRunner(List<File> roots) {
 		this.roots = roots
 
-		org.mozilla.javascript.Context ctx = null
-		try {
-			ctx = org.mozilla.javascript.Context.enter()
-			global = new ImporterTopLevel(ctx)
-			global.put('out', global, System.out)
-			global.put('log', global, log)
-			global.put('util', global, new Util(this))
-	
-			loadCoreScripts ctx, global
-		}
-		finally {
-			ctx.exit()
-		}
+		String ringoJarPath = null
+		String appRoot = System.getProperty("gravy.appRoot")
+		if ( appRoot ) // TODO this is broken (not pointing to WEB-INF)
+			ringoJarPath = appRoot+'/lib/ringo-modules.jar'
+		else if ( System.getenv()['GRAVY_HOME'] )
+			ringoJarPath = System.getenv()['GRAVY_HOME']+'/lib/ringojs/ringo-modules.jar'
 		
-		jsLoader = new JSLoader(roots)
-	}
-	
-	@CompileStatic Object require(String uri) {
-		run(uri, null, true)
+		Repository ringoRepo = new ZipRepository(ringoJarPath)
+		RingoConfig config = new RingoConfig(ringoRepo)
+		
+		Repository gravyRepo = null
+		if (appRoot) { // TODO this is broken gravy js files are not located in the classes folder. how does ringo find them? (the classpath maybe?)
+			config.addModuleRepository(new FileRepository(appRoot+'/classes'))
+		}
+//		String gravyJar = null
+//		if ( appRoot )
+//			gravyJar = appRoot+'/lib/gravy.jar'
+//		else if ( System.getenv()['GRAVY_HOME'] )
+//			gravyJar = System.getenv()['GRAVY_HOME']+'/lib/gravy.jar'
+//println "gravyRep: $gravyJar"
+//		config.addModuleRepository(new ZipRepository(gravyJar))
+
+		if ( roots ) {
+			roots.each { File thisRoot ->
+				config.addModuleRepository(new FileRepository(thisRoot))
+			}
+		}
+
+		engine = new RhinoEngine(config, null)
+		global = engine.getScope()
+		global.put('out', global, System.out)
+		global.put('devMode', global, System.getProperty('gravy.devMode')) 
+		getCoreScripts().each { String thisScript ->
+			engine.runScript(thisScript, [] as String[])
+		}
 	}
 	
 	@CompileStatic Object run(String scriptUri, Map<String, Object> binding) {
-		run scriptUri, binding, false
-	}
-	@CompileStatic Object run(String scriptUri, Map<String, Object> binding, boolean isRequire) {
 		Object returnValue = null
-		
-		org.mozilla.javascript.Context ctx = org.mozilla.javascript.Context.enter()
-		
-		try {
-			// instantiate the 'global' object
-			Scriptable jsScope = null
-			Scriptable exports = null
-			if ( isRequire ) {
-				Scriptable moduleScope = ctx.newObject(global)
-				moduleScope.setParentScope(global)
-				jsScope = moduleScope
-			} else {
-				jsScope = global
+println "1"			
+		if ( binding ) {
+println "2"			
+			binding.each { String key, Object value ->
+println "3"			
+				global.put(key, global, value)
 			}
-			exports = ctx.newObject(global)
-			
-			if ( binding ) {
-				binding.each { String key, Object value ->
-					jsScope.put(key, jsScope, value)
-				}
-			}
-			jsScope.put('exports', jsScope, exports)
-			
-			// read and evaluate application.js
-			String applicationScript = jsLoader.load(scriptUri)
-			ctx.evaluateString(jsScope, applicationScript, scriptUri, 1, null)
-			returnValue = exports
-
-		}
-		finally {
-			ctx.exit()
 		}
 		
+		// evaluate application.js
+println "4"		
+try {	
+		engine.runScript(scriptUri, [] as String[])
+} catch (Exception e) {
+println "4.5"
+e.printStackTrace()}
+println "5"			
+		Scriptable services = (Scriptable) global.get('services', global)
+		returnValue = services
 		returnValue
 	}
 	
 	abstract String[] getCoreScripts() 
-	
-	@CompileStatic private void loadCoreScripts(Context ctx, Scriptable _scope) {
-		getCoreScripts().each { String thisScript ->
-			InputStream gsStream = this.class.classLoader.getResourceAsStream(thisScript)
-			InputStreamReader gsReader = new InputStreamReader(gsStream)
-			ctx.evaluateReader(_scope, gsReader, thisScript, 1, null)
-		}
-	}
 }

@@ -11,7 +11,7 @@ class GravyJSRunner extends JSRunner {
 	}
 
 	@CompileStatic String[] getCoreScripts() {
-		['core.js','gravy.js']
+		['coffee-module-loader.js','core.js','gravy.js']
 	} 
 
 }

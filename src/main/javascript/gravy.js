@@ -45,12 +45,12 @@ var DELETE 	= 'delete'
  * dispatch types
  */
 
-var REQUEST = DispatcherType.REQUEST
-var FORWARD = DispatcherType.FORWARD
-var ERROR   = DispatcherType.ERROR
-var INCLUDE = DispatcherType.INCLUDE
+global.REQUEST = DispatcherType.REQUEST
+global.FORWARD = DispatcherType.FORWARD
+global.ERROR   = DispatcherType.ERROR
+global.INCLUDE = DispatcherType.INCLUDE
 
-var addEnterpriseService = function(uriPattern, method, callBack, dispatch) {
+global.addEnterpriseService = function(uriPattern, method, callBack, dispatch) {
 	var dispatchList = new ArrayList()
 	if ( dispatch == null || dispatch.length == 0 ) {
 		dispatchList.add(REQUEST)
@@ -64,12 +64,12 @@ var addEnterpriseService = function(uriPattern, method, callBack, dispatch) {
 	return gravyModule.addEnterpriseService(uriPattern, method, callBack, dispatchList)
 }
 
-var executeHandler = function(callBack, req, res, paramMap, paramList, objectBinding) {
+global.executeHandler = function(callBack, req, res, paramMap, paramList, objectBinding) {
 	var jsHandler = new NativeJSHandler(callBack)
 	jsHandler.invokeHandler(req, res, paramMap, paramList, objectBinding)
 }
 
-var NativeJSHandler = function(handler) {
+global.NativeJSHandler = function(handler) {
 	
     this.handler = handler
     
@@ -128,7 +128,7 @@ var NativeJSHandler = function(handler) {
  * 		res.render '/greeting.html', {name: @name}
  * , [REQUEST]
  */
-var get = function(uriPattern, callBack, dispatch) {
+global.get = function(uriPattern, callBack, dispatch) {
 	addEnterpriseService(uriPattern, GET, callBack, dispatch)
 }
 
@@ -144,7 +144,7 @@ var get = function(uriPattern, callBack, dispatch) {
  * 		res.render '/greeting.html', {name: @name}
  * , [REQUEST]
  */
-var post = function(uriPattern, callBack, dispatch) {
+global.post = function(uriPattern, callBack, dispatch) {
 	addEnterpriseService(uriPattern, POST, callBack, dispatch)
 }
 
@@ -159,7 +159,7 @@ var post = function(uriPattern, callBack, dispatch) {
  * 		res.render '/greeting.html', {name: @name}
  * , [REQUEST]
  */
-var del = function(uriPattern, callBack, dispatch) {
+global.del = function(uriPattern, callBack, dispatch) {
 	addEnterpriseService(uriPattern, DELETE, callBack, dispatch)
 }
 
@@ -174,7 +174,7 @@ var del = function(uriPattern, callBack, dispatch) {
  * 		res.render '/greeting.html', {name: @name}
  * , [REQUEST]
  */
-var options = function(uriPattern, callBack, dispatch) {
+global.options = function(uriPattern, callBack, dispatch) {
 	addEnterpriseService(uriPattern, OPTIONS, callBack, dispatch)
 }
 
@@ -189,7 +189,7 @@ var options = function(uriPattern, callBack, dispatch) {
  * 		res.render '/greeting.html', {name: this.name}
  * , [REQUEST]
  */
-var put = function(uriPattern, callBack, dispatch) {
+global.put = function(uriPattern, callBack, dispatch) {
 	addEnterpriseService(uriPattern, PUT, callBack, dispatch)
 }
 
@@ -204,7 +204,7 @@ var put = function(uriPattern, callBack, dispatch) {
  * 		res.render '/greeting.html', {name: this.name}
  * , [REQUEST]
  */
-var route = function(uriPattern, callBack, dispatch) {
+global.route = function(uriPattern, callBack, dispatch) {
 	addEnterpriseService(uriPattern, 'default', callBack, dispatch)
 }
 
@@ -215,7 +215,7 @@ var route = function(uriPattern, callBack, dispatch) {
  * schedule '* * * * * ', ->
  * 		println "Another minute bites the dust"
  */
-var schedule = function(cronString, callBack) {
+global.schedule = function(cronString, callBack) {
 	gravyModule.addCronService(cronString, callBack)
 }
 
@@ -223,7 +223,7 @@ var schedule = function(cronString, callBack) {
  * undocumented export functions
  */
 
-var commonObj = function(nativeObj) {
+global.commonObj = function(nativeObj) {
 	if ( nativeObj != null ) { 
 		return new CommonObject(nativeObj, GravyType.JAVASCRIPT)
 	} return null
@@ -232,7 +232,7 @@ var commonObj = function(nativeObj) {
 /*
  * called by the 'app' module
  */
-var Imports = function(importMap) {
+global.Imports = function(importMap) {
 	var exportIterator = importMap.entrySet().iterator()
 	while ( exportIterator.hasNext() ) {
 		var keyValue = exportIterator.next()
@@ -253,7 +253,7 @@ var Imports = function(importMap) {
 
 }
 
-var prepareImports = function(allImports, scope) {
+global.prepareImports = function(allImports, scope) {
 	var moduleIterator = allImports.entrySet().iterator()
 	while ( moduleIterator.hasNext() ) {
 		var thisModuleExports = moduleIterator.next()
@@ -263,11 +263,11 @@ var prepareImports = function(allImports, scope) {
 	}
 }
 
-var prepareExports = function(exports) {
+global.prepareExports = function(exports) { // service exports 
 	var preparedExports = new HashMap()
 	for (exp in exports) {
 		if ( Object.prototype.toString.call( exports[exp] ) == '[object Function]' ) {
-			var handler = new JSHandler(exports[exp], this) // TODO verify 'this'
+			var handler = new JSHandler(exports[exp], this) 
 			preparedExports.put(exp, handler)
 		}
 	}

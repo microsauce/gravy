@@ -45,6 +45,7 @@ class GravyBootstrapListener implements ServletContextListener {
 		//
 		// set appRoot
 		//
+		// TODO there's a bug or inconsistant use of appRoot somewhere
 		String deployPath = servletContext.getRealPath("/")
 		String appRoot = deployPath+'/WEB-INF'
 		if (!System.getProperty('gravy.devMode')) 
