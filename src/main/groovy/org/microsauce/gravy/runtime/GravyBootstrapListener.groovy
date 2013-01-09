@@ -43,13 +43,14 @@ class GravyBootstrapListener implements ServletContextListener {
 		def servletContext = sce.servletContext
 
 		//
-		// set appRoot
+		// set gravy system properties
 		//
-		// TODO there's a bug or inconsistant use of appRoot somewhere
-		String deployPath = servletContext.getRealPath("/")
-		String appRoot = deployPath+'/WEB-INF'
-		if (!System.getProperty('gravy.devMode')) 
-			System.setProperty('gravy.appRoot', appRoot)
+		String appRoot = servletContext.getRealPath("/")
+		String moduleRoot = appRoot+'/WEB-INF/modules'
+
+		System.setProperty('gravy.appRoot', appRoot)
+		System.setProperty('gravy.moduleRoot', moduleRoot)
+		System.setProperty('gravy.viewRoot', appRoot+'/WEB-INF/view')
 
 		//
 		// load configuration
@@ -72,21 +73,21 @@ class GravyBootstrapListener implements ServletContextListener {
 		//
 		// configure resource paths
 		//
-		File appRootFolder = new File(appRoot) 
+		File moduleRootFolder = new File(moduleRoot) 
 		List<String> resourceRoots = []
-		for ( File modFolder in ContextBuilder.listAllModules(appRootFolder) ) {
+		for ( File modFolder in ContextBuilder.listAllModules(moduleRootFolder) ) {
 			log.info "adding folder ${modFolder.name} to the resource path"
 			String moduleName = modFolder.name
-			String moduleResoursesFolder = "${deployPath}/${moduleName}".toString()
+			String moduleResoursesFolder = "${appRoot}/${moduleName}".toString()
 			if ( new File(moduleResoursesFolder).exists() )
 				resourceRoots << moduleResoursesFolder
-			String moduleViewFolder = "${deployPath}/WEB-INF/view/${moduleName}".toString()
+			String moduleViewFolder = "${appRoot}/WEB-INF/view/${moduleName}".toString()
 		}
 
 		//
 		// instantiate and build the Application Context
 		//
-		ContextBuilder contextBuilder = new ContextBuilder(appRootFolder, environment)
+		ContextBuilder contextBuilder = new ContextBuilder(new File(appRoot), environment)
 		contextBuilder.build()
 		Context context = contextBuilder.context
 		this.context = context
@@ -96,7 +97,7 @@ class GravyBootstrapListener implements ServletContextListener {
 			startSourceObserver app
 		}
 					
-		initEnterpriseRuntime context, resourceRoots, deployPath, sce, config.gravy.view.errorUri
+		initEnterpriseRuntime context, resourceRoots, appRoot, sce, config.gravy.view.errorUri
 		initCronRuntime context
 		
 	}

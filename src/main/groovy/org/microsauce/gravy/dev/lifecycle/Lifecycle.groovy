@@ -30,6 +30,7 @@ class Lifecycle {
 
 		projectBasedir = System.getProperty('user.dir')
 		tempFolder = System.getProperty('java.io.tmpdir')
+		System.setProperty('gravy.devMode', 'true')
 
 		def sysEnv = System.getenv()
 		gravyHome = sysEnv['GRAVY_HOME']
@@ -211,15 +212,9 @@ class Lifecycle {
 		JSRunner testRunner = new CoreJSRunner([jsScriptRoot, new File(projectBasedir, '/scripts')])
 		jsScriptRoot.eachFileRecurse { thisFile -> 
 			if ( thisFile.isFile() && !thisFile.name.endsWith('.coffee.js') ) {
-				def offset = thisFile.absolutePath - jsScriptRoot.absolutePath
-				if (offset.startsWith('/'))
-					offset = offset.substring(1, offset.length())
-println "script  root: ${jsScriptRoot.absolutePath}"					
-println "running test: $offset"					
-				testRunner.run(offset, null)
+				testRunner.run(thisFile.absolutePath, null)
 			}
 		}
-println "after JS tests"
 	}
 
 	private ClassLoader testClassLoader() {

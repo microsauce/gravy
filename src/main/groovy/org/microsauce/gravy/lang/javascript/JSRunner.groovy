@@ -3,6 +3,7 @@ package org.microsauce.gravy.lang.javascript
 import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j
 
+import org.microsauce.gravy.module.config.Config;
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.tools.shell.Global
@@ -28,25 +29,14 @@ abstract class JSRunner {
 			ringoJarPath = appRoot+'/lib/ringo-modules.jar'
 		else if ( System.getenv()['GRAVY_HOME'] )
 			ringoJarPath = System.getenv()['GRAVY_HOME']+'/lib/ringojs/ringo-modules.jar'
-		
+
 		Repository ringoRepo = new ZipRepository(ringoJarPath)
 		RingoConfig config = new RingoConfig(ringoRepo)
 		
-		Repository gravyRepo = null
-		if (appRoot) { // TODO this is broken gravy js files are not located in the classes folder. how does ringo find them? (the classpath maybe?)
-			config.addModuleRepository(new FileRepository(appRoot+'/classes'))
-		}
-//		String gravyJar = null
-//		if ( appRoot )
-//			gravyJar = appRoot+'/lib/gravy.jar'
-//		else if ( System.getenv()['GRAVY_HOME'] )
-//			gravyJar = System.getenv()['GRAVY_HOME']+'/lib/gravy.jar'
-//println "gravyRep: $gravyJar"
-//		config.addModuleRepository(new ZipRepository(gravyJar))
-
 		if ( roots ) {
 			roots.each { File thisRoot ->
-				config.addModuleRepository(new FileRepository(thisRoot))
+				if ( config == null ) config = new RingoConfig(new FileRepository(thisRoot))
+				else config.addModuleRepository(new FileRepository(thisRoot))
 			}
 		}
 
@@ -57,27 +47,19 @@ abstract class JSRunner {
 		getCoreScripts().each { String thisScript ->
 			engine.runScript(thisScript, [] as String[])
 		}
+		
 	}
 	
 	@CompileStatic Object run(String scriptUri, Map<String, Object> binding) {
 		Object returnValue = null
-println "1"			
 		if ( binding ) {
-println "2"			
 			binding.each { String key, Object value ->
-println "3"			
 				global.put(key, global, value)
 			}
 		}
 		
 		// evaluate application.js
-println "4"		
-try {	
 		engine.runScript(scriptUri, [] as String[])
-} catch (Exception e) {
-println "4.5"
-e.printStackTrace()}
-println "5"			
 		Scriptable services = (Scriptable) global.get('services', global)
 		returnValue = services
 		returnValue

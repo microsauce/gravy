@@ -31,7 +31,7 @@ class StartUp {
 		def clConfig = commandLineEnv(commandLine)
 
 		def projectPath = System.getProperty('user.dir')
-		System.setProperty('gravy.appRoot', DevUtils.appDeployPath(projectPath) ) //System.getProperty('user.dir'))
+//		System.setProperty('gravy.appRoot', DevUtils.appDeployPath(projectPath) ) //System.getProperty('user.dir'))
 
 		clConfig.each {key, value ->
 			System.setProperty(key, value)

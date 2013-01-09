@@ -2,8 +2,7 @@
 import org.microsauce.gravy.template.gstring.GStringTemplateEngine
 import java.util.concurrent.ConcurrentHashMap
 
-def appRoot = config.appRoot
-def documentRoot =  config.gravy.documentRoot ?: appRoot+'/WEB-INF/view'
+def documentRoot =  config.gravy.documentRoot ?: System.getProperty('gravy.viewRoot')
 def serviceUri = config.serviceUri ?: '/view/gstring' 
 def engines = new ConcurrentHashMap()
 

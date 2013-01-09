@@ -43,7 +43,7 @@ class ContextBuilder {
 	@CompileStatic private Collection<Module> instantiateModules(ConfigObject appConfig) {
 		List<Module> modules = []
 		
-		for (modFolder in ContextBuilder.listModules(appRoot)) { 
+		for (modFolder in ContextBuilder.listModules()) { 
 			Module module = instantiateModule(context, modFolder, appConfig, env, false) 
 			if ( module ) modules << module
 		}
@@ -72,7 +72,11 @@ class ContextBuilder {
 		List<File> application = []
 		
 		moduleFolder.eachFile { File file ->
-			if ( file.isFile() && file.name.startsWith('application.') )
+			if ( file.isFile() && (
+					file.name.equals('application.groovy') || 
+					file.name.equals('application.coffee') || 
+					file.name.equals('application.js')
+			))
 				application << file		
 		}
 		
@@ -85,9 +89,9 @@ class ContextBuilder {
 	}
 	
 	@CompileStatic
-	static List<File> listModules(File appRoot) {
+	static List<File> listModules() {
 		// return all except 'app'
-		File modulesFolder = new File(appRoot,'/modules')
+		File modulesFolder = new File(System.getProperty('gravy.moduleRoot'))
 
 		List<File> folders = []
 		modulesFolder.eachDir { File dir ->
@@ -97,20 +101,16 @@ class ContextBuilder {
 	}
 	
 	@CompileStatic
-	static List<File> listAllModules(File appRoot) {
-		// return all except 'app'
-		File modulesFolder = new File(appRoot,'/modules')
-
+	static List<File> listAllModules(File moduleRoot) {
 		List<File> folders = []
-		modulesFolder.eachDir { File dir ->
+		moduleRoot.eachDir { File dir ->
 			folders << dir
 		}
 		folders
 	}
 	
 	private Module instantiateApplication() {
-		File modFolder = new File(appRoot, 'modules')
-		File appFolder = new File(modFolder, 'app')
+		File appFolder = new File(new File(System.getProperty('gravy.moduleRoot')), 'app') // TODO refactor as moduleRoot File property
 		instantiateModule(context, appFolder, null, env, true)
 	}
 	

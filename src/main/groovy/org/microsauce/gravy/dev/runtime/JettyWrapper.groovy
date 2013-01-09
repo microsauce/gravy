@@ -27,9 +27,9 @@ class JettyWrapper extends ServerWrapper {
 		server = new Server(config.jetty.port)
 
         WebAppContext context = new WebAppContext()
-
-        context.setDescriptor(getDescriptorURI(config.appRoot))
-        context.setResourceBase(getResourceBase(config.appRoot)) 
+		String deployPath = DevUtils.appDeployPath(System.getProperty('user.dir'))
+        context.setDescriptor(getDescriptorURI(deployPath))
+        context.setResourceBase(deployPath) 
         context.setContextPath(config.jetty.contextPath)
         context.setParentLoaderPriority(true)
  
@@ -46,13 +46,7 @@ class JettyWrapper extends ServerWrapper {
 	}
 
 	private String getDescriptorURI(appRoot) { 
-		getResourceBase(appRoot)+'/WEB-INF/web.xml'
+		appRoot+'/WEB-INF/web.xml'
 	}
-
-	private String getResourceBase(String appRoot) {
-		String appName = new File(appRoot).name
-		DevUtils.appDeployPath(appName)
-	}
-
 
 }

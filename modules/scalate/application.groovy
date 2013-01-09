@@ -1,4 +1,6 @@
 
+// TODO this is broken (GravyTemplateServlet has been removed)
+
 import javax.servlet.http.HttpServlet
 import javax.servlet.http.HttpServletResponse
 import javax.servlet.http.HttpServletRequest
@@ -36,8 +38,7 @@ class ScalateServlet extends GravyTemplateServlet {
 }
 
 def runMode = config.scalate.mode ?: 'production'
-def appRoot = config.appRoot
-def documentRoot =  appRoot+'/WEB-INF/view'
+def documentRoot =  config.gravy.documentRoot ?: System.getProperty('gravy.viewRoot')
 def viewUri = config.gravy.viewUri ?: '/view/scalate'
 
 def viewServlet = new ScalateServlet(documentRoot, runMode)

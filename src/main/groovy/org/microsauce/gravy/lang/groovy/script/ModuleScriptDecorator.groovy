@@ -19,7 +19,7 @@ class ModuleScriptDecorator extends ScriptDecorator {
 		extractModule script.name
 //		script.classLoader = getClassLoader()
 
-		def (moduleFolder, moduleUri) = getModuleFolder(script.name, config.appRoot)
+		def (moduleFolder, moduleUri) = getModuleFolder(script.name, System.getProperty('gravy.appRoot'))
 		script.sourceUri = moduleUri+"${SLASH}application.groovy"
 		if (moduleFolder.exists()) {
 			script.binding.config = modConfig config, script.name, moduleUri
@@ -53,7 +53,7 @@ class ModuleScriptDecorator extends ScriptDecorator {
 	}
 
 	def private extractModule(modName) {
-		def modPath = "${config.appRoot}${SLASH}WEB-INF${SLASH}modules${SLASH}${modName}"
+		def modPath = "${System.getProperty('gravy.appRoot')}${SLASH}WEB-INF${SLASH}modules${SLASH}${modName}"
 		def modFile = new File(modPath)
 		def modJarPath = modPath+'.jar'
 		def modJar = new File(modJarPath)
@@ -86,7 +86,7 @@ class ModuleScriptDecorator extends ScriptDecorator {
 		}
 		else modConfig = appConfig[modName]
 
-		modConfig.appRoot = appConfig.appRoot
+//		modConfig.appRoot = System.getProperty('gravy.appRoot')
 
 		modConfig
 	}
