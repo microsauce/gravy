@@ -62,7 +62,10 @@ abstract class ModuleFactory {
 		//
 		// disable a module without un-installing/deleting it
 		//
-		if ( appConfig && ((ConfigObject)appConfig[moduleFolder.name]).disabled ) return null
+		if ( appConfig ) {
+			ConfigObject modConfig = (ConfigObject)appConfig[moduleFolder.name]
+			if ( modConfig && modConfig.disabled ) return null
+		}
 		
 		// create module classloader and instantiate the module object		
 		ClassLoader cl = createModuleClassLoader(moduleFolder)

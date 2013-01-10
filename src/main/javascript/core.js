@@ -1,21 +1,21 @@
-/*******************************************************
+/**
+ * This script defines core functions.
+ *
+ * Script bindings:
+ * 'out'			- the console PrintStream
+ */
 
-This script defines the core JavaScript API
-
-Script bindings:
-
-'out'			- the console PrintStream
-
-*******************************************************/
-
+/**
+ * The module services object.
+ */
 global.services = new Object();
 
 /********************************************************
  * documented utility/convenience functions
  *******************************************************/
 
-/*
- * JSON -> obj
+/**
+ * JavaScript JSON serialization functions
  */
 global.datePatternJS = new RegExp('[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z')
 global.datePatternJV = new RegExp('[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\+[0-9]{4}')
@@ -44,22 +44,21 @@ global.getGlobal = function() {
 	}).call(null);
 }
 
-/*
- * retrieve a configuration value 
+/**
+ * Retrieve a configuration value (from config.groovy) 
  */
 global.conf = function(key) {
 	return config.getProperty(key)
 }
 
-/*
+/**
  * print a line to the console
  */
-
 global.println = function(str) {
 	return out.println(str)
 }
 
-/*
+/**
  * print a string to the console
  */
 global.print = function(str) {

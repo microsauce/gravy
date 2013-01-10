@@ -1,5 +1,7 @@
 // lib/handlebars/base.js
 
+//export('Handlebars')
+
 /*jshint eqnull:true*/
 this.Handlebars = {};
 
@@ -1918,3 +1920,5 @@ Handlebars.VM = {
 
 Handlebars.template = Handlebars.VM.template;
 ;
+
+exports.compile = Handlebars.compile
