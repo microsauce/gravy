@@ -22,7 +22,7 @@ import org.microsauce.gravy.module.Module
 @Log4j
 abstract class Handler {
 	
-	Module module
+	protected Module module
 	
 	abstract Object doExecute(HttpServletRequest req, HttpServletResponse res, FilterChain chain, HandlerBinding handlerBinding)
 	abstract Object doExecute(Object params)

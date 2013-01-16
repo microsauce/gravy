@@ -25,7 +25,7 @@ class ServiceFactory {
 		EnterpriseService service = new EnterpriseService()
 		Map<String, Object> parseRoute = RegExUtils.parseRoute(uriPattern)
 		
-		HandlerFactory handlerFactory = HandlerFactory.getHandlerFactory(module.class)		
+		HandlerFactory handlerFactory = HandlerFactory.getHandlerFactory(module.class.name)	
 		service.uriPattern = (Pattern) parseRoute.uriPattern
 		service.uriString = uriPattern
 	 	service.params = parseRoute.params as List<String>
@@ -42,7 +42,7 @@ class ServiceFactory {
 	
 	@CompileStatic CronService makeCronService(Object scriptContext, String cronString, Object rawHandler) {
 		CronService cronService = new CronService()
-		HandlerFactory handlerFactory = HandlerFactory.getHandlerFactory(module.class)	
+		HandlerFactory handlerFactory = HandlerFactory.getHandlerFactory(module.class.name)	
 		cronService.cronString = cronString
 		cronService.handlers['default'] = handlerFactory.makeHandler(rawHandler, scriptContext)
 		cronService.module = module

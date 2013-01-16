@@ -1,11 +1,28 @@
 
-load 'handlebars-1.0.rc.1.js'
+###
+this module will give rudimentary support for handlebarsjs, jadejs
+hamljs
+###
 
-documentRoot = "#{conf('gravy.appRoot')}/WEB-INF/view"
-cache = {}
 
-retrieveTemplate = (uri, moduleName) ->
-	template = cache[uri]
-	if ( template == null )
-		source =  readFile "#{documentRoot}#{uri}"
-		template = Handlebars.compile source
+cons = require 'consolidate'
+
+documentRoot = System.getProperty 'gravy.viewRoot'
+renderUri = conf 'view.renderUri'
+engine = conf 'engine'
+cache = conf 'cache'
+
+get renderUri, (req, res) ->
+
+	model = req.get '_model'
+	viewUri = req.getAttribute '_view' 	# not serialized
+	module = req.getAttribute '_module'	# not serialized
+	moduleName = module.name
+	res.contentType = 'text/html'
+
+	if ( cache ) model.cache = true
+
+	cons[engine] documentRoot+'/'+moduleName+viewUri, model, (err, html) ->
+		if (err) throw err
+		res.write html
+

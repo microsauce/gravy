@@ -35,7 +35,15 @@
 	    </copy>
 	</target>
 	
-	<target name="jar" depends="jointCompile,javaScript"> 
+	<target name="ruby" depends="jointCompile">
+	    <copy todir="${basedir}/target/classes">
+	    	<fileset dir="${basedir}/src/main/ruby">
+	    		<include name="*/**"/>
+	    	</fileset>
+	    </copy>
+	</target>
+	
+	<target name="jar" depends="jointCompile,javaScript,ruby"> 
 		<jar destfile="${basedir}/lib/gravy.jar"
 			basedir="${basedir}/target/classes" />
 	</target>

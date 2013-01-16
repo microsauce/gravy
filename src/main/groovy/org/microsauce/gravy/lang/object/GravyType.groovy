@@ -1,7 +1,7 @@
 package org.microsauce.gravy.lang.object
 
 enum GravyType {
-	GROOVY("Groovy"), JAVASCRIPT("JavaScript")
+	GROOVY("Groovy"), JAVASCRIPT("JavaScript"), RUBY('Ruby')
 	
 	String type;
 	

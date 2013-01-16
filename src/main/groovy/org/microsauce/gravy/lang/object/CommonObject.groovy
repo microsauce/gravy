@@ -16,7 +16,7 @@ class CommonObject {
 	Map<String, Object> nativeRepresentations;
 	String serializedRepresentation;
 	
-	Stringer stringer;
+	Stringer stringer
 	
 	CommonObject(Object nativeValue, GravyType nativeType) {
 		this.nativeType = nativeType;

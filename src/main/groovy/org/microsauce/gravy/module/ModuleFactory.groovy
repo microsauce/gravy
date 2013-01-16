@@ -9,6 +9,7 @@ import org.microsauce.gravy.context.Context
 import org.microsauce.gravy.context.ServiceFactory
 import org.microsauce.gravy.module.groovy.GroovyModuleFactory
 import org.microsauce.gravy.module.javascript.JSModuleFactory
+import org.microsauce.gravy.module.ruby.RubyModuleFactory
 
 abstract class ModuleFactory {
 
@@ -17,7 +18,8 @@ abstract class ModuleFactory {
 	static Map FACTORY_TYPES = [
 		'groovy' : GroovyModuleFactory.class,
 		'js' :  JSModuleFactory.class,
-		'coffee' : JSModuleFactory.class
+		'coffee' : JSModuleFactory.class,
+		'rb' : RubyModuleFactory.class
 	]
 	
 	@CompileStatic static ModuleFactory getInstance(String type) {
@@ -38,7 +40,7 @@ abstract class ModuleFactory {
 		modConfig
 	}
 	
-	private static void completeConfig(ConfigObject config) {
+	private static void completeConfig(ConfigObject config) { // TODO move all this back to config
 		def appRoot = System.getProperty('gravy.appRoot')
 		config.appRoot 				= appRoot
 		config.gravy.refresh		= false

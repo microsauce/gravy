@@ -20,12 +20,12 @@ abstract class Module {
 	
 	ConfigObject moduleConfig
 	ConfigObject applicationConfig
-	ConfigObject config // the effective config: moduleConfig.merge applicationConfig
+	protected ConfigObject config // the effective config: moduleConfig.merge applicationConfig
 	
 	String name 
 	Boolean isApp
 	ClassLoader classLoader 
-	File folder 
+	protected File folder 
 	File scriptFile
 	ServiceFactory serviceFactory
 	String renderUri
@@ -62,9 +62,10 @@ abstract class Module {
 
 	@CompileStatic public void addEnterpriseService(String uriPattern, String method, Object rawHandler, List<DispatcherType> dispatch) {
 		log.info "addEnterpriseService: uri: $uriPattern - method: $method - dispatch: $dispatch"
+println "#uripattern $uriPattern - dispatch - $dispatch"		
 		EnterpriseService service = context.findServiceByUriString(uriPattern)
 		if ( service ) {
-			Handler thisHandler = HandlerFactory.getHandlerFactory(this.class).makeHandler(rawHandler, scriptContext)
+			Handler thisHandler = HandlerFactory.getHandlerFactory(this.class.name).makeHandler(rawHandler, scriptContext)
 			thisHandler.module = this
 			service.handlers[method] = thisHandler
 		} else {

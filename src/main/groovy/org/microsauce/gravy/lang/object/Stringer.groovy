@@ -4,6 +4,7 @@ import groovy.transform.CompileStatic
 
 import org.microsauce.gravy.lang.groovy.GroovySerializer
 import org.microsauce.gravy.lang.javascript.JSSerializer
+import org.microsauce.gravy.lang.ruby.RubySerializer
 
 class Stringer {
 	
@@ -21,6 +22,7 @@ class Stringer {
 		serializers = new HashMap<String, Serializer>();
 		serializers.put(GravyType.GROOVY.type, new GroovySerializer());
 		serializers.put(GravyType.JAVASCRIPT.type, JSSerializer.getInstance());
+		serializers.put(GravyType.RUBY.type, RubySerializer.getInstance());
 	}
 	
 	@CompileStatic Object parse(String string, GravyType context) {

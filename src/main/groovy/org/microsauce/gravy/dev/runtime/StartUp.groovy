@@ -25,13 +25,16 @@ class StartUp {
 
 		System.setProperty('gravy.env', environment)
 		System.setProperty('gravy.devMode', 'true')
-
+		
 		def port = commandLine.optionValue 'port'
-		def hostName = commandLine.optionValue 'host'
+		if (port) System.setProperty('jetty.port', port)
+		def host = commandLine.optionValue 'host'
+		if (host) System.setProperty('jetty.host', host)
+		def cp = commandLine.optionValue 'cp'
+		if (cp) System.setProperty('jetty.cp', cp)
 		def clConfig = commandLineEnv(commandLine)
 
 		def projectPath = System.getProperty('user.dir')
-//		System.setProperty('gravy.appRoot', DevUtils.appDeployPath(projectPath) ) //System.getProperty('user.dir'))
 
 		clConfig.each {key, value ->
 			System.setProperty(key, value)

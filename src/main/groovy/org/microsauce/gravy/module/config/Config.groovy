@@ -60,9 +60,9 @@ class Config {
 
 		config.appRoot 				= appRoot
 
-		config.jetty.contextPath 	= System.getProperty('jetty.contextPath') ?: config.jetty.contextPath ?: '/'
-		config.jetty.port 			= System.getProperty('jetty.port') ?: config.tomcat.port ?: 8080
-		config.jetty.host 			= System.getProperty('jetty.host') ?: config.tomcat.host ?: 'localhost'
+		config.jetty.contextPath 	= System.getProperty('jetty.cp') ?: config.jetty.contextPath ?: '/'
+		config.jetty.port 			= System.getProperty('jetty.port') ?: config.jetty.port ?: 8080
+		config.jetty.host 			= System.getProperty('jetty.host') ?: config.jetty.host ?: 'localhost'
 
 		config.gravy.refresh		= System.getProperty('gravy.refresh') ?: config.gravy.refresh ?: true
 		config.gravy.viewUri		= System.getProperty('gravy.viewUri') ?: config.gravy.viewUri ?: '/view/renderer'

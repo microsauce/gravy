@@ -75,7 +75,8 @@ class ContextBuilder {
 			if ( file.isFile() && (
 					file.name.equals('application.groovy') || 
 					file.name.equals('application.coffee') || 
-					file.name.equals('application.js')
+					file.name.equals('application.js') ||
+					file.name.equals('application.rb')
 			))
 				application << file		
 		}

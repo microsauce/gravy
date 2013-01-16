@@ -25,19 +25,22 @@ import org.mozilla.javascript.NativeFunction
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.ScriptableObject
 
+/**
+ * 
+ * @author microsuace
+ *
+ */
 class JSHandler extends Handler {
 
 	ScriptableObject scope 
 	NativeFunction callBack
 	
-	NativeFunction parseJson
 	NativeFunction executeHandler
 	Context ctx
 	
 	JSHandler(NativeFunction callBack, ScriptableObject scope) {
 		this.callBack = callBack
 		this.scope = scope
-		this.parseJson =  scope.get('parseJson', scope)
 		this.executeHandler = scope.get('executeHandler', scope)
 	}
 	

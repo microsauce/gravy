@@ -46,6 +46,18 @@ do
   	cp="$cp$separator$f"
 done
 
+JARS="$GRAVY_HOME/lib/jruby/*"
+for f in $JARS
+do
+	separator=":"
+	if [ "$first" = "first" ]; then
+		separator=""
+		first=""
+	fi
+
+  	cp="$cp$separator$f"
+done
+
 JARS="$JAVA_HOME/lib/*.jar"
 for f in $JARS
 do
