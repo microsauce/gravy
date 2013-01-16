@@ -201,8 +201,9 @@ add_service = Proc.new { |uri_pattern, method, dispatch, &block|
 
 module GravyModule
   
-  def self.init(add_service)
+  def self.init(add_service, conf)
     @@add_service = add_service
+    @@conf = conf
   end
 
   #
@@ -213,13 +214,29 @@ module GravyModule
     @@add_service.call uri_pattern, 'get', dispatch, &block
   end
   
+  def post(uri_pattern, dispatch = [], &block)
+    @@add_service.call uri_pattern, 'post', dispatch, &block
+  end
+  
+  def put(uri_pattern, dispatch = [], &block)
+    @@add_service.call uri_pattern, 'put', dispatch, &block
+  end
+  
+  def delete(uri_pattern, dispatch = [], &block)
+    @@add_service.call uri_pattern, 'delete', dispatch, &block
+  end
+
+  def route(uri_pattern, dispatch = [], &block)
+    @@add_service.call uri_pattern, 'default', dispatch, &block
+  end
+  
   def conf(key)
-    return j_properties.getProperty key
+    return @@conf.getProperty key
   end
 
 end
 
-GravyModule.init(add_service)
+GravyModule.init(add_service, j_properties)
 
 include GravyModule
 

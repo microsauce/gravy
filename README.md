@@ -2,7 +2,7 @@
 Gravy
 ===
 
-Gravy is a framework for rapid development of web applications in Groovy, JavaScript, or CoffeeScript 
+Gravy is a framework for rapid development of web applications in Groovy, JavaScript, CoffeeScript, and/or Ruby 
 on the Java Enterprise (a.k.a the meat-and-potatoes).  
 
 Hello Groovy:
@@ -22,6 +22,12 @@ Hello CoffeeScript:
 	get '/hello/:name', (req, res) ->
 		res.write "Hello #{@name}!"
 		
+Hello Ruby:
+
+	get '/hello/:name' do
+		res.write "Hello #{name}!"
+	end	
+		
 ## Getting Started
 
 ### Prerequisites
@@ -40,7 +46,7 @@ Hello CoffeeScript:
 
 ### Your First Application
 
-A Gravy application can be as simple as a single script (application.groovy|js|coffee), but most Gravy 
+A Gravy application can be as simple as a single script (application.groovy|js|coffee|rb), but most Gravy 
 applications will also employ modules, views (templates), static content (images, css, js), Java and 
 Groovy sources, and custom configuration. To create a sample application which demonstrates each of 
 these additional components run the following command:
@@ -61,15 +67,15 @@ is as follows:
 	    |   |_ test 
 	    |       |_ groovy                  - groovy test scripts
 	    |       |_ javascript              - javascript/coffeescript test scripts
+	    |       |_ ruby                    - ruby test scripts
 	    |- view                            - view templates
 	    |- conf                            - configuration (config.groovy)
 	    |- webroot                         - static resources (html, css, js, images, etc)
 	    |   |_ WEB-INF         
 	    |       |_ web.xml                 - the application deployment descriptor, for most
 	    |
-	    |- scripts                         - groovy sub-scripts/JS libraries
-	    |- modules                         - application modules
-	    |_ lib                             - application jar files
+	    |- modules                         - modules (application fragments)
+	    |_ lib                             - jar files, JS
 
 To run your new Gravy app execute the gravy command:
 
@@ -90,8 +96,8 @@ modification.  Make a change, refresh your browser, and benefit from the instant
 ### Modules
 
 A Gravy application is composed of one or more modules.  Modules define a set of web services (similar in concept 
-to a Servlet 3.0 'web fragment') or they export functionality to the 'app' module (but not both).  Module 
-exports are bound to the app script by module-name.  There is no support for cross language exports.
+to a Servlet 3.0 'web fragment') and/or they export functionality to the 'app' module.  Module exports are bound to 
+the app script by module-name.
 
 ## The Finer Points
 
