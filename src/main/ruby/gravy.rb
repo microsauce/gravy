@@ -6,6 +6,7 @@ Note: all tokens with a 'j_' prefix are injected into the ruby runtime from java
 
 =end
 
+require 'date' 
 require 'json'
 require 'ostruct'
 require 'java'
@@ -16,8 +17,8 @@ java_import java.util.ArrayList
 java_import java.util.HashMap
 
 #TODO verify
-ENV["RUBYLIB"] = j_mod_lib_path
-ENV["GEM_HOME"] = j_gem_home
+#ENV["RUBYLIB"] = j_mod_lib_path
+#ENV["GEM_HOME"] = j_gem_home
 
 scope = self
 services = OpenStruct.new
@@ -30,21 +31,23 @@ INCLUDE = DispatcherType::INCLUDE
 # patch Object
 class Object
 
-  def to_hash
-    hash = Hash.new
-    self.instance_variables.each do |element|
-        element_value = instance_variable_get(element)
-        value = nil
-        if element_value.is_a? Numeric or element_value.is_a? String or element_value.is_a? Date
-          value = element_value
-      else 
-        value = element_value.to_hash
-      end
-        hash[element[1, element.length].to_sym] = value
+  def to_serializable 
+    if self.is_a? Numeric or self.is_a? String
+      return self
+    elsif self.is_a? Date
+      return self.new_offset(0)
+    elsif self.is_a? Array
+      return self.collect {|element| element.to_serializable}
     end
 
+    hash = Hash.new
+    self.instance_variables.each do |var|
+      element_value = instance_variable_get(var)
+      hash[var[1, var.length].to_sym] = element_value.to_serializable
+    end
     return hash
   end
+  
 end
 
 # patch the hash
@@ -59,19 +62,26 @@ class Hash
   end
  
   private
-    def convert_to_ostruct_recursive(obj)
-      result = obj
-      if result.is_a? Hash
-        result = result.dup.with_sym_keys
-        result.each  do |key, val| 
-          result[key] = convert_to_ostruct_recursive(val)
-        end
-        result = OpenStruct.new result       
-      elsif result.is_a? Array
-         result = result.collect { |r| convert_to_ostruct_recursive(r) }
+  def convert_to_ostruct_recursive(obj)
+    result = obj
+    if result.is_a? Hash
+      result = result.dup.with_sym_keys
+      result.each  do |key, val| 
+        result[key] = convert_to_ostruct_recursive(val)
       end
-      return result
+      result = OpenStruct.new result       
+    elsif result.is_a? Array
+       result = result.collect { |r| convert_to_ostruct_recursive(r) }
     end
+    if obj.is_a? String and obj.length >= 19
+      sub_str = obj[0,20]
+      if sub_str =~ /[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}/
+        result = DateTime.strptime(sub_str, '%Y-%m-%dT%H:%M:%S').new_offset(0)
+      end
+    end
+    return result
+  end
+  
 end
 
 #
@@ -82,7 +92,7 @@ class Serializer
     return JSON.parse(str).to_ostruct_recursive()
   end
   def to_string obj
-    return  obj.to_hash.to_json
+    return  obj.to_serializable.to_json
   end
 end
 
@@ -240,13 +250,13 @@ GravyModule.init(add_service, j_properties)
 
 include GravyModule
 
-# TODO convert to Ruby
 class Imports
-  def initialize(import_map)
+  def initialize(import_map) # TODO this is brokin
+puts "\timport_map: #{import_map}"    
     import_map.each do |k, v|
 #      self.define_attribute k, v
 #      self.define_attribute 'handler', v
-      @handler = v
+      @handler = v # TODO this looks broken
       self.define_attribute k, Proc do |parm_1,parm_2,parm_3,parm_4,parm_5,parm_6,parm_7|
         return @handler.call(
           common_obj(parm_1),
@@ -269,6 +279,7 @@ end
 
 class ImportExport
   def prepare_imports(j_all_imports, scope) 
+puts "imports: #{j_all_imports}"    
     module_iterator = j_all_imports.entrySet().iterator() # TODO
     while module_iterator.hasNext() 
       this_module_exports = module_iterator.next()

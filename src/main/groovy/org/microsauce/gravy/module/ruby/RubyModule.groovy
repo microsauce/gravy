@@ -3,6 +3,7 @@ package org.microsauce.gravy.module.ruby;
 import groovy.transform.CompileStatic
 
 import org.jruby.RubyObject
+import org.jruby.embed.LocalContextScope
 import org.jruby.embed.LocalVariableBehavior
 import org.jruby.embed.ScriptingContainer
 import org.microsauce.gravy.context.Handler
@@ -14,16 +15,15 @@ public class RubyModule extends Module {
 	private ScriptingContainer container;
 	
 	RubyModule() {
-		container = new ScriptingContainer(LocalVariableBehavior.PERSISTENT);
-		List paths = new ArrayList();
-		paths.add("gems/json-1.7.6-java/lib/"); // TODO experiment with this
-		paths.add("gems/optruct-0.0.1/lib/");
-		container.setLoadPaths(paths)
+		container = new ScriptingContainer(LocalContextScope.CONCURRENT, LocalVariableBehavior.PERSISTENT);
 	}
 	
 	@Override
 	@CompileStatic protected Object doLoad(Map imports) {
-
+		List<String> paths = [this.folder.absolutePath+'/lib']
+println "module lib path: ${this.folder.absolutePath+'/lib'}"
+		container.setLoadPaths(paths)
+		
 		scriptContext = container;
 		
 		container.put("j_gravy_module", this);
