@@ -25,7 +25,7 @@ abstract class JSRunner {
 
 		String ringoJarPath = null
 		String appRoot = System.getProperty("gravy.appRoot")
-		if ( appRoot ) // TODO this is broken (not pointing to WEB-INF)
+		if ( appRoot ) 
 			ringoJarPath = appRoot+'/lib/ringo-modules.jar'
 		else if ( System.getenv()['GRAVY_HOME'] )
 			ringoJarPath = System.getenv()['GRAVY_HOME']+'/lib/ringojs/ringo-modules.jar'

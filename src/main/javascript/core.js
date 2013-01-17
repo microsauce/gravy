@@ -17,15 +17,13 @@ global.services = new Object();
 /**
  * JavaScript JSON serialization functions
  */
-global.datePatternJS = new RegExp('[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z')
-global.datePatternJV = new RegExp('[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\+[0-9]{4}')
+global.datePattern  = new RegExp('[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}')
 global.reviver = function (key, value) {
-    if (typeof(value)=='string') {
-        if ( datePatternJS.test(value) ) {
-            return new Date(Date.parse(value))
-        }
-        else if ( datePatternJV.test(value) ) {
-            var jsValue = value.replace(/\\+[0-9]{4}/g, '.000Z')
+    if (typeof(value)=='string' && value.length >= 19) {
+    	var subString = value.substring(0, 19)
+    	
+        if ( datePattern.test(subString) ) {
+            var jsValue = subString+'.000Z'
             return new Date(Date.parse(jsValue))
         }
     }

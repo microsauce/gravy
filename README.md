@@ -28,6 +28,10 @@ Hello Ruby:
 		res.write "Hello #{name}!"
 	end	
 		
+## Status
+
+Gravy is currently Alpha software.  Programming and tooling API's are still evolving, but near completion. 
+
 ## Getting Started
 
 ### Prerequisites

@@ -2,7 +2,7 @@
 
 This script defines the Gravy API for Ruby
 
-Note: all tokens with a 'j_' prefix are injected into the ruby runtime from java 
+Note: all tokens with a 'j_' prefix are injected or passed into the ruby runtime from java 
 
 =end
 
@@ -48,6 +48,24 @@ class Object
     return hash
   end
   
+  def metaclass
+    class << self
+      self
+    end
+  end
+  
+  def define_attributes(hash)
+    hash.each_pair { |key, value|
+      metaclass.send :attr_accessor, key
+      send "#{key}=".to_sym, value
+    }
+  end
+  
+  def define_attribute(key, value)
+    metaclass.send :attr_accessor, key
+    send "#{key}=".to_sym, value
+  end
+
 end
 
 # patch the hash
@@ -116,27 +134,6 @@ class CallbackWrapper
   
 end
 
-class Object
-  
-  def metaclass
-    class << self
-      self
-    end
-  end
-
-  def define_attributes(hash)
-    hash.each_pair { |key, value|
-      metaclass.send :attr_accessor, key
-      send "#{key}=".to_sym, value
-    }
-  end
-
-  def define_attribute(key, value)
-    metaclass.send :attr_accessor, key
-    send "#{key}=".to_sym, value
-  end
-  
-end
 
 class RubyHandler
 
