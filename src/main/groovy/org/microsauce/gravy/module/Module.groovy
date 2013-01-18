@@ -62,7 +62,7 @@ abstract class Module {
 
 	@CompileStatic public void addEnterpriseService(String uriPattern, String method, Object rawHandler, List<DispatcherType> dispatch) {
 		log.info "addEnterpriseService: uri: $uriPattern - method: $method - dispatch: $dispatch"
-println "#uripattern $uriPattern - dispatch - $dispatch"		
+	
 		EnterpriseService service = context.findServiceByUriString(uriPattern)
 		if ( service ) {
 			Handler thisHandler = HandlerFactory.getHandlerFactory(this.class.name).makeHandler(rawHandler, scriptContext)

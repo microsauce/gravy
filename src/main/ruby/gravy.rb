@@ -15,10 +15,7 @@ java_import javax.servlet.DispatcherType
 java_import org.microsauce.gravy.lang.object.CommonObject
 java_import java.util.ArrayList
 java_import java.util.HashMap
-
-#TODO verify
-#ENV["RUBYLIB"] = j_mod_lib_path
-#ENV["GEM_HOME"] = j_gem_home
+java_import org.microsauce.gravy.lang.object.GravyType
 
 scope = self
 exp = OpenStruct.new
@@ -248,14 +245,12 @@ GravyModule.init(add_service, j_properties)
 include GravyModule
 
 class Imports
-  def initialize(import_map) # TODO this is brokin
-puts "\timport_map: #{import_map}"    
+  def initialize(import_map) 
     import_map.each do |k, v|
-#      self.define_attribute k, v
-#      self.define_attribute 'handler', v
-      @handler = v # TODO this looks broken
-      self.define_attribute k, Proc do |parm_1,parm_2,parm_3,parm_4,parm_5,parm_6,parm_7|
-        return @handler.call(
+      self.define_attribute "#{k}_handler", v
+      self.define_singleton_method k do |parm_1=nil,parm_2=nil,parm_3=nil,parm_4=nil,parm_5=nil,parm_6=nil,parm_7=nil|
+
+        self.send("#{k}_handler".to_sym).call(
           common_obj(parm_1),
           common_obj(parm_2),
           common_obj(parm_3),
@@ -263,26 +258,38 @@ puts "\timport_map: #{import_map}"
           common_obj(parm_5),
           common_obj(parm_6),
           common_obj(parm_7)
-        )
+        )    
       end
 
     end
   end
   
   def common_obj(obj) 
-      return CommonObject.new(obj, GravyType.RUBY)
+    if obj
+      return CommonObject.new(obj, GravyType::RUBY)
+    else
+      return nil # TODO is jruby nil equivelent to or converted to java null ???
+    end
   end
 end
 
 class ImportExport
+
   def prepare_imports(j_all_imports, scope) 
-    module_iterator = j_all_imports.entrySet().iterator() # TODO
+    module_iterator = j_all_imports.entrySet().iterator() 
+    imported_modules = HashMap.new
     while module_iterator.hasNext() 
       this_module_exports = module_iterator.next()
       module_name = this_module_exports.getKey()
       module_imports = this_module_exports.getValue()
-      scope.define_attribute module_name, Imports.new(module_imports) 
-    end
+      #   adding the mod identifier to scope [global] in this way did not work,
+      #   the identifier was accessible in the top level scope but not in the 
+      #   handler closure 
+      #scope.define_attribute module_name, Imports.new(module_imports)
+      
+      imported_modules.put module_name, Imports.new(module_imports)
+    end 
+    return imported_modules
   end
   
   def prepare_exports(exports)  # service exports 

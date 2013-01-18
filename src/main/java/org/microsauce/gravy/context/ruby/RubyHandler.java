@@ -57,7 +57,7 @@ class RubyHandler extends Handler {
 			GravyHttpServletResponse jsRes = patchResponse(req, res, module);
 
 			return container.callMethod(callBack, "invoke", 
-					new Object[] {/*callBack,*/ jsReq, jsRes, handlerBinding.getParamMap(), handlerBinding.getParamList(), objectBinding});
+					new Object[] {jsReq, jsRes, handlerBinding.getParamMap(), handlerBinding.getParamList(), objectBinding});
 	}
 	
 	protected GravyType context() {

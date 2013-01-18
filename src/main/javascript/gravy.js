@@ -233,22 +233,23 @@ global.commonObj = function(nativeObj) {
  * called by the 'app' module
  */
 global.Imports = function(importMap) {
-	var exportIterator = importMap.entrySet().iterator()
+	var exportIterator = importMap.entrySet().iterator();
 	while ( exportIterator.hasNext() ) {
-		var keyValue = exportIterator.next()
-		var exp = keyValue.getKey()
-		this.handler = keyValue.getValue() // TODO this looks broken 
-		this[exp] = function(parm1,parm2,parm3,parm4,parm5,parm6,parm7) {
-			return this.handler.call(
-				commonObj(parm1),
-				commonObj(parm2),
-				commonObj(parm3),
-				commonObj(parm4),
-				commonObj(parm5),
-				commonObj(parm6),
-				commonObj(parm7)
-			)
-		}
+		var keyValue = exportIterator.next();
+		var exp = keyValue.getKey();
+		(function(expName, imp, handler) {
+			imp[expName] = function(parm1,parm2,parm3,parm4,parm5,parm6,parm7) {
+				return handler.call(
+					commonObj(parm1),
+					commonObj(parm2),
+					commonObj(parm3),
+					commonObj(parm4),
+					commonObj(parm5),
+					commonObj(parm6),
+					commonObj(parm7)
+				);
+			}
+		})(exp, this, keyValue.getValue());
 	}
 
 }

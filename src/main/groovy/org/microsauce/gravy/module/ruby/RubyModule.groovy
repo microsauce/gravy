@@ -52,7 +52,10 @@ public class RubyModule extends Module {
 	@CompileStatic private void prepareImports(Map<String, Handler> imports) {
 		RubyObject importExport = (RubyObject)container.get("import_export");
 		RubyObject scope = (RubyObject)container.get("scope");
-		container.callMethod(importExport, "prepare_imports", [imports, scope] as Object[]);
+		Object importMap = (Map)container.callMethod(importExport, "prepare_imports", [imports, scope] as Object[]);
+		importMap.each { String modName, Object modImport -> 
+			container.put(modName, modImport)
+		}
 	}
 
 	private Map<String, Handler> prepareExports(RubyObject exports) {
