@@ -8,7 +8,7 @@
 /**
  * The module services object.
  */
-global.services = new Object();
+global.exp = new Object();
 
 /********************************************************
  * documented utility/convenience functions
@@ -31,22 +31,10 @@ global.reviver = function (key, value) {
     return value
 }
 
-/*global.replacer = function(key, value) {
-	if (Object.prototype.toString.call(value)==='[object Date]') { 
-		// toISOString minus 'millis' and Z - these are non-standard
-		value = value.toISOString().substring(0, 19)
-	}
-	return value
-}
-*/
 global.parseJson = function(jsonText) {
 	return JSON.parse(jsonText, reviver)
 }
 
-/*global.stringify = function(object) {
-	return JSON.stringify(object, replacer)
-}
-*/
 global.getGlobal = function() {
 	return (function(){
 		return this;

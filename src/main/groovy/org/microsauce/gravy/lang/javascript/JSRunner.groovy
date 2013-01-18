@@ -60,7 +60,7 @@ abstract class JSRunner {
 		
 		// evaluate application.js
 		engine.runScript(scriptUri, [] as String[])
-		Scriptable services = (Scriptable) global.get('services', global)
+		Scriptable services = (Scriptable) global.get('exp', global)
 		returnValue = services
 		returnValue
 	}

@@ -21,7 +21,7 @@ java_import java.util.HashMap
 #ENV["GEM_HOME"] = j_gem_home
 
 scope = self
-services = OpenStruct.new
+exp = OpenStruct.new
 
 REQUEST = DispatcherType::REQUEST
 FORWARD = DispatcherType::FORWARD
@@ -276,7 +276,6 @@ end
 
 class ImportExport
   def prepare_imports(j_all_imports, scope) 
-puts "imports: #{j_all_imports}"    
     module_iterator = j_all_imports.entrySet().iterator() # TODO
     while module_iterator.hasNext() 
       this_module_exports = module_iterator.next()

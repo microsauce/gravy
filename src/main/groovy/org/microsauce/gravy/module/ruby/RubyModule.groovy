@@ -15,13 +15,14 @@ public class RubyModule extends Module {
 	private ScriptingContainer container;
 	
 	RubyModule() {
-		container = new ScriptingContainer(LocalContextScope.CONCURRENT, LocalVariableBehavior.PERSISTENT);
+		// SINGLETHREADED is 'thread indifferent' and not a singleton
+		container = new ScriptingContainer(LocalContextScope.SINGLETHREAD, LocalVariableBehavior.PERSISTENT);
 	}
 	
 	@Override
 	@CompileStatic protected Object doLoad(Map imports) {
+
 		List<String> paths = [this.folder.absolutePath+'/lib']
-println "module lib path: ${this.folder.absolutePath+'/lib'}"
 		container.setLoadPaths(paths)
 		
 		scriptContext = container;
@@ -44,7 +45,7 @@ println "module lib path: ${this.folder.absolutePath+'/lib'}"
 			throw new RuntimeException(t);
 		}
 		
-		RubyObject exports = (RubyObject)container.get("services");
+		RubyObject exports = (RubyObject)container.get("exp");
 		return prepareExports(exports);
 	}
 
