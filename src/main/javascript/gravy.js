@@ -5,12 +5,11 @@ This script defines the Gravy JavaScript API
 Script bindings:
 
 'gravyModule'  	- the calling module
-'log'			- the application logger
-'out'			- the console PrintStream
+'log'           - the application logger
+'out'           - the console PrintStream
 'config'        - a Java Properties object
-'util'			- a utility class - IO functions - etc
 
-*******************************************************/
+ *******************************************************/
 
 /*
  Java imports
@@ -31,86 +30,88 @@ importPackage(org.microsauce.gravy.lang.object)
  * http methods
  */
 
-var GET  	= 'get'
-var POST 	= 'post'
-var PUT 	= 'put'
+var GET = 'get'
+var POST = 'post'
+var PUT = 'put'
 var OPTIONS = 'post'
-var DELETE 	= 'delete'
+var DELETE = 'delete'
 
 /********************************************************
  * documented global variables
  ********************************************************/
-	
+
 /*
  * dispatch types
  */
 
 global.REQUEST = DispatcherType.REQUEST
 global.FORWARD = DispatcherType.FORWARD
-global.ERROR   = DispatcherType.ERROR
+global.ERROR = DispatcherType.ERROR
 global.INCLUDE = DispatcherType.INCLUDE
 
 global.addEnterpriseService = function(uriPattern, method, callBack, dispatch) {
 	var dispatchList = new ArrayList()
-	if ( dispatch == null || dispatch.length == 0 ) {
+	if (dispatch == null || dispatch.length == 0) {
 		dispatchList.add(REQUEST)
 		dispatchList.add(FORWARD)
 	} else {
-		for ( i = 0; i < dispatch.length; i++  ) {
+		for (i = 0; i < dispatch.length; i++) {
 			dispatchList.add(dispatch[i])
 		}
 	}
-	
-	return gravyModule.addEnterpriseService(uriPattern, method, callBack, dispatchList)
+
+	return gravyModule.addEnterpriseService(uriPattern, method, callBack,
+			dispatchList)
 }
 
-global.executeHandler = function(callBack, req, res, paramMap, paramList, objectBinding) {
+global.executeHandler = function(callBack, req, res, paramMap, paramList,
+		objectBinding) {
 	var jsHandler = new NativeJSHandler(callBack)
 	jsHandler.invokeHandler(req, res, paramMap, paramList, objectBinding)
 }
 
 global.NativeJSHandler = function(handler) {
-	
-    this.handler = handler
-    
-    this.invokeHandler = function(req, res, paramMap, paramList, objectBinding) {
 
-    	// add uri parameters to 'this'
-    	if ( paramMap != null ) {
-	        var iterator = paramMap.keySet().iterator()
-	        while (iterator.hasNext()) {
-	            var key = iterator.next()
-	            this[key] = paramMap.get(key)
-	        }
-    	}
-    	
-        // create the splat array
-    	if ( paramList != null ) {
-	        var iterator = paramList.iterator()
-	        this.splat = []
-	        while (iterator.hasNext()) {
-	            var next = iterator.next()
-	            this.splat.push(next)
-	        }
-    	}
+	this.handler = handler
 
-    	// build the parameter array
-    	var params = new Array()
-    	if ( req != null && res != null ) {
-    		params.push(req)
-    		params.push(res)
-    	}
-    		
-    	if ( objectBinding != null ) {
-	        var iterator = objectBinding.keySet().iterator()
-	        while (iterator.hasNext()) {
-	            var key = iterator.next()
-	            this[key] = objectBinding.get(key)
-	        }
-    	}
-    	
-        this.handler.apply(this, params)
-    }
+	this.invokeHandler = function(req, res, paramMap, paramList, objectBinding) {
+
+		// add uri parameters to 'this'
+		if (paramMap != null) {
+			var iterator = paramMap.keySet().iterator()
+			while (iterator.hasNext()) {
+				var key = iterator.next()
+				this[key] = paramMap.get(key)
+			}
+		}
+
+		// create the splat array
+		if (paramList != null) {
+			var iterator = paramList.iterator()
+			this.splat = []
+			while (iterator.hasNext()) {
+				var next = iterator.next()
+				this.splat.push(next)
+			}
+		}
+
+		// build the parameter array
+		var params = new Array()
+		if (req != null && res != null) {
+			params.push(req)
+			params.push(res)
+		}
+
+		if (objectBinding != null) {
+			var iterator = objectBinding.keySet().iterator()
+			while (iterator.hasNext()) {
+				var key = iterator.next()
+				this[key] = objectBinding.get(key)
+			}
+		}
+
+		this.handler.apply(this, params)
+	}
 }
 
 /********************************************************
@@ -224,9 +225,10 @@ global.schedule = function(cronString, callBack) {
  */
 
 global.commonObj = function(nativeObj) {
-	if ( nativeObj != null ) { 
+	if (nativeObj != null) {
 		return new CommonObject(nativeObj, GravyType.JAVASCRIPT)
-	} return null
+	}
+	return null
 }
 
 /*
@@ -234,20 +236,15 @@ global.commonObj = function(nativeObj) {
  */
 global.Imports = function(importMap) {
 	var exportIterator = importMap.entrySet().iterator();
-	while ( exportIterator.hasNext() ) {
+	while (exportIterator.hasNext()) {
 		var keyValue = exportIterator.next();
 		var exp = keyValue.getKey();
 		(function(expName, imp, handler) {
-			imp[expName] = function(parm1,parm2,parm3,parm4,parm5,parm6,parm7) {
-				return handler.call(
-					commonObj(parm1),
-					commonObj(parm2),
-					commonObj(parm3),
-					commonObj(parm4),
-					commonObj(parm5),
-					commonObj(parm6),
-					commonObj(parm7)
-				);
+			imp[expName] = function(parm1, parm2, parm3, parm4, parm5, parm6,
+					parm7) {
+				return handler.call(commonObj(parm1), commonObj(parm2),
+					commonObj(parm3), commonObj(parm4), commonObj(parm5),
+					commonObj(parm6), commonObj(parm7));
 			}
 		})(exp, this, keyValue.getValue());
 	}
@@ -256,7 +253,7 @@ global.Imports = function(importMap) {
 
 global.prepareImports = function(allImports, scope) {
 	var moduleIterator = allImports.entrySet().iterator()
-	while ( moduleIterator.hasNext() ) {
+	while (moduleIterator.hasNext()) {
 		var thisModuleExports = moduleIterator.next()
 		var moduleName = thisModuleExports.getKey()
 		var moduleImports = thisModuleExports.getValue()
@@ -267,8 +264,8 @@ global.prepareImports = function(allImports, scope) {
 global.prepareExports = function(exports) { // service exports 
 	var preparedExports = new HashMap()
 	for (exp in exports) {
-		if ( Object.prototype.toString.call( exports[exp] ) == '[object Function]' ) {
-			var handler = new JSHandler(exports[exp], this) 
+		if (Object.prototype.toString.call(exports[exp]) == '[object Function]') {
+			var handler = new JSHandler(exports[exp], this)
 			preparedExports.put(exp, handler)
 		}
 	}

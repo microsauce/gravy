@@ -45,7 +45,9 @@ class CommonObject {
 			serializedRepresentation = stringer.toString(
 				nativeRepresentations.get(nativeType.type), nativeType)
 		}
-		
+println "jsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjson"
+println "json: $serializedRepresentation"		
+println "jsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjson"
 		serializedRepresentation
 	}
 	

@@ -31,6 +31,7 @@ public class RubyModule extends Module {
 		container.put("j_properties", config.toProperties());
 		container.put("j_mod_lib_path", folder.getAbsolutePath()+"/lib");
 		container.put("j_gem_home", config.get("gem_home")); 
+		container.put("j_container", container);
 
 		try {
 			InputStream scriptStream = this.getClass().getResourceAsStream("/gravy.rb");

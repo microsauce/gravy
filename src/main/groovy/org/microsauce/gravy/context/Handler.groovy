@@ -52,7 +52,7 @@ abstract class Handler {
 		Object np1 = nativeObj(parm1)
 		if (np1) parms.add(0, np1)
 		Object result = doExecute(parms)
-println "result: $result"		
+
 		new CommonObject(result, context()).toNative()
 	}
 		

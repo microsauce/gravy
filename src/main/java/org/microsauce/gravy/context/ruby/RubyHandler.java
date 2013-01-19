@@ -33,13 +33,13 @@ class RubyHandler extends Handler {
 	ScriptingContainer container;
 	RubyObject callBack;
 	
-	RubyHandler(RubyObject callBack, ScriptingContainer container) {
+	public RubyHandler(RubyObject callBack, ScriptingContainer container) {
 		this.container = container;
 		this.callBack = callBack;
 	}
 	
 	public Object doExecute(Object params) {
-		return container.callMethod(callBack, "invoke_handler", params);
+		return container.callMethod(callBack, "invoke", params);
 	}
 
 	@Override

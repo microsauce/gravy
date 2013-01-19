@@ -6,6 +6,8 @@ Note: all tokens with a 'j_' prefix are injected or passed into the ruby runtime
 
 =end
 
+# TODO refactor much of this code into GravyModule
+
 require 'date' 
 require 'json'
 require 'ostruct'
@@ -16,6 +18,7 @@ java_import org.microsauce.gravy.lang.object.CommonObject
 java_import java.util.ArrayList
 java_import java.util.HashMap
 java_import org.microsauce.gravy.lang.object.GravyType
+java_import org.microsauce.gravy.context.ruby.RubyHandler
 
 scope = self
 exp = OpenStruct.new
@@ -104,7 +107,11 @@ end
 #
 class Serializer
   def parse str
-    return JSON.parse(str).to_ostruct_recursive()
+    begin
+      return JSON.parse(str).to_ostruct_recursive()
+    rescue JSON::ParserError # this may be a primitive type
+      return JSON.parse("{\"data\" : #{str} }")['data']
+    end
   end
   def to_string obj
     return  obj.to_serializable.to_json
@@ -125,14 +132,29 @@ class CallbackWrapper
 
   # call this method from Java handler
   def invoke(req, res, param_map, param_list, object_binding)
-    ruby_handler = RubyHandler.new(&@block)
+    ruby_handler = NativeRubyHandler.new(&@block)
     ruby_handler.invoke_handler req, res, param_map, param_list, object_binding
   end
   
 end
 
+class ExportCallbackWrapper
+  attr_accessor :call_back
 
-class RubyHandler
+  def initialize(call_back)
+    @call_back = call_back
+  end
+
+  # call this method from Java handler
+  def invoke(args)
+#    ruby_handler = NativeRubyHandler.new(&@block)
+#    ruby_handler.invoke_handler req, res, param_map, param_list, object_binding
+    @call_back.call *args
+  end
+  
+end
+
+class NativeRubyHandler
 
   attr_accessor :block 
   
@@ -186,6 +208,8 @@ class RubyHandler
 
 end
 
+# TODO add this as a private method in GravyModule
+# TODO pass j_gravy_module into the module initializer
 add_service = Proc.new { |uri_pattern, method, dispatch, &block|
   dispatch_list = ArrayList.new
   if dispatch.length == 0 
@@ -197,16 +221,20 @@ add_service = Proc.new { |uri_pattern, method, dispatch, &block|
     end
   end
 
-  call_back = CallbackWrapper.new(uri_pattern, 'GET', &block)
+  call_back = CallbackWrapper.new(uri_pattern, method, &block)
   j_gravy_module.addEnterpriseService(uri_pattern, method, call_back, dispatch_list)
   
 }
 
+add_scheduled_task = Proc.new { |cron_string, &call_back|
+  j_gravy_module.addCronService(cron_string, &callBack)
+}
 
 module GravyModule
   
-  def self.init(add_service, conf)
+  def self.init(add_service, add_scheduled_task, conf)
     @@add_service = add_service
+    @@add_scheduled_task = add_scheduled_task
     @@conf = conf
   end
 
@@ -234,13 +262,18 @@ module GravyModule
     @@add_service.call uri_pattern, 'default', dispatch, &block
   end
   
+  def schedule(cron_string, &block)
+    @@add_service.call 
+    #addCronService(cronString, callBack)
+  end
+  
   def conf(key)
     return @@conf.getProperty key
   end
 
 end
 
-GravyModule.init(add_service, j_properties)
+GravyModule.init(add_service, add_scheduled_task, j_properties)
 
 include GravyModule
 
@@ -275,6 +308,10 @@ end
 
 class ImportExport
 
+  def initialize(container)
+    @container = container
+  end
+  
   def prepare_imports(j_all_imports, scope) 
     module_iterator = j_all_imports.entrySet().iterator() 
     imported_modules = HashMap.new
@@ -282,6 +319,7 @@ class ImportExport
       this_module_exports = module_iterator.next()
       module_name = this_module_exports.getKey()
       module_imports = this_module_exports.getValue()
+      
       #   adding the mod identifier to scope [global] in this way did not work,
       #   the identifier was accessible in the top level scope but not in the 
       #   handler closure 
@@ -294,10 +332,10 @@ class ImportExport
   
   def prepare_exports(exports)  # service exports 
     prepared_exports = HashMap.new
-    exports.each do |this_export|
-      if this_export.is_a? Proc
-        var handler = RubyHandler.new(this_export) 
-        prepared_exports.put(exp, handler)
+    exports.marshal_dump.each do |k,v|
+      if v.is_a? Proc or v.lambda?
+        handler = RubyHandler.new(ExportCallbackWrapper.new(v), @container) #exports[exp], this  
+        prepared_exports.put(k, handler)
       end
     end
     
@@ -306,4 +344,4 @@ class ImportExport
   
 end
 
-import_export = ImportExport.new
+import_export = ImportExport.new(j_container)
