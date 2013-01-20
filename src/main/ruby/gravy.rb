@@ -147,8 +147,20 @@ class ExportCallbackWrapper
 
   # call this method from Java handler
   def invoke(args)
-#    ruby_handler = NativeRubyHandler.new(&@block)
-#    ruby_handler.invoke_handler req, res, param_map, param_list, object_binding
+    @call_back.call *args
+  end
+  
+end
+
+class ScheduldTaskCallbackWrapper
+  attr_accessor :call_back
+
+  def initialize(&call_back)
+    @call_back = call_back
+  end
+
+  # call this method from Java handler
+  def invoke(args)
     @call_back.call *args
   end
   
@@ -227,7 +239,7 @@ add_service = Proc.new { |uri_pattern, method, dispatch, &block|
 }
 
 add_scheduled_task = Proc.new { |cron_string, &call_back|
-  j_gravy_module.addCronService(cron_string, &callBack)
+  j_gravy_module.addCronService(cron_string, ScheduldTaskCallbackWrapper.new(&call_back))
 }
 
 module GravyModule
@@ -263,8 +275,7 @@ module GravyModule
   end
   
   def schedule(cron_string, &block)
-    @@add_service.call 
-    #addCronService(cronString, callBack)
+    @@add_scheduled_task.call cron_string, &block
   end
   
   def conf(key)
