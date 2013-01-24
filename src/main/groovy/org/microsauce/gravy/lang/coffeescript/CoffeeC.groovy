@@ -7,9 +7,8 @@ import java.nio.file.InvalidPathException
 import java.nio.file.Path
 import java.nio.file.Paths
 
-import org.mozilla.javascript.Context
 import org.mozilla.javascript.JavaScriptException
-import org.mozilla.javascript.Scriptable
+import org.ringojs.engine.RhinoEngine
 
 /**
  * 
@@ -18,36 +17,17 @@ import org.mozilla.javascript.Scriptable
  */
 class CoffeeC {
 
-	private Scriptable globalScope;
+	private RhinoEngine engine;
 
-	public CoffeeC(ClassLoader classLoader) {
-		init(classLoader)
+	public CoffeeC(RhinoEngine engine) {
+		this.engine = engine
+		init()
 	}
 	
 	@CompileStatic
-	private init(ClassLoader classLoader) {
-		InputStream inputStream = classLoader.getResourceAsStream("coffee-script.js")
-		try {
-			Reader reader = new InputStreamReader(inputStream, "UTF-8")
-			try {
-				Context context = Context.enter()
-				context.setOptimizationLevel(-1) // Without this, Rhino hits a 64K bytecode limit and fails
-				try {
-					globalScope = context.initStandardObjects()
-					context.evaluateReader(globalScope, reader, "coffee-script.js", 0, null)
-				} finally {
-					Context.exit()
-				}
-			} finally {
-				reader.close()
-			}
-		} catch (Exception e) {
-			throw new RuntimeException(e)
-		} finally {
-			try {
-				inputStream.close()
-			} catch (IOException e) {}
-		}
+	private init() {
+		engine.setOptimizationLevel(-1)
+		engine.runScript('coffee-script.js') 
 	} 
 
 	public URI coffeeScriptToJavaScript(URI coffeeScript) throws JavaScriptException,
@@ -60,22 +40,12 @@ class CoffeeC {
 	}
 
 	public String compile(String coffeeScriptSource) throws JavaScriptException {
-		Context context = Context.enter()
-		try {
-			Scriptable compileScope = context.newObject(globalScope)
-			compileScope.setParentScope(globalScope)
-			compileScope.put("coffeeScriptSource", compileScope, coffeeScriptSource)
-
-			Object src = context.evaluateString(compileScope,
-					String.format("CoffeeScript.compile(coffeeScriptSource);"),
-					"CoffeeScriptCompiler", 0, null)
-			if (src != null) {
-				return src.toString()
-			} else {
-				return null
-			}
-		} finally {
-			Context.exit()
+		engine.getScope().put("coffeeScriptSource", engine.getScope(), coffeeScriptSource)
+		Object src = engine.evaluateExpression("CoffeeScript.compile(coffeeScriptSource);")
+		if (src != null) {
+			return src.toString()
+		} else {
+			return null
 		}
 	}
 

@@ -5,7 +5,6 @@ import groovy.util.logging.Log4j
 
 import org.microsauce.gravy.context.Handler
 import org.microsauce.gravy.lang.javascript.GravyJSRunner
-import org.microsauce.gravy.lang.javascript.JSLoader
 import org.microsauce.gravy.lang.javascript.JSRunner
 import org.microsauce.gravy.lang.javascript.JSSerializer;
 import org.microsauce.gravy.module.Module
@@ -17,7 +16,7 @@ import org.mozilla.javascript.ScriptableObject
 @Log4j
 class JSModule extends Module {
 
-	JSLoader jsModuleLoader
+//	JSLoader jsModuleLoader
 	JSRunner jsRunner
 
 	@Override

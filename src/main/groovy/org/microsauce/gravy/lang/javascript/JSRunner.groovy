@@ -24,14 +24,21 @@ abstract class JSRunner {
 		this.roots = roots
 
 		String ringoJarPath = null
+//		String gravyJarPath = null
 		String appRoot = System.getProperty("gravy.appRoot")
-		if ( appRoot ) 
+		if ( appRoot ) {
 			ringoJarPath = appRoot+'/lib/ringo-modules.jar'
-		else if ( System.getenv()['GRAVY_HOME'] )
+//			gravyJarPath = appRoot+'/lib/gravy.jar'
+		}
+		else if ( System.getenv()['GRAVY_HOME'] ) {
 			ringoJarPath = System.getenv()['GRAVY_HOME']+'/lib/ringojs/ringo-modules.jar'
+//			gravyJarPath = System.getenv()['GRAVY_HOME']+'/lib/gravy.jar'
+		}
 
 		Repository ringoRepo = new ZipRepository(ringoJarPath)
 		RingoConfig config = new RingoConfig(ringoRepo)
+//		if (gravyJarPath)
+//			config.addModuleRepository(new ZipRepository(gravyJarPath))
 		
 		if ( roots ) {
 			roots.each { File thisRoot ->

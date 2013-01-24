@@ -8,6 +8,7 @@ import org.jruby.embed.LocalContextScope
 import org.jruby.embed.LocalVariableBehavior
 import org.jruby.embed.ScriptingContainer
 import org.microsauce.gravy.dev.DevUtils
+import org.microsauce.gravy.lang.coffeescript.CoffeeC
 import org.microsauce.gravy.lang.javascript.CoreJSRunner
 import org.microsauce.gravy.lang.javascript.JSRunner
 
@@ -192,8 +193,36 @@ class Lifecycle {
 			    }
 		    }
 		}
+		
 	}
 
+	private void compileCoffee() {
+		// if JS module type
+		JSRunner js = new CoreJSRunner(null)
+		def engine = js.engine
+		def compiler = new CoffeeC(engine)
+
+		String coffeeScriptUri = projectBasedir+'/application.coffee'
+		String javaScriptUri = projectBasedir+'/application.js'
+		
+		if ( exists(coffeeScriptUri) || exists(javaScriptUri) ) {
+			if (exists(coffeeScriptUri)) {
+				println "\tcompiling $coffeeScriptUri"
+				compiler.coffeeScriptToJavaScript(new File(coffeeScriptUri).toURI())
+			}
+			
+			String libUri = projectBasedir+'/lib'
+			if ( exists(libUri) ) {
+				new File(libUri).eachFileRecurse { thisFile ->
+					if (thisFile.name.endsWith('.coffee')) {
+						println "\tcompiling ${thisFile.absolutePath}"
+						compiler.coffeeScriptToJavaScript(thisFile.toURI())
+					}
+				}
+			}
+		}
+	}
+	
 	boolean test() {
 
 		compile()
@@ -229,13 +258,15 @@ class Lifecycle {
 		rubyScriptRoot.eachFileRecurse { thisFile ->
 			container.runScriptlet(new FileInputStream(thisFile), thisFile.absolutePath)
 		}
+		
+		true // TODO handle errors
 	}
 
 	private ClassLoader testClassLoader() {
 		def urls = [] 
 		def target = new File("${projectBasedir}/target/classes")
 		if ( target.exists() ) {
-			urls << new File("${projectBasedir}/target/classes").toURL()
+			urls << new File("${projectBasedir}/target/classes").toURI().toURL()
 		}
 		target = new File("${projectBasedir}/target/lib")
 		if ( target.exists() ) {
@@ -473,8 +504,14 @@ class Lifecycle {
 
 		if (!skipTests) if (!test()) return
 
-		assemble true
+		println '========================================================================='
+		println '= compile coffee script sources                                         ='
+		println '========================================================================='
 
+		compileCoffee()
+		
+		assemble true
+		
 		println '========================================================================='
 		println '= bundle application as war                                             ='
 		println '========================================================================='
