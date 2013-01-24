@@ -24,7 +24,7 @@ class JSModule extends Module {
 	@CompileStatic
 	protected Object doLoad(Map<String, Handler> imports) {
 
-		jsRunner = new GravyJSRunner([this.folder, new File(folder, '/scripts')] as List<File>)
+		jsRunner = new GravyJSRunner([this.folder, new File(folder, '/lib')] as List<File>)
 		scriptContext = jsRunner.global
 		JSSerializer.initInstance(jsRunner.global)
 

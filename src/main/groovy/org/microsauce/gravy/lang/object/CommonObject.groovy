@@ -8,6 +8,10 @@ import groovy.transform.CompileStatic
  * This class encapsulates an object utilized by any or all supported
  * language environments (Groovy and JavaScript currently).  
  * 
+ * All Jruby objects are bound to a particular ruby runtime.  Therefore ruby objects
+ * must always be serialized (even when forwarding a request to another ruby handler).
+ * Ruby objects are eagerly serialized.  
+ * 
  * @author jboone
  */
 class CommonObject {
@@ -23,7 +27,7 @@ class CommonObject {
 		nativeRepresentations = new HashMap<String, Object>();
 		nativeRepresentations.put(nativeType.type, nativeValue);
 		this.stringer = Stringer.getInstance();  
-		if (nativeType.type == GravyType.RUBY.type) toString()
+		if (nativeType.type == GravyType.RUBY.type) toString() // eager serialize Ruby
 	}
 	
 	@CompileStatic Object value(GravyType context) {

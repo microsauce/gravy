@@ -24,7 +24,7 @@ class ModuleScriptDecorator extends ScriptDecorator {
 		if (moduleFolder.exists()) {
 			script.binding.config = modConfig config, script.name, moduleUri
 			script.roots << moduleUri
-			script.roots << moduleUri+"${SLASH}scripts"
+			script.roots << moduleUri+"${SLASH}lib"
 
 			def libFolderUri = moduleUri+"${SLASH}lib"
 			def libFolder = new File(libFolderUri)

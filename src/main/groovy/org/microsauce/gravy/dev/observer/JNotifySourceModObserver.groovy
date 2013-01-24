@@ -35,8 +35,8 @@ class JNotifySourceModObserver implements SourceModObserver {
 
     	if (exists(projectFolder)) 
     		JNotify.addWatch(projectFolder, mask, false, scriptListenter)
-    	if (exists("${projectFolder}/scripts")) 
-    		JNotify.addWatch("${projectFolder}/scripts", mask, false, scriptListenter)
+    	if (exists("${projectFolder}/lib")) 
+    		JNotify.addWatch("${projectFolder}/lib", mask, false, scriptListenter)
     	if (exists("${projectFolder}/src/main")) 
     		JNotify.addWatch("${projectFolder}/src/main", mask, true, sourceListener)
 

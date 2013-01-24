@@ -33,9 +33,9 @@ class GroovyModule extends Module {
 		script.sourceUri = scriptFile.absolutePath
 		if ( folder.exists() ) {
 			script.roots << folder.absolutePath
-			File scriptsFolder = new File(folder, '/scripts')
+			File scriptsFolder = new File(folder, '/lib')
 			if ( scriptsFolder.exists() )
-				script.roots << folder.absolutePath+"/scripts"
+				script.roots << folder.absolutePath+"/lib"
 		}
 		addClosure script.binding
 		GroovyAPI.module = this

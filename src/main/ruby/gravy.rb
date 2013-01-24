@@ -20,19 +20,6 @@ java_import java.util.HashMap
 java_import org.microsauce.gravy.lang.object.GravyType
 java_import org.microsauce.gravy.context.ruby.RubyHandler
 
-#
-# moving to CONCURRENT / TRANSIENT model - prevent api script from running more than once
-#
-
-#exp = OpenStruct.new
-#if defined? ruby_api_initialized
-#  puts "Gravy runtime already initialized"
-#  exit 0
-#end
-  
-
-#ruby_api_initialized = true
-
 scope = self
 
 REQUEST = DispatcherType::REQUEST

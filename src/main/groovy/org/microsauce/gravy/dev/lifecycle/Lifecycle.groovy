@@ -209,7 +209,7 @@ class Lifecycle {
 		println '========================================================================='
 	
 		def jsScriptRoot = new File(projectBasedir, '/src/test/javascript')
-		JSRunner testRunner = new CoreJSRunner([jsScriptRoot, new File(projectBasedir, '/scripts')])
+		JSRunner testRunner = new CoreJSRunner([jsScriptRoot, new File(projectBasedir, '/lib')])
 		jsScriptRoot.eachFileRecurse { thisFile -> 
 			if ( thisFile.isFile() && !thisFile.name.endsWith('.coffee.js') ) {
 				testRunner.run(thisFile.absolutePath, null)
@@ -396,11 +396,11 @@ class Lifecycle {
 			def confFolder = webInfMod+'/conf'
 			link confFolder, confroot
 		}
-		def scriptsroot = modPath+'/scripts'
-		if ( exists(scriptsroot) ) {
-			def scriptsFolder = webInfMod+'/scripts'
-			link scriptsFolder, scriptsroot
-		}
+//		def scriptsroot = modPath+'/scripts'
+//		if ( exists(scriptsroot) ) {
+//			def scriptsFolder = webInfMod+'/scripts'
+//			link scriptsFolder, scriptsroot
+//		}
 		def libroot = modPath+'/lib'
 		if ( exists(libroot) ) {
 			def libFolder = webInfMod+'/lib'
@@ -489,7 +489,7 @@ class Lifecycle {
 		        include(name:"webroot/**")
 		        include(name:"conf/**")
 		        include(name:"lib/**")
-		        include(name:"scripts/**")
+//		        include(name:"scripts/**")
 		    }
 		}
 
@@ -552,7 +552,7 @@ class Lifecycle {
 		        include(name:"webroot/**")
 		        include(name:"conf/**")
 		        include(name:"lib/**")
-		        include(name:"scripts/**")
+//		        include(name:"scripts/**")
 		    }
 		}
 
