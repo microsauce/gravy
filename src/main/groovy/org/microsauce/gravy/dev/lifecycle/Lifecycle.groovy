@@ -4,9 +4,12 @@ import java.nio.file.*
 import java.nio.file.attribute.*
 
 import org.codehaus.groovy.tools.RootLoader
+import org.jruby.embed.LocalContextScope
+import org.jruby.embed.LocalVariableBehavior
+import org.jruby.embed.ScriptingContainer
 import org.microsauce.gravy.dev.DevUtils
-import org.microsauce.gravy.lang.javascript.JSRunner
 import org.microsauce.gravy.lang.javascript.CoreJSRunner
+import org.microsauce.gravy.lang.javascript.JSRunner
 
 class Lifecycle {
 
@@ -214,6 +217,17 @@ class Lifecycle {
 			if ( thisFile.isFile() && !thisFile.name.endsWith('.coffee.js') ) {
 				testRunner.run(thisFile.absolutePath, null)
 			}
+		}
+		
+		println '========================================================================='
+		println '= execute ruby test scripts                                             ='
+		println '========================================================================='
+		def container = new ScriptingContainer(LocalContextScope.SINGLETHREAD, LocalVariableBehavior.TRANSIENT);
+		List<String> rubyLoadPath = [projectBasedir+'/lib']
+		container.setLoadPaths(rubyLoadPath)
+		def rubyScriptRoot = new File(projectBasedir, '/src/test/ruby')
+		rubyScriptRoot.eachFileRecurse { thisFile ->
+			container.runScriptlet(new FileInputStream(thisFile), thisFile.absolutePath)
 		}
 	}
 
