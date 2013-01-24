@@ -20,8 +20,20 @@ java_import java.util.HashMap
 java_import org.microsauce.gravy.lang.object.GravyType
 java_import org.microsauce.gravy.context.ruby.RubyHandler
 
+#
+# moving to CONCURRENT / TRANSIENT model - prevent api script from running more than once
+#
+
+#exp = OpenStruct.new
+#if defined? ruby_api_initialized
+#  puts "Gravy runtime already initialized"
+#  exit 0
+#end
+  
+
+#ruby_api_initialized = true
+
 scope = self
-exp = OpenStruct.new
 
 REQUEST = DispatcherType::REQUEST
 FORWARD = DispatcherType::FORWARD
@@ -41,9 +53,13 @@ class Object
     end
 
     hash = Hash.new
-    self.instance_variables.each do |var|
-      element_value = instance_variable_get(var)
-      hash[var[1, var.length].to_sym] = element_value.to_serializable
+    if self.is_a? Hash
+      return self.each {|k,v| hash[k] = v.to_serializable()}
+    else
+      self.instance_variables.each do |var|
+        element_value = instance_variable_get(var)
+        hash[var[1, var.length].to_sym] = element_value.to_serializable
+      end
     end
     return hash
   end
@@ -181,7 +197,7 @@ class NativeRubyHandler
     self.define_attribute 'res', res
 
     # add uri parameters to 'self'
-    if param_map != nil
+    if not param_map.nil?
       iterator = param_map.keySet().iterator()
       while iterator.hasNext()
         key = iterator.next()
@@ -191,7 +207,7 @@ class NativeRubyHandler
     end # if
 
     # create the 'splat' array
-    if param_list != nil # TODO not equal or not nil
+    if not param_list.nil? # TODO not equal or not nil
       iterator = param_list.iterator()
       splat = Array.new
       while iterator.hasNext()

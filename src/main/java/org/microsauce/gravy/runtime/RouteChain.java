@@ -36,6 +36,7 @@ class RouteChain implements FilterChain {
 			Handler methodHandler = route.getHandlers().get(method);
 			Handler handler = methodHandler != null ? methodHandler : route.getHandlers().get(EnterpriseService.DEFAULT);
 			try {
+				GravyThreadLocal.SCRIPT_CONTEXT.set(handler.getModule().getScriptContext());
 				handler.execute(
 						(HttpServletRequest)req, 
 						(HttpServletResponse)res, 

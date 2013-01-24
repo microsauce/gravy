@@ -13,10 +13,12 @@ import org.microsauce.gravy.module.Module
 public class RubyModule extends Module {
 
 	private ScriptingContainer container;
+	private org.jruby.RubyModule rubyModule;
 	
 	RubyModule() {
-		// SINGLETHREADED is 'thread indifferent' and not a singleton
+		// SINGLETHREADED - supports multiple ruby instances
 		container = new ScriptingContainer(LocalContextScope.SINGLETHREAD, LocalVariableBehavior.PERSISTENT);
+			//LocalContextScope.CONCURRENT, LocalVariableBehavior.PERSISTENT);
 	}
 	
 	@Override
@@ -39,14 +41,16 @@ public class RubyModule extends Module {
 			// add module exports to the script scope (app only)
 			if ( imports != null && imports.size() > 0 ) prepareImports(imports);
 			
-			container.runScriptlet(new FileInputStream(new File(folder, "application.rb")), "application.rb");
+//			rubyModule = (RubyModule)container.runScriptlet(new FileInputStream(new File(folder, "application.rb")), "${folder.absolutePath}/application.rb");
+			rubyModule = (org.jruby.RubyModule)container.runScriptlet(assembleModuleScript(name, new File(folder, "application.rb")), "${folder.absolutePath}/application.rb");
 			RubySerializer.initInstance(container);
 		}
 		catch (Throwable t) {
 			throw new RuntimeException(t);
 		}
 		
-		RubyObject exports = (RubyObject)container.get("exp");
+//		RubyObject exports = (RubyObject)container.get(rubyModule, "exp");
+		RubyObject exports = (RubyObject)container.callMethod(rubyModule, "get_exp");
 		return prepareExports(exports);
 	}
 
@@ -59,6 +63,16 @@ public class RubyModule extends Module {
 		}
 	}
 
+	@CompileStatic private Reader assembleModuleScript(String moduleName, File scriptFile) {
+		String rawScriptText = scriptFile.text
+		return new StringReader("""
+		  module Gravy_Module_$moduleName; extend self; include GravyModule; exp = OpenStruct.new; @@exp = exp; def self.get_exp(); @@exp; end;
+            $rawScriptText
+          end
+		  Gravy_Module_$moduleName
+		""".toString())
+	}
+	
 	private Map<String, Handler> prepareExports(RubyObject exports) {
 		RubyObject importExport = (RubyObject)container.get("import_export");
 		return (Map<String, Handler>)container.callMethod(importExport, "prepare_exports", [exports] as Object[]);

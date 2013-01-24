@@ -5,6 +5,7 @@ import groovy.transform.CompileStatic
 import org.jruby.RubyObject
 import org.jruby.embed.ScriptingContainer
 import org.microsauce.gravy.lang.object.Serializer
+import org.microsauce.gravy.runtime.GravyThreadLocal
 
 class RubySerializer implements Serializer {
 
@@ -16,21 +17,27 @@ class RubySerializer implements Serializer {
 	
 	static void initInstance(ScriptingContainer container) {
 		instance = new RubySerializer()
-		instance.container = container
-		instance.nativeSerializer = container.get 'serializer'
+		instance.serializerContainer = container
+		instance.serializer = container.get 'serializer'
 	}
 
-	private ScriptingContainer container;
-	private RubyObject nativeSerializer;
-	
+	private ScriptingContainer serializerContainer;
+	private RubyObject serializer;
+
 	@Override
 	@CompileStatic public Object parse(String string) {
-		container.callMethod(nativeSerializer, 'parse', [string] as Object[])
+		ScriptingContainer parseContainer = parserContainer()
+		RubyObject parser = (RubyObject)parseContainer.get('serializer')
+		parserContainer().callMethod(parser, 'parse', [string] as Object[])
 	}
 
 	@Override
 	@CompileStatic public String toString(Object object) {
-		(String)container.callMethod(nativeSerializer, 'to_string', [object] as Object[])
+		(String)serializerContainer.callMethod(serializer, 'to_string', [object] as Object[])
+	}
+	
+	@CompileStatic ScriptingContainer parserContainer() {
+		(ScriptingContainer)GravyThreadLocal.SCRIPT_CONTEXT.get()
 	}
 
 }

@@ -23,9 +23,14 @@ class CommonObject {
 		nativeRepresentations = new HashMap<String, Object>();
 		nativeRepresentations.put(nativeType.type, nativeValue);
 		this.stringer = Stringer.getInstance();  
+		if (nativeType.type == GravyType.RUBY.type) toString()
 	}
 	
 	@CompileStatic Object value(GravyType context) {
+
+		if ( context.type == GravyType.RUBY.type )
+			return stringer.parse(serializedRepresentation, context);
+		
 		Object nativeObj = nativeRepresentations.get(context.type);
 		if ( nativeObj ) {
 			return nativeObj;
@@ -45,9 +50,6 @@ class CommonObject {
 			serializedRepresentation = stringer.toString(
 				nativeRepresentations.get(nativeType.type), nativeType)
 		}
-println "jsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjson"
-println "json: $serializedRepresentation"		
-println "jsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjsonjson"
 		serializedRepresentation
 	}
 	

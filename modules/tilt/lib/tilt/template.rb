@@ -1,5 +1,5 @@
 module Tilt
-  TOPOBJECT = defined?(BasicObject) ? BasicObject : Object
+  TOPOBJECT = defined?(BasicObject) ? BasicObject : Object 
 
   # Base class for template implementations. Subclasses must implement
   # the #prepare method and one of the #evaluate or #precompiled_template
@@ -136,8 +136,8 @@ module Tilt
     def cached_evaluate(scope, locals, &block)
       # Redefine itself to use method compilation the next time:
       def self.cached_evaluate(scope, locals, &block)
-        method = compiled_method(locals.keys)
-        method.bind(scope).call(locals, &block)
+        method = compiled_method(locals.keys)        
+        method.bind(scope).call(locals, &block) # TODO this is broken bind expects binding of type 'BasicObject'
       end
 
       # Use instance_eval the first time:

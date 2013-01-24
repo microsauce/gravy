@@ -42,6 +42,10 @@ abstract class Module {
 	
 	Module() {}
 	
+	public getScriptContext() {
+		return scriptContext;
+	}
+	
 	@CompileStatic void load() {
 		try {
 			if ( binding == null ) binding = [:]

@@ -27,6 +27,14 @@ abstract class Handler {
 	abstract Object doExecute(HttpServletRequest req, HttpServletResponse res, FilterChain chain, HandlerBinding handlerBinding)
 	abstract Object doExecute(Object params)
 
+	public Module getModule() {
+		return module;
+	}
+	
+	public void setModule(Module module) {
+		this.module = module;
+	}
+	
 	@CompileStatic public Object call( 
 		CommonObject parm1,
 		CommonObject parm2,

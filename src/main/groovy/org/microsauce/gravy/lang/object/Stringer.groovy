@@ -1,5 +1,5 @@
 package org.microsauce.gravy.lang.object
-
+// use a threadlocale current script context
 import groovy.transform.CompileStatic
 
 import org.microsauce.gravy.lang.groovy.GroovySerializer
