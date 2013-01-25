@@ -55,7 +55,7 @@ class GroovyModule extends Module {
 	@CompileStatic Map<String, Map<String, Closure>> prepareImports(Map<String, Map<String, Handler>> allImports) {
 		Map<String, Map<String, Closure>> preparedImports = new HashMap<String, Map<String, Closure>>()
 		allImports.each { String moduleName, Map<String, Handler> imports ->
-			imports.each { String name, Handler handler ->
+			imports.each { Object name, Handler handler ->
 				if ( !preparedImports.get(moduleName) ) preparedImports.put(moduleName, new HashMap<String, Closure>())
 				Closure closure = { Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7 ->
 					handler.call(
@@ -67,7 +67,7 @@ class GroovyModule extends Module {
 						commonObj(p6),
 						commonObj(p7))
 				}
-				preparedImports.get(moduleName).put(name, closure)
+				preparedImports.get(moduleName).put(name.toString(), closure)
 			}
 		}
 		

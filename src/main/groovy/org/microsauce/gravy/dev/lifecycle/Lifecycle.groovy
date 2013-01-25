@@ -223,10 +223,12 @@ class Lifecycle {
 		}
 	}
 	
-	boolean test() {
+	boolean test(skipTests = false) {
 
 		compile()
 
+		if (skipTests) return
+		
 		println '========================================================================='
 		println '= execute groovy test scripts                                           ='
 		println '========================================================================='
@@ -502,7 +504,8 @@ class Lifecycle {
 		def modules = listModules()
 		def warName = warNm ?: appName
 
-		if (!skipTests) if (!test()) return
+		//if (!skipTests) if (!test()) return
+		test skipTests
 
 		println '========================================================================='
 		println '= compile coffee script sources                                         ='
