@@ -11,12 +11,6 @@ IF "%JAVA_HOME%"==""  (
 )
 
 setLocal EnableDelayedExpansion
-set cp=
-for /R %GRAVY_HOME%/lib/groovy %%a in (*.jar) do (
-	set cp=!cp!;%%a
-)
-for /R %JAVA_HOME%/lib %%a in (*.jar) do (
-	set cp=!cp!;%%a
-)
+set cp=%GRAVY_HOME%\lib\*;%GRAVY_HOME%\lib\groovy\*;%GRAVY_HOME%\lib\rhino\*;%GRAVY_HOME%\lib\ringojs\*;%GRAVY_HOME%\lib\jruby\*;%JAVA_HOME%\lib\*
 
-%JAVA_HOME%\bin\java -cp %cp%;%GRAVY_HOME%\lib\gravy.jar org.codehaus.groovy.tools.GroovyStarter --classpath %cp%;%GRAVY_HOME%\lib\gravy.jar --main groovy.ui.GroovyMain %GRAVY_HOME%\bin\scripts\commandLine.groovy %*
+%JAVA_HOME%\bin\java -cp %GRAVY_HOME%\lib\*;%GRAVY_HOME%\lib\groovy\*;%GRAVY_HOME%\lib\rhino\*;%GRAVY_HOME%\lib\ringojs\*;%GRAVY_HOME%\lib\jruby\* org.codehaus.groovy.tools.GroovyStarter --classpath %cp%;%GRAVY_HOME%\lib\gravy.jar --main groovy.ui.GroovyMain %GRAVY_HOME%\bin\scripts\commandLine.groovy %*
