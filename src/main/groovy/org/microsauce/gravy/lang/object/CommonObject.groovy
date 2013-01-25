@@ -33,7 +33,7 @@ class CommonObject {
 	@CompileStatic Object value(GravyType context) {
 
 		if ( context.type == GravyType.RUBY.type )
-			return stringer.parse(serializedRepresentation, context);
+			return stringer.parse(toString(), context);
 		
 		Object nativeObj = nativeRepresentations.get(context.type);
 		if ( nativeObj ) {
@@ -54,6 +54,7 @@ class CommonObject {
 			serializedRepresentation = stringer.toString(
 				nativeRepresentations.get(nativeType.type), nativeType)
 		}
+
 		serializedRepresentation
 	}
 	

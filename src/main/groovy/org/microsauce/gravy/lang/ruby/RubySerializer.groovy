@@ -37,7 +37,7 @@ class RubySerializer implements Serializer {
 	}
 	
 	@CompileStatic ScriptingContainer parserContainer() {
-		(ScriptingContainer)GravyThreadLocal.SCRIPT_CONTEXT.get()
+		(ScriptingContainer)GravyThreadLocal.SCRIPT_CONTEXT.get() ?: serializerContainer
 	}
 
 }

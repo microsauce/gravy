@@ -16,7 +16,6 @@ import org.mozilla.javascript.ScriptableObject
 @Log4j
 class JSModule extends Module {
 
-//	JSLoader jsModuleLoader
 	JSRunner jsRunner
 
 	@Override

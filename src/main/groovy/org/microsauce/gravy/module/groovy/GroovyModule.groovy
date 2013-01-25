@@ -57,7 +57,7 @@ class GroovyModule extends Module {
 		allImports.each { String moduleName, Map<String, Handler> imports ->
 			imports.each { Object name, Handler handler ->
 				if ( !preparedImports.get(moduleName) ) preparedImports.put(moduleName, new HashMap<String, Closure>())
-				Closure closure = { Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7 ->
+				Closure closure = { Object p1 = null, Object p2 = null, Object p3 = null, Object p4 = null, Object p5 = null, Object p6 = null, Object p7 = null ->
 					handler.call(
 						commonObj(p1),
 						commonObj(p2),

@@ -110,6 +110,7 @@ end
 #
 class Serializer
   def parse str
+    return nil if str.nil? or str.empty? 
     begin
       return JSON.parse(str).to_ostruct_recursive()
     rescue JSON::ParserError # this may be a primitive type

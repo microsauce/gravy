@@ -23,7 +23,7 @@ require 'tilt'
 cache = ConcurrentHashMap.new # TODO import
 
 load_template = proc { |template_path| 
-puts "loading template: #{template_path}"  
+
   template = cache[template_path]gr
   if template == nil
     template = Tilt.new(template_path)
@@ -43,11 +43,9 @@ get render_uri do
   template = load_template.call document_root+'/'+_module.getName+'/'+view_uri
 
   if model.is_a? Hash
-puts "i'm a hash"    
     # it will always be an ostruct
     res.write template.render nil, model # TODO for some reason I must wrap the model in a java HashMap
   else
-puts "i'm NOT a hash: #{model.class.name}"    
     res.write(template.render(model))
   end
   #res.flush # TODO
