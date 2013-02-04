@@ -17,15 +17,20 @@ java_import javax.servlet.DispatcherType
 java_import org.microsauce.gravy.lang.object.CommonObject
 java_import java.util.ArrayList
 java_import java.util.HashMap
+java_import java.lang.String
 java_import org.microsauce.gravy.lang.object.GravyType
 java_import org.microsauce.gravy.context.ruby.RubyHandler
+java_import org.jruby.javasupport.JavaUtil
 
 scope = self
+#$string_converter = JavaUtil::getJavaConverter(java.lang.String.class)
 
 REQUEST = DispatcherType::REQUEST
 FORWARD = DispatcherType::FORWARD
 ERROR   = DispatcherType::ERROR
 INCLUDE = DispatcherType::INCLUDE
+
+
 
 # patch Object
 class Object
@@ -212,10 +217,27 @@ class NativeRubyHandler
         self.define_attribute key, object_binding.get(key)
       end
     end
+    
+    # create the query/form binding
+    method = req.getMethod
+    parameters = load_parameters(req)
+    if method == 'GET' or method == 'DELETE'
+      self.define_attribute 'query', parameters
+    elsif method == 'POST' or method == 'PUT'
+      self.define_attribute 'form', parameters
+    end
 
     # call the handler
     self.instance_exec &block
 
+  end
+  
+  def load_parameters(req)
+    parameter_hash = {}
+    req.getParameterMap.each do |k,v|
+      parameter_hash[k] = v[0] # TODO why is it an array ??
+    end
+    return OpenStruct.new(parameter_hash)
   end
  
   def to_s

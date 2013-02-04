@@ -21,6 +21,7 @@ importPackage(java.util)
 importPackage(java.io)
 importPackage(org.microsauce.gravy.context.javascript)
 importPackage(org.microsauce.gravy.lang.object)
+importPackage(org.ringojs.wrappers)
 
 /********************************************************
  * undocumented global variables
@@ -101,6 +102,16 @@ global.NativeJSHandler = function(handler) {
 			params.push(req)
 			params.push(res)
 		}
+		
+		// set the form/query properties
+		var method = req.getMethod()
+		var parameters = this.loadParameters(req) //new ScriptableMap(req.getParameterMap())
+		if (method == 'GET' || method == 'DELETE') { // TODO verify method name - all caps
+			this.query = parameters
+		}
+		else if (method == 'POST' || method == 'PUT') {
+			this.form = parameters
+		}
 
 		if (objectBinding != null) {
 			var iterator = objectBinding.keySet().iterator()
@@ -111,6 +122,16 @@ global.NativeJSHandler = function(handler) {
 		}
 
 		this.handler.apply(this, params)
+	}
+	
+	this.loadParameters = function(req) {
+		var parms = {}
+		var parameterNames = req.getParameterNames()
+		while (parameterNames.hasMoreElements()) {
+			thisParamaterName = parameterNames.nextElement()
+			parms[thisParamaterName] = req.getParameter(thisParamaterName)
+		}
+		return parms
 	}
 }
 

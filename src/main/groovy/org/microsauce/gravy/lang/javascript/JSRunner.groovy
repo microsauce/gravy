@@ -44,6 +44,7 @@ abstract class JSRunner {
 		engine = new RhinoEngine(config, null)
 		global = engine.getScope()
 		global.put('out', global, System.out)
+		global.put('log', global, log)
 		global.put('devMode', global, System.getProperty('gravy.devMode')) 
 		getCoreScripts().each { String thisScript ->
 			engine.runScript(thisScript, [] as String[])

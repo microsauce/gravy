@@ -61,6 +61,8 @@ class GroovyHandler extends Handler {
 		binding.out = res.writer
 		binding.chain = chain
 		binding.json = jsonObject
+		if (req.method == 'GET') binding.query = req.parameterMap
+		else if (req.method == 'POST' || req.method == 'PUT') binding.form = req.parameterMap		
 		
 		// add uri parameters 
 		handlerBinding.paramMap.each { String key, String value ->
