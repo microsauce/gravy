@@ -11,7 +11,7 @@ import org.microsauce.gravy.lang.object.GravyType;
 import org.microsauce.gravy.lang.patch.BaseEnterpriseProxy
 import org.microsauce.gravy.module.Module
 
-abstract class GravyResponseProxy<T extends HttpServletResponse> extends BaseEnterpriseProxy {
+class GravyResponseProxy<T extends HttpServletResponse> extends BaseEnterpriseProxy {
 	
 	HttpServletRequest request
 	String renderUri
@@ -45,7 +45,9 @@ abstract class GravyResponseProxy<T extends HttpServletResponse> extends BaseEnt
 		((T) target).writer.flush()
 	}
 	
-	protected abstract GravyType context();
+	protected Module context() {
+        module
+    }
 	
 }
 

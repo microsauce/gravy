@@ -8,8 +8,11 @@ Note: all tokens with a 'j_' prefix are injected or passed into the ruby runtime
 
 # TODO refactor much of this code into GravyModule
 
+gravy_initialized = true  
+  
 require 'date' 
 require 'json'
+require 'yaml'
 require 'ostruct'
 require 'java'
 
@@ -29,8 +32,6 @@ REQUEST = DispatcherType::REQUEST
 FORWARD = DispatcherType::FORWARD
 ERROR   = DispatcherType::ERROR
 INCLUDE = DispatcherType::INCLUDE
-
-
 
 # patch Object
 class Object
@@ -119,6 +120,7 @@ class Serializer
     begin
       return JSON.parse(str).to_ostruct_recursive()
     rescue JSON::ParserError # this may be a primitive type
+      return nil if str.nil? or str.empty? 
       return JSON.parse("{\"data\" : #{str} }")['data']
     end
   end
@@ -127,8 +129,18 @@ class Serializer
   end
 end
 
-# instantiate the serializer 
+class YamlSerializer
+  def parse str
+    return YAML::load(str) 
+  end
+  def to_string obj
+    return YAML::dump(obj)
+  end
+end
+
+# instantiate the serializers 
 serializer = Serializer.new
+yaml_serializer = YamlSerializer.new
 
 class CallbackWrapper
   attr_accessor :uri_pattern, :method, :block
@@ -140,9 +152,9 @@ class CallbackWrapper
   end
 
   # call this method from Java handler
-  def invoke(req, res, param_map, param_list, object_binding)
+  def invoke(req, res, param_map, param_list, object_binding, parms)
     ruby_handler = NativeRubyHandler.new(&@block)
-    ruby_handler.invoke_handler req, res, param_map, param_list, object_binding
+    ruby_handler.invoke_handler req, res, param_map, param_list, object_binding, parms
   end
   
 end
@@ -183,7 +195,7 @@ class NativeRubyHandler
     @block = block
   end
 
-  def invoke_handler(req, res, param_map, param_list, object_binding)
+  def invoke_handler(req, res, param_map, param_list, object_binding, parms)
 
     # add the req and res to the handler scope
     self.define_attribute 'req', req
@@ -220,11 +232,11 @@ class NativeRubyHandler
     
     # create the query/form binding
     method = req.getMethod
-    parameters = load_parameters(req)
+    #parameters = load_parameters(req)
     if method == 'GET' or method == 'DELETE'
-      self.define_attribute 'query', parameters
+      self.define_attribute 'query', OpenStruct.new(parms) #parameters
     elsif method == 'POST' or method == 'PUT'
-      self.define_attribute 'form', parameters
+      self.define_attribute 'form', OpenStruct.new(parms)  #parameters
     end
 
     # call the handler
@@ -273,6 +285,7 @@ module GravyModule
   def self.init(add_service, add_scheduled_task, conf)
     @@add_service = add_service
     @@add_scheduled_task = add_scheduled_task
+puts "conf: #{conf}"    
     @@conf = conf
   end
 

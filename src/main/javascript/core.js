@@ -5,6 +5,7 @@
  * 'out'			- the console PrintStream
  */
 
+
 /**
  * The module services object.
  */
@@ -32,7 +33,7 @@ global.reviver = function (key, value) {
 }
 
 global.parseJson = function(jsonText) {
-	return JSON.parse(jsonText, reviver)
+	return JSON.load(jsonText, reviver)
 }
 
 global.getGlobal = function() {

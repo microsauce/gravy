@@ -1,0 +1,891 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="EclipseModuleManager">
+    <libelement value="jar://$MODULE_DIR$/lib/groovy/ant-1.8.4.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/groovy/ant-antlr-1.8.4.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/groovy/ant-junit-1.8.4.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/groovy/ant-launcher-1.8.4.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/groovy/antlr-2.7.7.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/groovy/asm-4.0.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/groovy/asm-analysis-4.0.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/groovy/asm-commons-4.0.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/groovy/asm-tree-4.0.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/groovy/asm-util-4.0.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/groovy/bsf-2.4.0.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/groovy/commons-cli-1.2.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/groovy/commons-logging-1.1.1.jar!/" />
+    <libelement value="file://lib/groovy/gpars-1.0-beta-3.jar" />
+    <libelement value="file://lib/groovy/groovy-2.0.4.jar" />
+    <libelement value="file://lib/groovy/groovy-ant-2.0.4.jar" />
+    <libelement value="file://lib/groovy/groovy-bsf-2.0.4.jar" />
+    <libelement value="file://lib/groovy/groovy-console-2.0.4.jar" />
+    <libelement value="file://lib/groovy/groovy-docgenerator-2.0.4.jar" />
+    <libelement value="file://lib/groovy/groovy-groovydoc-2.0.4.jar" />
+    <libelement value="file://lib/groovy/groovy-groovysh-2.0.4.jar" />
+    <libelement value="file://lib/groovy/groovy-jmx-2.0.4.jar" />
+    <libelement value="file://lib/groovy/groovy-json-2.0.4.jar" />
+    <libelement value="file://lib/groovy/groovy-jsr223-2.0.4.jar" />
+    <libelement value="file://lib/groovy/groovy-sql-2.0.4.jar" />
+    <libelement value="file://lib/groovy/groovy-swing-2.0.4.jar" />
+    <libelement value="file://lib/groovy/groovy-templates-2.0.4.jar" />
+    <libelement value="file://lib/groovy/groovy-test-2.0.4.jar" />
+    <libelement value="file://lib/groovy/groovy-testng-2.0.4.jar" />
+    <libelement value="file://lib/groovy/groovy-xml-2.0.4.jar" />
+    <libelement value="file://lib/groovy/hamcrest-core-1.1.jar" />
+    <libelement value="jar://$MODULE_DIR$/lib/groovy/ivy-2.2.0.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/groovy/jansi-1.6.jar!/" />
+    <libelement value="file://lib/groovy/jcommander-1.12.jar" />
+    <libelement value="jar://$MODULE_DIR$/lib/groovy/jline-1.0.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/groovy/jsr166y-1.7.0.jar!/" />
+    <libelement value="file://lib/groovy/qdox-1.12.jar" />
+    <libelement value="file://lib/groovy/testng-6.5.2.jar" />
+    <libelement value="jar://$MODULE_DIR$/lib/groovy/xmlpull-1.1.3.1.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/groovy/xstream-1.4.2.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/jetty8/jsp/com.sun.el-2.2.0.v201108011116.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/jetty8/jsp/javax.el-2.2.0.v201108011116.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/jetty8/jsp/javax.servlet.jsp-2.2.0.v201112011158.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/jetty8/jsp/javax.servlet.jsp.jstl-1.2.0.v201105211821.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/jetty8/jsp/org.apache.jasper.glassfish-2.2.2.v201112011158.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/jetty8/jsp/org.apache.taglibs.standard.glassfish-1.2.0.v201112081803.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/jetty8/jsp/org.eclipse.jdt.core-3.7.1.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/jetty8/jetty-ajp-8.1.5.v20120716.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/jetty8/jetty-annotations-8.1.5.v20120716.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/jetty8/jetty-client-8.1.5.v20120716.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/jetty8/jetty-continuation-8.1.5.v20120716.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/jetty8/jetty-deploy-8.1.5.v20120716.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/jetty8/jetty-http-8.1.5.v20120716.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/jetty8/jetty-io-8.1.5.v20120716.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/jetty8/jetty-jmx-8.1.5.v20120716.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/jetty8/jetty-jndi-8.1.5.v20120716.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/jetty8/jetty-overlay-deployer-8.1.5.v20120716.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/jetty8/jetty-plus-8.1.5.v20120716.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/jetty8/jetty-policy-8.1.5.v20120716.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/jetty8/jetty-rewrite-8.1.5.v20120716.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/jetty8/jetty-security-8.1.5.v20120716.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/jetty8/jetty-server-8.1.5.v20120716.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/jetty8/jetty-servlet-8.1.5.v20120716.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/jetty8/jetty-servlets-8.1.5.v20120716.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/jetty8/jetty-util-8.1.5.v20120716.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/jetty8/jetty-webapp-8.1.5.v20120716.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/jetty8/jetty-websocket-8.1.5.v20120716.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/jetty8/jetty-xml-8.1.5.v20120716.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/jetty8/servlet-api-3.0.jar!/" />
+    <libelement value="file://$MODULE_DIR$/lib/jnotify/jnotify_64bit.dll" />
+    <libelement value="jar://$MODULE_DIR$/lib/jnotify/jnotify-0.93.jar!/" />
+    <libelement value="file://$MODULE_DIR$/lib/jnotify/jnotify.dll" />
+    <libelement value="file://$MODULE_DIR$/lib/jnotify/libjnotify.dylib" />
+    <libelement value="file://$MODULE_DIR$/lib/jnotify/libjnotify.so" />
+    <libelement value="jar://$MODULE_DIR$/lib/junit/junit-4.10.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/c3p0-0.9.1.1.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/cron4j-2.2.5.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/gravy.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/log4j-1.2.16.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/rhino/js-14.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/rhino/js.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/ringojs/ringo-core.jar!/" />
+    <libelement value="jar://$MODULE_DIR$/lib/ringojs/ringo-modules.jar!/" />
+    <libelement value="file://lib/jruby/jruby.jar" />
+    <libelement value="jar://$MODULE_DIR$/lib/jruby/jruby-complete-1.7.2.jar!/" />
+    <conelement value="GROOVY_SUPPORT" />
+    <src_description expected_position="0">
+      <src_folder value="file://$MODULE_DIR$/bin/scripts" expected_position="0" />
+      <src_folder value="file://$MODULE_DIR$/src/main/ruby" expected_position="1" />
+      <src_folder value="file://$MODULE_DIR$/src/main/javascript" expected_position="2" />
+      <src_folder value="file://$MODULE_DIR$/src/main/coffeescript" expected_position="3" />
+      <src_folder value="file://$MODULE_DIR$/src/main/groovy" expected_position="4" />
+      <src_folder value="file://$MODULE_DIR$/src/main/java" expected_position="5" />
+      <src_folder value="GROOVY_DSL_SUPPORT" expected_position="8" />
+    </src_description>
+  </component>
+  <component name="NewModuleRootManager" inherit-compiler-output="false">
+    <output url="file://$MODULE_DIR$/target/classes" />
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/bin/scripts" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main/ruby" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main/javascript" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main/coffeescript" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main/groovy" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
+    </content>
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="library" exported="" name="GROOVY_SUPPORT" level="application" />
+    <orderEntry type="module-library">
+      <library name="ant-1.8.4.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/groovy/ant-1.8.4.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="ant-antlr-1.8.4.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/groovy/ant-antlr-1.8.4.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="ant-junit-1.8.4.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/groovy/ant-junit-1.8.4.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="ant-launcher-1.8.4.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/groovy/ant-launcher-1.8.4.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="antlr-2.7.7.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/groovy/antlr-2.7.7.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="asm-4.0.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/groovy/asm-4.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="asm-analysis-4.0.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/groovy/asm-analysis-4.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="asm-commons-4.0.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/groovy/asm-commons-4.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="asm-tree-4.0.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/groovy/asm-tree-4.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="asm-util-4.0.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/groovy/asm-util-4.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="bsf-2.4.0.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/groovy/bsf-2.4.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="commons-cli-1.2.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/groovy/commons-cli-1.2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="commons-logging-1.1.1.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/groovy/commons-logging-1.1.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="gpars-1.0-beta-3.jar">
+        <CLASSES>
+          <root url="file://lib/groovy/gpars-1.0-beta-3.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="groovy-2.0.4.jar">
+        <CLASSES>
+          <root url="file://lib/groovy/groovy-2.0.4.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="groovy-ant-2.0.4.jar">
+        <CLASSES>
+          <root url="file://lib/groovy/groovy-ant-2.0.4.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="groovy-bsf-2.0.4.jar">
+        <CLASSES>
+          <root url="file://lib/groovy/groovy-bsf-2.0.4.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="groovy-console-2.0.4.jar">
+        <CLASSES>
+          <root url="file://lib/groovy/groovy-console-2.0.4.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="groovy-docgenerator-2.0.4.jar">
+        <CLASSES>
+          <root url="file://lib/groovy/groovy-docgenerator-2.0.4.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="groovy-groovydoc-2.0.4.jar">
+        <CLASSES>
+          <root url="file://lib/groovy/groovy-groovydoc-2.0.4.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="groovy-groovysh-2.0.4.jar">
+        <CLASSES>
+          <root url="file://lib/groovy/groovy-groovysh-2.0.4.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="groovy-jmx-2.0.4.jar">
+        <CLASSES>
+          <root url="file://lib/groovy/groovy-jmx-2.0.4.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="groovy-json-2.0.4.jar">
+        <CLASSES>
+          <root url="file://lib/groovy/groovy-json-2.0.4.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="groovy-jsr223-2.0.4.jar">
+        <CLASSES>
+          <root url="file://lib/groovy/groovy-jsr223-2.0.4.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="groovy-sql-2.0.4.jar">
+        <CLASSES>
+          <root url="file://lib/groovy/groovy-sql-2.0.4.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="groovy-swing-2.0.4.jar">
+        <CLASSES>
+          <root url="file://lib/groovy/groovy-swing-2.0.4.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="groovy-templates-2.0.4.jar">
+        <CLASSES>
+          <root url="file://lib/groovy/groovy-templates-2.0.4.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="groovy-test-2.0.4.jar">
+        <CLASSES>
+          <root url="file://lib/groovy/groovy-test-2.0.4.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="groovy-testng-2.0.4.jar">
+        <CLASSES>
+          <root url="file://lib/groovy/groovy-testng-2.0.4.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="groovy-xml-2.0.4.jar">
+        <CLASSES>
+          <root url="file://lib/groovy/groovy-xml-2.0.4.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="hamcrest-core-1.1.jar">
+        <CLASSES>
+          <root url="file://lib/groovy/hamcrest-core-1.1.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="ivy-2.2.0.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/groovy/ivy-2.2.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jansi-1.6.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/groovy/jansi-1.6.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jcommander-1.12.jar">
+        <CLASSES>
+          <root url="file://lib/groovy/jcommander-1.12.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jline-1.0.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/groovy/jline-1.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jsr166y-1.7.0.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/groovy/jsr166y-1.7.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="qdox-1.12.jar">
+        <CLASSES>
+          <root url="file://lib/groovy/qdox-1.12.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="testng-6.5.2.jar">
+        <CLASSES>
+          <root url="file://lib/groovy/testng-6.5.2.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="xmlpull-1.1.3.1.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/groovy/xmlpull-1.1.3.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="xstream-1.4.2.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/groovy/xstream-1.4.2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="com.sun.el-2.2.0.v201108011116.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty8/jsp/com.sun.el-2.2.0.v201108011116.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="javax.el-2.2.0.v201108011116.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty8/jsp/javax.el-2.2.0.v201108011116.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="javax.servlet.jsp-2.2.0.v201112011158.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty8/jsp/javax.servlet.jsp-2.2.0.v201112011158.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="javax.servlet.jsp.jstl-1.2.0.v201105211821.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty8/jsp/javax.servlet.jsp.jstl-1.2.0.v201105211821.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="org.apache.jasper.glassfish-2.2.2.v201112011158.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty8/jsp/org.apache.jasper.glassfish-2.2.2.v201112011158.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="org.apache.taglibs.standard.glassfish-1.2.0.v201112081803.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty8/jsp/org.apache.taglibs.standard.glassfish-1.2.0.v201112081803.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="org.eclipse.jdt.core-3.7.1.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty8/jsp/org.eclipse.jdt.core-3.7.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jetty-ajp-8.1.5.v20120716.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty8/jetty-ajp-8.1.5.v20120716.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jetty-annotations-8.1.5.v20120716.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty8/jetty-annotations-8.1.5.v20120716.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jetty-client-8.1.5.v20120716.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty8/jetty-client-8.1.5.v20120716.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jetty-continuation-8.1.5.v20120716.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty8/jetty-continuation-8.1.5.v20120716.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jetty-deploy-8.1.5.v20120716.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty8/jetty-deploy-8.1.5.v20120716.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jetty-http-8.1.5.v20120716.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty8/jetty-http-8.1.5.v20120716.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jetty-io-8.1.5.v20120716.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty8/jetty-io-8.1.5.v20120716.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jetty-jmx-8.1.5.v20120716.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty8/jetty-jmx-8.1.5.v20120716.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jetty-jndi-8.1.5.v20120716.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty8/jetty-jndi-8.1.5.v20120716.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jetty-overlay-deployer-8.1.5.v20120716.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty8/jetty-overlay-deployer-8.1.5.v20120716.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jetty-plus-8.1.5.v20120716.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty8/jetty-plus-8.1.5.v20120716.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jetty-policy-8.1.5.v20120716.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty8/jetty-policy-8.1.5.v20120716.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jetty-rewrite-8.1.5.v20120716.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty8/jetty-rewrite-8.1.5.v20120716.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jetty-security-8.1.5.v20120716.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty8/jetty-security-8.1.5.v20120716.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jetty-server-8.1.5.v20120716.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty8/jetty-server-8.1.5.v20120716.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jetty-servlet-8.1.5.v20120716.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty8/jetty-servlet-8.1.5.v20120716.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jetty-servlets-8.1.5.v20120716.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty8/jetty-servlets-8.1.5.v20120716.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jetty-util-8.1.5.v20120716.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty8/jetty-util-8.1.5.v20120716.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jetty-webapp-8.1.5.v20120716.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty8/jetty-webapp-8.1.5.v20120716.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jetty-websocket-8.1.5.v20120716.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty8/jetty-websocket-8.1.5.v20120716.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jetty-xml-8.1.5.v20120716.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty8/jetty-xml-8.1.5.v20120716.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="servlet-api-3.0.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jetty8/servlet-api-3.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jnotify_64bit.dll">
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/lib/jnotify/jnotify_64bit.dll" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jnotify-0.93.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jnotify/jnotify-0.93.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jnotify.dll">
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/lib/jnotify/jnotify.dll" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libjnotify.dylib">
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/lib/jnotify/libjnotify.dylib" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libjnotify.so">
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/lib/jnotify/libjnotify.so" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="junit-4.10.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/junit/junit-4.10.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="c3p0-0.9.1.1.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/c3p0-0.9.1.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="cron4j-2.2.5.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/cron4j-2.2.5.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="gravy.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/gravy.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="log4j-1.2.16.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/log4j-1.2.16.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="js-14.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/rhino/js-14.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="js.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/rhino/js.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="ringo-core.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/ringojs/ringo-core.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="ringo-modules.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/ringojs/ringo-modules.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jruby.jar">
+        <CLASSES>
+          <root url="file://lib/jruby/jruby.jar" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="jruby-complete-1.7.2.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jruby/jruby-complete-1.7.2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="library" name="groovy-2.0.4" level="application" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/commons-fileupload-1.2.2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+  </component>
+</module>
+

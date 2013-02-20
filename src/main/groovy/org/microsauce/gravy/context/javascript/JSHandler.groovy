@@ -1,6 +1,7 @@
 package org.microsauce.gravy.context.javascript
 
 import groovy.transform.CompileStatic
+import org.ringojs.wrappers.Stream
 
 import java.lang.reflect.Proxy
 
@@ -43,7 +44,11 @@ class JSHandler extends Handler {
 		this.scope = scope
 		this.executeHandler = scope.get('executeHandler', scope)
 	}
-	
+
+    Object wrapInputStream(InputStream inputStream) {
+        return new Stream(scope, inputStream, null)
+    }
+
 	@Override
 	@CompileStatic public Object doExecute(Object params) {
 		ctx = org.mozilla.javascript.Context.enter()
@@ -58,21 +63,21 @@ class JSHandler extends Handler {
 
 	@Override
 	@CompileStatic public Object doExecute(HttpServletRequest req, HttpServletResponse res,
-			FilterChain chain, HandlerBinding handlerBinding) {
+			FilterChain chain, HandlerBinding handlerBinding, Map parms) {  // TODO chase parms into rhino
 
 		ctx = org.mozilla.javascript.Context.enter() 
 		try {
 			Map<String, Object> objectBinding = null
 			if ( handlerBinding.json ) { 
 				objectBinding = [:] 
-				CommonObject json = new CommonObject(null, GravyType.JAVASCRIPT)
+				CommonObject json = new CommonObject(null, module)
 				json.serializedRepresentation = handlerBinding.json
 				objectBinding.json = json.toNative()
 			}
 			GravyHttpSession jsSess = patchSession(req, module) 
 			GravyHttpServletRequest jsReq = patchRequest(req, res, jsSess, chain, module) 
 			GravyHttpServletResponse jsRes = patchResponse(req, res, module)
-			executeHandler.call(ctx, scope, scope, [callBack, jsReq, jsRes, handlerBinding.paramMap, handlerBinding.paramList, objectBinding] as Object[])
+			executeHandler.call(ctx, scope, scope, [callBack, jsReq, jsRes, handlerBinding.paramMap, handlerBinding.paramList, objectBinding, parms] as Object[])
 		}
 		finally {
 			ctx.exit()
@@ -87,58 +92,22 @@ class JSHandler extends Handler {
 		GravyHttpServletRequest jsReq = (GravyHttpServletRequest) Proxy.newProxyInstance(
 			this.class.getClassLoader(),
 			[GravyHttpServletRequest.class] as Class[],
-			new JSRequestProxy(req, res, sess, chain, module))
+			new GravyRequestProxy(req, res, sess, chain, module))
 		jsReq
 	}
 	@CompileStatic GravyHttpServletResponse patchResponse(HttpServletRequest req, HttpServletResponse res, Module module) {
 		GravyHttpServletResponse jsRes = (GravyHttpServletResponse)Proxy.newProxyInstance(
 			this.class.getClassLoader(),
 			[GravyHttpServletResponse.class] as Class[],
-			new JSResponseProxy(res, req, module.renderUri, module))
+			new GravyResponseProxy(res, req, module.renderUri, module))
 		return jsRes
 	}
 	@CompileStatic GravyHttpSession patchSession(HttpServletRequest req, Module module) {
 		GravyHttpSession jsSess = (GravyHttpSession)Proxy.newProxyInstance(
 			this.class.getClassLoader(),
 			[GravyHttpSession.class] as Class[],
-			new JSSessionProxy(req.session, module))
+			new GravySessionProxy(req.session, module))
 		return jsSess
 	}
 
-	class JSResponseProxy<T extends HttpServletResponse> extends GravyResponseProxy {
-
-		JSResponseProxy(HttpServletResponse res,
-				HttpServletRequest request, String renderUri, Module module) {
-			super(res, request, renderUri, module)
-		}
-				
-		@CompileStatic GravyType context() {
-			GravyType.JAVASCRIPT
-		}
-	}
-	
-	class JSSessionProxy<T extends HttpSession> extends GravySessionProxy {
-		
-		public JSSessionProxy(Object target, Module module) {
-			super(target, module);
-		}
-
-		@CompileStatic GravyType context() {
-			GravyType.JAVASCRIPT
-		}
-
-	} 
-	
-	class JSRequestProxy<T extends HttpServletRequest> extends GravyRequestProxy {
-		
-		public JSRequestProxy(Object target, HttpServletResponse res,
-				HttpSession session, FilterChain chain, Module module) {
-			super(target, res, session, chain, module)
-		}
-				
-		@CompileStatic GravyType context() {
-			GravyType.JAVASCRIPT
-		}
-	}
-	
 }

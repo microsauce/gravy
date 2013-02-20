@@ -29,9 +29,13 @@ class GroovyHandler extends Handler {
 		this.closure = closure
 	}
 
+    @CompileStatic Object wrapInputStream(InputStream inputStream) {
+        return inputStream
+    }
+
 	@Override
 	@CompileStatic public Object doExecute(HttpServletRequest req, HttpServletResponse res,
-		FilterChain chain, HandlerBinding handlerBinding) {
+		FilterChain chain, HandlerBinding handlerBinding, Map parms) {
 		
 		Object jsonObject = null
 		if ( handlerBinding.json ) {
@@ -43,15 +47,15 @@ class GroovyHandler extends Handler {
 		GravyHttpSession gSess = (GravyHttpSession)Proxy.newProxyInstance(
 			this.class.getClassLoader(),
 			[GravyHttpSession.class] as Class[],
-			new GroovySessionProxy(req.session, module)) 
+			new GravySessionProxy(req.session, module))
 		GravyHttpServletRequest gReq =  (GravyHttpServletRequest) Proxy.newProxyInstance(
 			this.class.getClassLoader(),
 			[GravyHttpServletRequest.class] as Class[],
-			new GroovyRequestProxy(req, res, gSess, chain, module))
+			new GravyRequestProxy(req, res, gSess, chain, module))
 		GravyHttpServletResponse gRes = (GravyHttpServletResponse)Proxy.newProxyInstance(
 			this.class.getClassLoader(),
 			[GravyHttpServletResponse.class] as Class[],
-			new GroovyResponseProxy(res, req, module.renderUri, module))
+			new GravyResponseProxy(res, req, module.renderUri, module))
 		
 		// add the jee runtime to the closure binding
 		Map binding = [:]
@@ -61,10 +65,10 @@ class GroovyHandler extends Handler {
 		binding.out = res.writer
 		binding.chain = chain
 		binding.json = jsonObject
-		if (req.method == 'GET') binding.query = req.parameterMap
-		else if (req.method == 'POST' || req.method == 'PUT') binding.form = req.parameterMap		
-		
-		// add uri parameters 
+		if (req.method == 'GET' || req.method == 'DELETE') binding.query = parms
+		else if (req.method == 'POST' || req.method == 'PUT') binding.form = parms
+
+		// add uri parameters
 		handlerBinding.paramMap.each { String key, String value ->
 			binding[key] = value
 		}
@@ -84,45 +88,10 @@ class GroovyHandler extends Handler {
 		closure.call(_paramList.length == 1 ? _paramList[0] : _paramList)
 	}
 
-	@CompileStatic protected GravyType context() {
-		GravyType.GROOVY
-	}
-		
 	@CompileStatic public Object doExecute(Object params) {
 		Closure closure = (Closure)closure.clone()
 		closure.call(params)		
 	}
-	
-	class GroovyResponseProxy<T extends HttpServletResponse> extends GravyResponseProxy {
-		
-		GroovyResponseProxy(HttpServletResponse res,
-				HttpServletRequest request, String renderUri, Module module) {
-			super(res, request, renderUri, module)
-		}
 
-		@CompileStatic GravyType context() { GravyType.GROOVY }
-			
-	}
-	
-	class GroovySessionProxy<T extends HttpSession> extends GravySessionProxy {
-		
-		public GroovySessionProxy(Object target, Module module) {
-			super(target, module)
-		}
-		
-		@CompileStatic GravyType context() { GravyType.GROOVY }
-		
-	}
-	
-	class GroovyRequestProxy<T extends HttpServletRequest> extends GravyRequestProxy {
-		
-		public GroovyRequestProxy(Object target, HttpServletResponse res,
-				HttpSession session, FilterChain chain, Module module) {
-			super(target, res, session, chain, module)
-		}
-
-		@CompileStatic GravyType context() { GravyType.GROOVY }
-
-	}
 
 }

@@ -2,6 +2,7 @@ package org.microsauce.gravy.module
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j
+import org.microsauce.gravy.lang.object.GravyType
 
 import javax.servlet.DispatcherType
 import javax.servlet.Filter
@@ -18,26 +19,33 @@ import org.microsauce.gravy.context.ServiceFactory
 @Log4j
 abstract class Module { 
 	
+	// module configuration
 	ConfigObject moduleConfig
 	ConfigObject applicationConfig
-	protected ConfigObject config // the effective config: moduleConfig.merge applicationConfig
+	ConfigObject config // the effective config: moduleConfig.merge applicationConfig
 	
+	// structural properties
+    GravyType type
 	String name 
 	Boolean isApp
 	ClassLoader classLoader 
 	protected File folder 
 	File scriptFile
+	File lib // TODO follow this through: module factory and any mod implementation that cares about it (Ruby)
+	
 	ServiceFactory serviceFactory
+	
+	// configurable properties - config.groovy
 	String renderUri
 	String errorUri
-	boolean serializeAttributes 
+	 
+	Module app // TODO flesh this out contextbuilder and any mod implementation that cares about it
 
-	Object returnValue // TODO refactor this as 'exports'
-	Map binding // TODO is this property used - delete 
-		// used by the main app script only (mod1 ret val, mod2, etc)
+	Object exports // TODO refactor as exports
+	Map imports // TODO refactor as imports
 	
-	// pass these into the scripting environment
-	Context context //
+	// the application context
+	Context context 
 	Object scriptContext
 	
 	Module() {}
@@ -48,8 +56,8 @@ abstract class Module {
 	
 	@CompileStatic void load() {
 		try {
-			if ( binding == null ) binding = [:]
-			returnValue = doLoad(binding) 
+			if ( imports == null ) imports = [:]
+			exports = doLoad(imports) 
 		}
 		catch ( all ) {
 			log.error "failed to load module: ${name}", all
@@ -62,7 +70,7 @@ abstract class Module {
 	 * 
 	 * @return module script return value
 	 */
-	abstract protected Object doLoad(Map binding)
+	abstract protected Object doLoad(Map imports)
 
 	@CompileStatic public void addEnterpriseService(String uriPattern, String method, Object rawHandler, List<DispatcherType> dispatch) {
 		log.info "addEnterpriseService: uri: $uriPattern - method: $method - dispatch: $dispatch"

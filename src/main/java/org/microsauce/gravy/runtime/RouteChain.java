@@ -10,16 +10,19 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.microsauce.gravy.context.Context;
+//import org.microsauce.gravy.context.Context;
 import org.microsauce.gravy.context.EnterpriseService;
 import org.microsauce.gravy.context.Handler;
 
+/**
+ *
+ */
 class RouteChain implements FilterChain {
 
 	List<EnterpriseService> routes;
 	Integer currentPosition = 0;
 	FilterChain serverChain;
-	Context context;
+//	Context context;
 
 	RouteChain(FilterChain serverChain, List<EnterpriseService> routes) {
 		this.serverChain = serverChain;
@@ -36,7 +39,8 @@ class RouteChain implements FilterChain {
 			Handler methodHandler = route.getHandlers().get(method);
 			Handler handler = methodHandler != null ? methodHandler : route.getHandlers().get(EnterpriseService.DEFAULT);
 			try {
-				GravyThreadLocal.SCRIPT_CONTEXT.set(handler.getModule().getScriptContext());
+System.out.println("uri - " +((HttpServletRequest) req).getRequestURI()+ " - handler - " + handler + " | mod - " + handler.getModule());
+				GravyThreadLocal.SCRIPT_CONTEXT.set(handler.getModule().getScriptContext()); // TODO get NPE here on occasion
 				handler.execute(
 						(HttpServletRequest)req, 
 						(HttpServletResponse)res, 
@@ -49,7 +53,7 @@ class RouteChain implements FilterChain {
 			}
 			finally {
 				if ( !res.isCommitted() )
-					res.getWriter().flush();
+					res.getWriter().flush();  // TODO review the flush here
 			}
 		}
 	}

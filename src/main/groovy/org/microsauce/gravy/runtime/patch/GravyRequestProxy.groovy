@@ -13,7 +13,7 @@ import org.microsauce.gravy.lang.object.GravyType
 import org.microsauce.gravy.lang.patch.BaseEnterpriseProxy
 import org.microsauce.gravy.module.Module
 
-abstract class GravyRequestProxy<T extends HttpServletRequest> extends BaseEnterpriseProxy {
+class GravyRequestProxy<T extends HttpServletRequest> extends BaseEnterpriseProxy {
 	
 	FilterChain chain
 	HttpServletResponse response
@@ -47,9 +47,11 @@ abstract class GravyRequestProxy<T extends HttpServletRequest> extends BaseEnter
 	}
 	@CompileStatic HttpSession session() {
 	 	session
-	} 
+	}
 
-	protected abstract GravyType context();
+    @CompileStatic protected Module context() {
+        module
+    }
 	
 }
 

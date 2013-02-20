@@ -5,10 +5,17 @@ import groovy.transform.CompileStatic
 import org.microsauce.gravy.lang.javascript.JSRunner
 import org.microsauce.gravy.module.Module
 import org.microsauce.gravy.module.ModuleFactory
+import org.microsauce.gravy.lang.object.GravyType
 
 class JSModuleFactory extends ModuleFactory {
 
-	@Override
+    @Override
+    @CompileStatic
+    public GravyType type() {
+        GravyType.JAVASCRIPT
+    }
+
+    @Override
 	@CompileStatic
 	public String moduleClassName() {
 		'org.microsauce.gravy.module.javascript.JSModule'

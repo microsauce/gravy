@@ -31,10 +31,11 @@ class ContextBuilder {
 		
 		Map<String, Object> moduleBindings = [:]
 		for ( thisModule in modules ) {
+			thisModule.app = application
 			thisModule.load()
-			moduleBindings[thisModule.name] = thisModule.returnValue
+			moduleBindings[thisModule.name] = thisModule.exports
 		}
-		app.binding = moduleBindings
+		app.imports = moduleBindings
 		app.load()
 		app.context
 	}

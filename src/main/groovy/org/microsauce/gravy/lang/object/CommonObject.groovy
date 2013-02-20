@@ -1,6 +1,7 @@
 package org.microsauce.gravy.lang.object
 
 import groovy.transform.CompileStatic
+import org.microsauce.gravy.module.Module
 
 
 /**
@@ -8,43 +9,36 @@ import groovy.transform.CompileStatic
  * This class encapsulates an object utilized by any or all supported
  * language environments (Groovy and JavaScript currently).  
  * 
- * All Jruby objects are bound to a particular ruby runtime.  Therefore ruby objects
- * must always be serialized (even when forwarding a request to another ruby handler).
- * Ruby objects are eagerly serialized.  
- * 
  * @author jboone
  */
 class CommonObject {
 
-	GravyType nativeType;
-	Map<String, Object> nativeRepresentations;
-	String serializedRepresentation;
-	
+	GravyType nativeType
+    Module module
+	Map<String, Object> nativeRepresentations
+	String serializedRepresentation
+
 	Stringer stringer
 	
-	CommonObject(Object nativeValue, GravyType nativeType) {
-		this.nativeType = nativeType;
+	CommonObject(Object nativeValue, Module module) { //GravyType nativeType) {
+		this.nativeType = module.type
 		nativeRepresentations = new HashMap<String, Object>();
-		nativeRepresentations.put(nativeType.type, nativeValue);
+		nativeRepresentations.put(nativeType.type+module.name, nativeValue);
 		this.stringer = Stringer.getInstance();  
-		if (nativeType.type == GravyType.RUBY.type) toString() // eager serialize Ruby
 	}
 	
-	@CompileStatic Object value(GravyType context) {
+	@CompileStatic Object value(Module destModule) {
 
-		if ( context.type == GravyType.RUBY.type )
-			return stringer.parse(toString(), context);
-		
-		Object nativeObj = nativeRepresentations.get(context.type);
+		Object nativeObj = nativeRepresentations.get(destModule.type.type+destModule.name);
 		if ( nativeObj ) {
 			return nativeObj;
 		}
 		else if ( serializedRepresentation ) {
-			return stringer.parse(serializedRepresentation, context);
+			return stringer.parse(serializedRepresentation, destModule.type);
 		}
 		else {
-			nativeObj = stringer.parse(this.toString(), context);
-			nativeRepresentations.put(context.type, nativeObj);
+			nativeObj = stringer.parse(this.toString(), destModule.type);
+			nativeRepresentations.put(destModule.type.type+destModule.name, nativeObj);
 			return nativeObj;
 		}
 	}

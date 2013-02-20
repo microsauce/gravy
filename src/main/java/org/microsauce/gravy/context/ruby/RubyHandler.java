@@ -1,5 +1,6 @@
 package org.microsauce.gravy.context.ruby;
 
+import java.io.InputStream;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.jruby.RubyIO;
 import org.jruby.RubyObject;
 import org.jruby.embed.ScriptingContainer;
 import org.microsauce.gravy.context.Handler;
@@ -22,6 +24,7 @@ import org.microsauce.gravy.runtime.patch.GravyHttpSession;
 import org.microsauce.gravy.runtime.patch.GravyRequestProxy;
 import org.microsauce.gravy.runtime.patch.GravyResponseProxy;
 import org.microsauce.gravy.runtime.patch.GravySessionProxy;
+import org.ringojs.wrappers.Stream;
 
 /**
  * 
@@ -42,13 +45,17 @@ class RubyHandler extends Handler {
 		return container.callMethod(callBack, "invoke", params);
 	}
 
-	@Override
+    protected Object wrapInputStream(InputStream inputStream) {
+        return new RubyIO(container.getProvider().getRuntime(), inputStream);
+    }
+
+    @Override
 	public Object doExecute(HttpServletRequest req, HttpServletResponse res,
-			FilterChain chain, HandlerBinding handlerBinding) {
+			FilterChain chain, HandlerBinding handlerBinding, Map parms) { // TODO chase parms into Ruby
 			Map<String, Object> objectBinding = null;
 			if ( handlerBinding.getJson() != null ) { 
 				objectBinding = new HashMap<String, Object>(); 
-				CommonObject json = new CommonObject(null, GravyType.RUBY);
+				CommonObject json = new CommonObject(null, module);
 				json.setSerializedRepresentation(handlerBinding.getJson());
 				objectBinding.put("json", json.toNative());
 			}
@@ -57,7 +64,7 @@ class RubyHandler extends Handler {
 			GravyHttpServletResponse jsRes = patchResponse(req, res, module);
 
 			return container.callMethod(callBack, "invoke", 
-					new Object[] {jsReq, jsRes, handlerBinding.getParamMap(), handlerBinding.getParamList(), objectBinding});
+					new Object[] {jsReq, jsRes, handlerBinding.getParamMap(), handlerBinding.getParamList(), objectBinding, parms});
 	}
 	
 	protected GravyType context() {
@@ -68,58 +75,22 @@ class RubyHandler extends Handler {
 		GravyHttpServletRequest rbReq = (GravyHttpServletRequest) Proxy.newProxyInstance(
 			this.getClass().getClassLoader(),
 			new Class[] {GravyHttpServletRequest.class},
-			new RubyRequestProxy(req, res, sess, chain, module));
+			new GravyRequestProxy(req, res, sess, chain, module));
 		return rbReq;
 	}
 	GravyHttpServletResponse patchResponse(HttpServletRequest req, HttpServletResponse res, Module module) {
 		GravyHttpServletResponse rbRes = (GravyHttpServletResponse)Proxy.newProxyInstance(
 			this.getClass().getClassLoader(),
 			new Class[] {GravyHttpServletResponse.class},
-			new RubyResponseProxy(res, req, module.getRenderUri(), module));
+			new GravyResponseProxy(res, req, module.getRenderUri(), module));
 		return rbRes;
 	}
 	GravyHttpSession patchSession(HttpServletRequest req, Module module) {
 		GravyHttpSession rbSess = (GravyHttpSession)Proxy.newProxyInstance(
 			this.getClass().getClassLoader(),
 			new Class[] {GravyHttpSession.class},
-			new RubySessionProxy(req.getSession(), module));
+			new GravySessionProxy(req.getSession(), module));
 		return rbSess;
 	}
 
-	class RubyResponseProxy<T extends HttpServletResponse> extends GravyResponseProxy {
-
-		RubyResponseProxy(HttpServletResponse res,
-				HttpServletRequest request, String renderUri, Module module) {
-			super(res, request, renderUri, module);
-		}
-				
-		protected GravyType context() {
-			return GravyType.RUBY;
-		}
-	}
-	
-	class RubySessionProxy<T extends HttpSession> extends GravySessionProxy {
-		
-		public RubySessionProxy(Object target, Module module) {
-			super(target, module);
-		}
-
-		protected GravyType context() {
-			return GravyType.RUBY;
-		}
-
-	} 
-	
-	class RubyRequestProxy<T extends HttpServletRequest> extends GravyRequestProxy {
-		
-		public RubyRequestProxy(Object target, HttpServletResponse res,
-				HttpSession session, FilterChain chain, Module module) {
-			super(target, res, session, chain, module);
-		}
-				
-		protected GravyType context() {
-			return GravyType.RUBY;
-		}
-	}
-	
 }

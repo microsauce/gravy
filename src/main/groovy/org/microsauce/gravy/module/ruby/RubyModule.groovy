@@ -18,14 +18,21 @@ public class RubyModule extends Module {
 	RubyModule() {
 		// SINGLETHREADED - supports multiple ruby instances
 		container = new ScriptingContainer(LocalContextScope.SINGLETHREAD, LocalVariableBehavior.PERSISTENT);
-			//LocalContextScope.CONCURRENT, LocalVariableBehavior.PERSISTENT);
+	}
+	
+	private void setLoadPaths(List<String> loadPaths) {
+		if ( app && new File(app.folder, 'lib').exists()) {
+			if ( !container.loadPaths ) container.loadPaths = new ArrayList<String>()
+			container.loadPaths.addAll(loadPaths)
+//			container.loadPaths.add(new File(app.folder, 'lib').absolutePath) // TODO make configurable
+		}	
 	}
 	
 	@Override
 	@CompileStatic protected Object doLoad(Map imports) {
 
 		List<String> paths = [this.folder.absolutePath+'/lib']
-		container.setLoadPaths(paths)
+		setLoadPaths(paths)
 		
 		scriptContext = container;
 		

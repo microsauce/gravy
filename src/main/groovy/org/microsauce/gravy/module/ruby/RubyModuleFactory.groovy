@@ -1,12 +1,18 @@
 package org.microsauce.gravy.module.ruby
 
 import groovy.transform.CompileStatic
-
+import org.microsauce.gravy.lang.object.GravyType
 import org.microsauce.gravy.module.ModuleFactory
 
 class RubyModuleFactory extends ModuleFactory {
-	
-	@Override
+
+    @Override
+    @CompileStatic
+    public GravyType type() {
+        GravyType.RUBY
+    }
+
+    @Override
 	@CompileStatic
 	public String moduleClassName() {
 		'org.microsauce.gravy.module.ruby.RubyModule'

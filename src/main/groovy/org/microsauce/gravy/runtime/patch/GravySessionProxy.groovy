@@ -9,7 +9,7 @@ import org.microsauce.gravy.lang.object.GravyType
 import org.microsauce.gravy.lang.patch.BaseEnterpriseProxy
 import org.microsauce.gravy.module.Module
 
-abstract class GravySessionProxy<T extends HttpSession> extends BaseEnterpriseProxy {
+class GravySessionProxy<T extends HttpSession> extends BaseEnterpriseProxy {
 	
 	Module module
 	
@@ -27,8 +27,10 @@ abstract class GravySessionProxy<T extends HttpSession> extends BaseEnterprisePr
 		CommonObject obj = new CommonObject(value, context())
 		((T)target).setAttribute key, obj
 	}
-	
-	protected abstract GravyType context();
+
+    @CompileStatic protected Module context() {
+        module
+    }
 
 } 
 

@@ -21,7 +21,7 @@ importPackage(java.util)
 importPackage(java.io)
 importPackage(org.microsauce.gravy.context.javascript)
 importPackage(org.microsauce.gravy.lang.object)
-importPackage(org.ringojs.wrappers)
+//importPackage(org.ringojs.wrappers)
 
 /********************************************************
  * undocumented global variables
@@ -66,16 +66,16 @@ global.addEnterpriseService = function(uriPattern, method, callBack, dispatch) {
 }
 
 global.executeHandler = function(callBack, req, res, paramMap, paramList,
-		objectBinding) {
+		objectBinding, parms) {
 	var jsHandler = new NativeJSHandler(callBack)
-	jsHandler.invokeHandler(req, res, paramMap, paramList, objectBinding)
+	jsHandler.invokeHandler(req, res, paramMap, paramList, objectBinding, parms)
 }
 
 global.NativeJSHandler = function(handler) {
 
 	this.handler = handler
 
-	this.invokeHandler = function(req, res, paramMap, paramList, objectBinding) {
+	this.invokeHandler = function(req, res, paramMap, paramList, objectBinding, parms) {
 
 		// add uri parameters to 'this'
 		if (paramMap != null) {
@@ -105,11 +105,10 @@ global.NativeJSHandler = function(handler) {
 		
 		// set the form/query properties
 		var method = req.getMethod()
-		var parameters = this.loadParameters(req) //new ScriptableMap(req.getParameterMap())
-		if (method == 'GET' || method == 'DELETE') { // TODO verify method name - all caps
+		var parameters = new ScriptableMap(parms) //this.loadParameters(req) //new ScriptableMap(req.getParameterMap())
+		if (method == 'GET' || method == 'DELETE') {
 			this.query = parameters
-		}
-		else if (method == 'POST' || method == 'PUT') {
+		} else if (method == 'POST' || method == 'PUT') {
 			this.form = parameters
 		}
 
@@ -123,7 +122,7 @@ global.NativeJSHandler = function(handler) {
 
 		this.handler.apply(this, params)
 	}
-	
+/*
 	this.loadParameters = function(req) {
 		var parms = {}
 		var parameterNames = req.getParameterNames()
@@ -133,6 +132,7 @@ global.NativeJSHandler = function(handler) {
 		}
 		return parms
 	}
+*/
 }
 
 /********************************************************
@@ -186,21 +186,6 @@ global.del = function(uriPattern, callBack, dispatch) {
 }
 
 /*
- * define a 'options' request handler
- * 
- * Example: 
- * options '/hello/:name', (req, res) -> 
- * 		res.render '/greeting.html', {name: @name}
- * 
- * options '/hello/:name', (req, res) -> 
- * 		res.render '/greeting.html', {name: @name}
- * , [REQUEST]
- */
-global.options = function(uriPattern, callBack, dispatch) {
-	addEnterpriseService(uriPattern, OPTIONS, callBack, dispatch)
-}
-
-/*
  * define a 'put' request handler
  * 
  * Example: 
@@ -228,6 +213,13 @@ global.put = function(uriPattern, callBack, dispatch) {
  */
 global.route = function(uriPattern, callBack, dispatch) {
 	addEnterpriseService(uriPattern, 'default', callBack, dispatch)
+}
+
+/*
+ * alias for 'route'.
+ */
+global.use = function(uriPattern, callBack, dispatch) {
+	route(uriPattern, 'default', callBack, dispatch)
 }
 
 /*

@@ -119,7 +119,7 @@ class GravyBootstrapListener implements ServletContextListener {
 	
 	@CompileStatic
 	private void startSourceObserver(Module app) {
-		Map binding = app.binding
+		Map binding = app.imports
 		String projectFolder = System.getProperty('user.dir')
 		def sourceObserver = new JNotifySourceModObserver(projectFolder) 
 		sourceObserver.addScriptHandler(new RedeploySourceModHandler(app))

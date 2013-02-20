@@ -20,12 +20,12 @@ require engine
 require 'tilt'
 
 # template cache
-cache = ConcurrentHashMap.new # TODO import
+cache = ConcurrentHashMap.new 
 
 load_template = proc { |template_path| 
 
-  template = cache[template_path]gr
-  if template == nil
+  template = cache[template_path]
+  if template.nil?
     template = Tilt.new(template_path)
     cache[template_path] = template
   end
@@ -44,7 +44,7 @@ get render_uri do
 
   if model.is_a? Hash
     # it will always be an ostruct
-    res.write template.render nil, model # TODO for some reason I must wrap the model in a java HashMap
+    res.write template.render nil, model 
   else
     res.write(template.render(model))
   end

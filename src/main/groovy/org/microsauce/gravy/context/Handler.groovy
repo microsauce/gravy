@@ -2,17 +2,20 @@ package org.microsauce.gravy.context
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j
-
-import java.util.regex.Pattern
-
-import javax.servlet.FilterChain
-import javax.servlet.RequestDispatcher
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
-
+import org.apache.commons.fileupload.FileItem
+import org.apache.commons.fileupload.FileUploadException
+import org.apache.commons.fileupload.disk.DiskFileItemFactory
+import org.apache.commons.fileupload.servlet.ServletFileUpload
 import org.microsauce.gravy.lang.object.CommonObject
 import org.microsauce.gravy.lang.object.GravyType
 import org.microsauce.gravy.module.Module
+
+import javax.servlet.FilterChain
+import javax.servlet.RequestDispatcher
+import javax.servlet.ServletException
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
+import java.util.regex.Pattern
 
 /**
  * A request handler defined in an application script.
@@ -23,8 +26,8 @@ import org.microsauce.gravy.module.Module
 abstract class Handler {
 	
 	protected Module module
-	
-	abstract Object doExecute(HttpServletRequest req, HttpServletResponse res, FilterChain chain, HandlerBinding handlerBinding)
+
+	abstract Object doExecute(HttpServletRequest req, HttpServletResponse res, FilterChain chain, HandlerBinding handlerBinding, Map parms)
 	abstract Object doExecute(Object params)
 
 	public Module getModule() {
@@ -61,20 +64,18 @@ abstract class Handler {
 		if (np1) parms.add(0, np1)
 		Object result = doExecute(parms)
 
-		new CommonObject(result, context()).toNative()
+		new CommonObject(result, module).toNative()
 	}
 		
 	@CompileStatic private Object nativeObj(CommonObject obj) {
-		obj ? obj.value(context()) : null
+		obj ? obj.value(module) : null
 	}
 
-	protected abstract GravyType context()
-	
 	@CompileStatic
 	Object execute(HttpServletRequest req, HttpServletResponse res, FilterChain chain, Pattern uriPattern, List<String> params) {
 		HandlerBinding handlerBinding = new HandlerBinding(req, res, uriPattern, params)
 		try {
-			doExecute(req, res, chain, handlerBinding)
+			doExecute(req, res, chain, handlerBinding, parseRequest(req))
 		}
 		catch ( Throwable t ) {
 			org.microsauce.gravy.runtime.Error error = new org.microsauce.gravy.runtime.Error(t)
@@ -84,6 +85,30 @@ abstract class Handler {
 			dispatcher.forward(req, res)
 		}
 	}
+
+    protected abstract Object wrapInputStream(InputStream inputStream);
+
+    // TODO examine this - the servlet API adds form data and query string data to the parameter map,
+    @CompileStatic private Map parseRequest(HttpServletRequest req) {
+        Map map = [:]
+        if ( (req.method == 'POST' || req.method == 'PUT') && ServletFileUpload.isMultipartContent(req) ) {
+            try {
+                List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(req); // TODO add config options
+                for (item in items) {
+                    if (item.isFormField()) map[item.getFieldName()] = item.getString()
+                    else map[item.getFieldName()] = wrapInputStream(item.getInputStream())
+                }
+            } catch (FileUploadException e) {
+                throw new ServletException("Failed to parse multi-part request.", e);
+            }
+        }
+        else {
+            req.getParameterNames().each { String key ->
+                map[key] = req.getParameter(key)
+            }
+        }
+        return map
+    }
 	
 	@CompileStatic Object execute(Object ... parms) {
 		doExecute(parms)

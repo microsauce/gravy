@@ -7,6 +7,7 @@ import org.codehaus.groovy.tools.LoaderConfiguration
 import org.codehaus.groovy.tools.RootLoader
 import org.microsauce.gravy.context.Context
 import org.microsauce.gravy.context.ServiceFactory
+import org.microsauce.gravy.lang.object.GravyType
 import org.microsauce.gravy.module.groovy.GroovyModuleFactory
 import org.microsauce.gravy.module.javascript.JSModuleFactory
 import org.microsauce.gravy.module.ruby.RubyModuleFactory
@@ -47,7 +48,7 @@ abstract class ModuleFactory {
 		config.gravy.view.renderUri		= config.gravy.view.renderUri	 ?: '/view/gstring'
 		config.gravy.view.documentRoot  = config.gravy.view.documentRoot ?: '/WEB-INF/view'
 		config.gravy.view.errorUri		= config.gravy.view.errorUri	 ?: '/error'
-		config.gravy.serializeAttributes= config.gravy.serializeAttributes ?: true
+//		config.gravy.serializeAttributes= config.gravy.serializeAttributes ?: true
 		
 		if (System.getProperty('gravy.devMode')) {
 			config.gravy.refresh		= true // TODO is this used ??? 
@@ -81,6 +82,7 @@ abstract class ModuleFactory {
 		else module.config = module.moduleConfig
 			
 		// non-config properties
+        module.type = type()
 		module.context = context
 		module.name = moduleFolder.name
 		module.scriptFile = new File(moduleScriptName())
@@ -96,7 +98,6 @@ abstract class ModuleFactory {
 		module.renderUri = gravyViewConfig.renderUri
 		module.applicationConfig = appConfig
 		module.errorUri = gravyViewConfig.errorUri
-		module.serializeAttributes = gravyConfig.serializeAttributes
 
 		module
 	}
@@ -135,5 +136,9 @@ abstract class ModuleFactory {
 	 * @return
 	 */
 	abstract String moduleScriptName()
-	
+
+    /**
+     * The module type
+     */
+	abstract GravyType type()
 }
