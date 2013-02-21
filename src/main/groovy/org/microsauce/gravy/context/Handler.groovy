@@ -88,7 +88,6 @@ abstract class Handler {
 
     protected abstract Object wrapInputStream(InputStream inputStream);
 
-    // TODO examine this - the servlet API adds form data and query string data to the parameter map,
     @CompileStatic private Map parseRequest(HttpServletRequest req) {
         Map map = [:]
         if ( (req.method == 'POST' || req.method == 'PUT') && ServletFileUpload.isMultipartContent(req) ) {

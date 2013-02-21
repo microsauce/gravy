@@ -6,6 +6,10 @@ import javax.servlet.http.HttpServletResponse;
 
 interface GravyHttpServletResponse extends HttpServletResponse {
 	void render(String viewUri, Object model)
-	void write(String output)
+    void renderJson(Object model) // TODO lang specific
+    void print(String output)
+	void write(byte[] output)
 	void redirect(String url)
+    Object getOut()
+    void setOut(Object out)
 }

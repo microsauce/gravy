@@ -20,7 +20,8 @@ class CommonObject {
 
 	Stringer stringer
 	
-	CommonObject(Object nativeValue, Module module) { //GravyType nativeType) {
+	CommonObject(Object nativeValue, Module module) {
+        this.module = module
 		this.nativeType = module.type
 		nativeRepresentations = new HashMap<String, Object>();
 		nativeRepresentations.put(nativeType.type+module.name, nativeValue);
@@ -46,10 +47,10 @@ class CommonObject {
 	@CompileStatic String toString() {
 		if ( !serializedRepresentation ) {
 			serializedRepresentation = stringer.toString(
-				nativeRepresentations.get(nativeType.type), nativeType)
+				nativeRepresentations.get(nativeType.type+module.name), nativeType)
 		}
 
-		serializedRepresentation
+        serializedRepresentation
 	}
 	
 	@CompileStatic Object toNative() {

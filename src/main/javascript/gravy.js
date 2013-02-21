@@ -34,7 +34,6 @@ importPackage(org.microsauce.gravy.lang.object)
 var GET = 'get'
 var POST = 'post'
 var PUT = 'put'
-var OPTIONS = 'post'
 var DELETE = 'delete'
 
 /********************************************************

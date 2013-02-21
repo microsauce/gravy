@@ -39,8 +39,7 @@ class RouteChain implements FilterChain {
 			Handler methodHandler = route.getHandlers().get(method);
 			Handler handler = methodHandler != null ? methodHandler : route.getHandlers().get(EnterpriseService.DEFAULT);
 			try {
-System.out.println("uri - " +((HttpServletRequest) req).getRequestURI()+ " - handler - " + handler + " | mod - " + handler.getModule());
-				GravyThreadLocal.SCRIPT_CONTEXT.set(handler.getModule().getScriptContext()); // TODO get NPE here on occasion
+				GravyThreadLocal.SCRIPT_CONTEXT.set(handler.getModule().getScriptContext());
 				handler.execute(
 						(HttpServletRequest)req, 
 						(HttpServletResponse)res, 
@@ -53,7 +52,7 @@ System.out.println("uri - " +((HttpServletRequest) req).getRequestURI()+ " - han
 			}
 			finally {
 				if ( !res.isCommitted() )
-					res.getWriter().flush();  // TODO review the flush here
+					res.getOutputStream().flush();  // TODO review the flush here - this will preclude any other service on the chain from writing to the response stream
 			}
 		}
 	}

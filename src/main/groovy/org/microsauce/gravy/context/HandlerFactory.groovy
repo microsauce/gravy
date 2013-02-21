@@ -19,7 +19,6 @@ abstract class HandlerFactory {
 	}
 	
 	static HandlerFactory getHandlerFactory(String moduleClassName) {
-println "HANDLER_FACTORIES ${HANDLER_FACTORIES}"		
 		HANDLER_FACTORIES[moduleClassName]
 	}
 	

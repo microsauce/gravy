@@ -1,6 +1,7 @@
 package org.microsauce.gravy.context.ruby;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,7 +52,7 @@ class RubyHandler extends Handler {
 
     @Override
 	public Object doExecute(HttpServletRequest req, HttpServletResponse res,
-			FilterChain chain, HandlerBinding handlerBinding, Map parms) { // TODO chase parms into Ruby
+			FilterChain chain, HandlerBinding handlerBinding, Map parms) {
 			Map<String, Object> objectBinding = null;
 			if ( handlerBinding.getJson() != null ) { 
 				objectBinding = new HashMap<String, Object>(); 
@@ -75,14 +76,14 @@ class RubyHandler extends Handler {
 		GravyHttpServletRequest rbReq = (GravyHttpServletRequest) Proxy.newProxyInstance(
 			this.getClass().getClassLoader(),
 			new Class[] {GravyHttpServletRequest.class},
-			new GravyRequestProxy(req, res, sess, chain, module));
+			new RubyRequestProxy(req, res, sess, chain, module));
 		return rbReq;
 	}
 	GravyHttpServletResponse patchResponse(HttpServletRequest req, HttpServletResponse res, Module module) {
 		GravyHttpServletResponse rbRes = (GravyHttpServletResponse)Proxy.newProxyInstance(
 			this.getClass().getClassLoader(),
 			new Class[] {GravyHttpServletResponse.class},
-			new GravyResponseProxy(res, req, module.getRenderUri(), module));
+			new RubyResponseProxy(res, req, module.getRenderUri(), module));
 		return rbRes;
 	}
 	GravyHttpSession patchSession(HttpServletRequest req, Module module) {
@@ -92,5 +93,21 @@ class RubyHandler extends Handler {
 			new GravySessionProxy(req.getSession(), module));
 		return rbSess;
 	}
+
+
+    class RubyResponseProxy extends GravyResponseProxy {
+
+        public RubyResponseProxy(HttpServletResponse res, HttpServletRequest request, String renderUri, Module module) {
+            super(res, request, renderUri, module);
+            out = (new RubyIO(container.getProvider().getRuntime(), (OutputStream) out));
+        }
+    }
+
+    class RubyRequestProxy extends GravyRequestProxy {
+        public RubyRequestProxy(Object target, HttpServletResponse res, HttpSession session, FilterChain chain, Module module) {
+            super(target, res, session, chain, module);
+            setInput(new RubyIO(container.getProvider().getRuntime(), (InputStream)getInput()));
+        }
+    }
 
 }

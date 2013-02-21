@@ -92,14 +92,14 @@ class JSHandler extends Handler {
 		GravyHttpServletRequest jsReq = (GravyHttpServletRequest) Proxy.newProxyInstance(
 			this.class.getClassLoader(),
 			[GravyHttpServletRequest.class] as Class[],
-			new GravyRequestProxy(req, res, sess, chain, module))
+			new JSRequestProxy(req, res, sess, chain, module))
 		jsReq
 	}
 	@CompileStatic GravyHttpServletResponse patchResponse(HttpServletRequest req, HttpServletResponse res, Module module) {
 		GravyHttpServletResponse jsRes = (GravyHttpServletResponse)Proxy.newProxyInstance(
 			this.class.getClassLoader(),
 			[GravyHttpServletResponse.class] as Class[],
-			new GravyResponseProxy(res, req, module.renderUri, module))
+			new JSResponseProxy(res, req, module.renderUri, module))
 		return jsRes
 	}
 	@CompileStatic GravyHttpSession patchSession(HttpServletRequest req, Module module) {
@@ -109,5 +109,20 @@ class JSHandler extends Handler {
 			new GravySessionProxy(req.session, module))
 		return jsSess
 	}
+
+    class JSResponseProxy extends GravyResponseProxy {
+        JSResponseProxy(HttpServletResponse res, HttpServletRequest request, String renderUri, Module module) {
+            super(res, request, renderUri, module)
+            out = new Stream(scope, out, null)
+        }
+    }
+
+    class JSRequestProxy extends GravyRequestProxy {
+
+        JSRequestProxy(Object target, HttpServletResponse res, HttpSession session, FilterChain chain, Module module) {
+            super(target, res, session, chain, module)
+//            input = new Stream(scope, input, module)
+        }
+    }
 
 }

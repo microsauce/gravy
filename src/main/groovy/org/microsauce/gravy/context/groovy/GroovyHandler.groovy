@@ -62,7 +62,9 @@ class GroovyHandler extends Handler {
 		binding.req = gReq
 		binding.sess = gSess
 		binding.res = gRes
-		binding.out = res.writer
+        OutputStream out = res.outputStream // writer
+		binding.out = out
+        binding.writer = new PrintWriter(new OutputStreamWriter(out, 'utf-8'))
 		binding.chain = chain
 		binding.json = jsonObject
 		if (req.method == 'GET' || req.method == 'DELETE') binding.query = parms

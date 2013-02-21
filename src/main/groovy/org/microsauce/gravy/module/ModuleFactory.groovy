@@ -48,8 +48,7 @@ abstract class ModuleFactory {
 		config.gravy.view.renderUri		= config.gravy.view.renderUri	 ?: '/view/gstring'
 		config.gravy.view.documentRoot  = config.gravy.view.documentRoot ?: '/WEB-INF/view'
 		config.gravy.view.errorUri		= config.gravy.view.errorUri	 ?: '/error'
-//		config.gravy.serializeAttributes= config.gravy.serializeAttributes ?: true
-		
+
 		if (System.getProperty('gravy.devMode')) {
 			config.gravy.refresh		= true // TODO is this used ??? 
 			config.jetty.contextPath 	= System.getProperty('jetty.contextPath') ?: config.jetty.contextPath ?: '/'

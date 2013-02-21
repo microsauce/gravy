@@ -16,12 +16,16 @@ class GravyResponseProxy<T extends HttpServletResponse> extends BaseEnterprisePr
 	HttpServletRequest request
 	String renderUri
 	Module module
+    PrintWriter writer
+    public Object out
 	
 	GravyResponseProxy(HttpServletResponse res, HttpServletRequest request, String renderUri, Module module) {
 		super(res)
 		this.request = request
 		this.renderUri = renderUri
 		this.module = module
+        this.out = ((T)target).getOutputStream()
+        this.writer = new PrintWriter(new OutputStreamWriter(this.out, 'utf-8'))
 	}
 	
 	@CompileStatic void render(String _viewUri, Object model) {
@@ -33,19 +37,35 @@ class GravyResponseProxy<T extends HttpServletResponse> extends BaseEnterprisePr
 		((T) target).contentType = 'text/html'
 		dispatcher.forward(request, (T) target)
 	}
-	@CompileStatic void write(String output) {
-		((T) target).writer.write(output)
+    /**
+     * convenience for js / ruby
+     * @param bytes
+     */
+	@CompileStatic void print(String outputStr) {
+		this.writer.write(outputStr)
+        this.writer.flush() // TODO
 	}
+    /**
+     * convenience for js / ruby - TODO provide wrapper in sub-class to extract binary for JS / RB
+     * @param bytes
+     */
+    @CompileStatic void write(byte[] bytes) {
+        ((OutputStream)out).write(bytes)
+    }
 	@CompileStatic void redirect(String url) {
 		((T) target).sendRedirect(url)
 	}
 	@CompileStatic void renderJson(Object model) {
 		((T) target).contentType = 'application/json'
-		((T) target).writer << new CommonObject(model, context()).toString() 
-		((T) target).writer.flush()
+		writer << new CommonObject(model, context()).toString()
+		writer.flush()
 	}
-	
-	protected Module context() {
+
+    Object getOut() {out}
+
+    void setOut(Object out) {/*do nothing*/}
+
+    protected Module context() {
         module
     }
 	
