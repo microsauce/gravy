@@ -121,7 +121,7 @@ class JSHandler extends Handler {
 
         JSRequestProxy(Object target, HttpServletResponse res, HttpSession session, FilterChain chain, Module module) {
             super(target, res, session, chain, module)
-//            input = new Stream(scope, input, module)
+            input = new Stream(module.scriptContext, input, module)
         }
     }
 
