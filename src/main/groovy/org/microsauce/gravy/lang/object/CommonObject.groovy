@@ -55,9 +55,9 @@ class CommonObject {
 	
 	@CompileStatic Object toNative() {
 		Object nativeObj = nativeRepresentations.get(nativeType.type)
-		if ( !nativeRepresentations.containsKey(nativeType.type) ) {
+		if ( !nativeRepresentations.containsKey(nativeType.type+module.name) ) {
 			nativeObj = stringer.parse(serializedRepresentation, nativeType)
-			nativeRepresentations.put(nativeType.type, nativeObj)
+			nativeRepresentations.put(nativeType.type+module.name, nativeObj)
 		}
 		nativeObj
 	}

@@ -70,17 +70,19 @@ class Lifecycle {
 			moduleNames = [] as Set
 
 			def modFolder = new File("${projectBasedir}/modules")
-			def modulesFolder = modFolder
-			modulesFolder.eachFile { thisFile ->
-				if ( thisFile.isDirectory() )
-					moduleNames << thisFile.name
-			}
+            if ( modFolder.exists() ) {
+                def modulesFolder = modFolder
+                modulesFolder.eachFile { thisFile ->
+                    if ( thisFile.isDirectory() )
+                        moduleNames << thisFile.name
+                }
 
-			if ( managedModules ) {
-				managedModules.each { thisMod ->
-					moduleNames << moduleName(thisMod)
-				}
-			}
+                if ( managedModules ) {
+                    managedModules.each { thisMod ->
+                        moduleNames << moduleName(thisMod)
+                    }
+                }
+            }
 		}
 
 		moduleNames

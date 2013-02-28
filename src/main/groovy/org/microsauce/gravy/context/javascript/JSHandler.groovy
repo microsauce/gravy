@@ -79,6 +79,9 @@ class JSHandler extends Handler {
 			GravyHttpServletResponse jsRes = patchResponse(req, res, module)
 			executeHandler.call(ctx, scope, scope, [callBack, jsReq, jsRes, handlerBinding.paramMap, handlerBinding.paramList, objectBinding, parms] as Object[])
 		}
+catch(Throwable t) {
+    t.printStackTrace()
+}
 		finally {
 			ctx.exit()
 		}
@@ -118,10 +121,9 @@ class JSHandler extends Handler {
     }
 
     class JSRequestProxy extends GravyRequestProxy {
-
-        JSRequestProxy(Object target, HttpServletResponse res, HttpSession session, FilterChain chain, Module module) {
+         JSRequestProxy(Object target, HttpServletResponse res, HttpSession session, FilterChain chain, Module module) {
             super(target, res, session, chain, module)
-            input = new Stream(module.scriptContext, input, module)
+            input = new Stream(module.scriptContext, input, null)
         }
     }
 
