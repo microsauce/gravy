@@ -34,7 +34,7 @@ class RouteFilter implements Filter {
 		HttpServletRequest req = (HttpServletRequest) request;
 		FilterChain routeChain = buildChain(chain, req);
 		if ( routeChain == null ) {
-			log.debug("no routes defined for uri ${req.requestURI}");
+			log.debug("no routes defined for uri "+req.getRequestURI());
 			chain.doFilter(req, res);
 		}
 		else {

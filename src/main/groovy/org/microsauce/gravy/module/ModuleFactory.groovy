@@ -97,6 +97,7 @@ abstract class ModuleFactory {
 		module.renderUri = gravyViewConfig.renderUri
 		module.applicationConfig = appConfig
 		module.errorUri = gravyViewConfig.errorUri
+        module.moduleLogger = Logger.getLogger(module.name+'/'+module.scriptFile.name)
 
 		module
 	}

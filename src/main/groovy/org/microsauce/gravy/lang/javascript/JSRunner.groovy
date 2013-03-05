@@ -2,7 +2,7 @@ package org.microsauce.gravy.lang.javascript
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j
-
+import org.apache.log4j.Logger
 import org.microsauce.gravy.module.config.Config;
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
@@ -19,9 +19,11 @@ abstract class JSRunner {
 	RhinoEngine engine 
 	Global global
 	List<File> roots
+    Logger scriptLogger
 	
-	JSRunner(List<File> roots) {
+	JSRunner(List<File> roots, Logger logger) {
 		this.roots = roots
+        this.scriptLogger = logger
 
 		String ringoJarPath = null
 		String appRoot = System.getProperty("gravy.appRoot")
@@ -44,7 +46,7 @@ abstract class JSRunner {
 		engine = new RhinoEngine(config, null)
 		global = engine.getScope()
 		global.put('out', global, System.out)
-		global.put('log', global, log)
+		global.put('log', global, scriptLogger)
 		global.put('devMode', global, System.getProperty('gravy.devMode')) 
 		getCoreScripts().each { String thisScript ->
 			engine.runScript(thisScript, [] as String[])

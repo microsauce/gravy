@@ -21,7 +21,6 @@ importPackage(java.util)
 importPackage(java.io)
 importPackage(org.microsauce.gravy.context.javascript)
 importPackage(org.microsauce.gravy.lang.object)
-//importPackage(org.ringojs.wrappers)
 
 /********************************************************
  * undocumented global variables
@@ -215,7 +214,7 @@ global.route = function(uriPattern, callBack, dispatch) {
 }
 
 /*
- * alias for 'route'.
+ * alias for 'route' - a la expressjs.
  */
 global.use = function(uriPattern, callBack, dispatch) {
 	route(uriPattern, 'default', callBack, dispatch)
@@ -252,8 +251,7 @@ global.Imports = function(importMap) {
 		var keyValue = exportIterator.next();
 		var exp = keyValue.getKey();
 		(function(expName, imp, handler) {
-			imp[expName] = function(parm1, parm2, parm3, parm4, parm5, parm6,
-					parm7) {
+			imp[expName] = function(parm1, parm2, parm3, parm4, parm5, parm6, parm7) {
 				return handler.call(commonObj(parm1), commonObj(parm2),
 					commonObj(parm3), commonObj(parm4), commonObj(parm5),
 					commonObj(parm6), commonObj(parm7));

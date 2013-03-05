@@ -42,7 +42,7 @@ war           - package your application as a web archive [appName].war in the t
 *create-gv [app-name]    - create a new Groovy application
 *create-js [app-name]    - create a new JavaScript application
 *create-cs [app-name]    - create a new CoffeeScript application
-*sample [app-name]       - create a sample application
+*sample [app-name]       - create the sample application
 
 list-mods               - list available core modules
 install-mod [mod-name]  - install a core module in this application

@@ -16,7 +16,7 @@ class GravyResponseProxy<T extends HttpServletResponse> extends BaseEnterprisePr
 	HttpServletRequest request
 	String renderUri
 	Module module
-    PrintWriter writer
+    public PrintWriter print
     public Object out
 	
 	GravyResponseProxy(HttpServletResponse res, HttpServletRequest request, String renderUri, Module module) {
@@ -25,7 +25,7 @@ class GravyResponseProxy<T extends HttpServletResponse> extends BaseEnterprisePr
 		this.renderUri = renderUri
 		this.module = module
         this.out = ((T)target).getOutputStream()
-        this.writer = new PrintWriter(new OutputStreamWriter(this.out, 'utf-8'))
+        this.print = new PrintWriter(new OutputStreamWriter(this.out, 'utf-8'))
 	}
 	
 	@CompileStatic void render(String _viewUri, Object model) {
@@ -42,9 +42,12 @@ class GravyResponseProxy<T extends HttpServletResponse> extends BaseEnterprisePr
      * @param bytes
      */
 	@CompileStatic void print(String outputStr) {
-		this.writer.write(outputStr)
-        this.writer.flush() // TODO
+		this.print.write(outputStr)
+        this.print.flush() // TODO
 	}
+    @CompileStatic void println(String outputStr) {
+        print(outputStr+'\n')
+    }
     /**
      * convenience for js / ruby - TODO provide wrapper in sub-class to extract binary for JS / RB
      * @param bytes
@@ -57,8 +60,8 @@ class GravyResponseProxy<T extends HttpServletResponse> extends BaseEnterprisePr
 	}
 	@CompileStatic void renderJson(Object model) {
 		((T) target).contentType = 'application/json'
-		writer << new CommonObject(model, context()).toString()
-		writer.flush()
+		print << new CommonObject(model, context()).toString()
+		print.flush()
 	}
 
     Object getOut() {out}

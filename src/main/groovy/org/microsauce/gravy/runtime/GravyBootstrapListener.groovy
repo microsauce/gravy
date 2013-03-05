@@ -59,11 +59,6 @@ class GravyBootstrapListener implements ServletContextListener {
 		ConfigObject config = ModuleFactory.loadModuleConfig(new File("${appRoot}/modules/app"), environment) //Config.getInstance(environment).get()
 
 		//
-		// initialize logging
-		//
-		initLogging(config)
-
-		//
 		// initialize error handler
 		//
 		String errorPage = config.gravy.errorPage ?: null
@@ -99,8 +94,13 @@ class GravyBootstrapListener implements ServletContextListener {
 					
 		initEnterpriseRuntime context, resourceRoots, appRoot, sce, config.gravy.view.errorUri
 		initCronRuntime context
-		
-	}
+
+        //
+        // initialize logging
+        //
+        initLogging(config)
+
+    }
 
 	@CompileStatic private void initCronRuntime(Context context) {
 		if ( context.cronServices ) {
@@ -178,7 +178,18 @@ class GravyBootstrapListener implements ServletContextListener {
 	private void initLogging(ConfigObject config) {
 		if (config.log4j) {
 			PropertyConfigurator.configure(config.toProperties())
-		}
+		} else {
+            ConsoleAppender console = new ConsoleAppender()
+            console.setLayout(new PatternLayout('%d{HH:mm:ss,SSS} [%p|%c] :: %m%n'))
+            console.setThreshold(Level.DEBUG)
+            console.setTarget('System.out')
+            console.activateOptions()
+            Logger microsauce = Logger.getLogger('org.microsauce')
+            microsauce.setLevel(Level.OFF)
+            Logger.getRootLogger().removeAllAppenders()
+            Logger.getRootLogger().addAppender(console)
+            Logger.getRootLogger().setLevel(Level.DEBUG)
+        }
 	}
 
 }

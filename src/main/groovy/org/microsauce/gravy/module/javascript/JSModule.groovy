@@ -2,7 +2,7 @@ package org.microsauce.gravy.module.javascript
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j
-
+import org.apache.log4j.Logger
 import org.microsauce.gravy.context.Handler
 import org.microsauce.gravy.lang.javascript.GravyJSRunner
 import org.microsauce.gravy.lang.javascript.JSRunner
@@ -22,7 +22,8 @@ class JSModule extends Module {
 	@CompileStatic
 	protected Object doLoad(Map<String, Handler> imports) {
 
-		jsRunner = new GravyJSRunner([this.folder, new File(folder, '/lib')] as List<File>)
+		jsRunner = new GravyJSRunner([this.folder, new File(folder, '/lib')] as List<File>,
+                moduleLogger)
 		scriptContext = jsRunner.global
 		JSSerializer.initInstance(jsRunner.global)
 

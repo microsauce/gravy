@@ -2,6 +2,7 @@ package org.microsauce.gravy.module
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j
+import org.apache.log4j.Logger
 import org.microsauce.gravy.lang.object.GravyType
 
 import javax.servlet.DispatcherType
@@ -47,6 +48,8 @@ abstract class Module {
 	// the application context
 	Context context 
 	Object scriptContext
+    Logger moduleLogger
+
 	
 	Module() {}
 	
