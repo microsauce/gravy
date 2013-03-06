@@ -66,10 +66,7 @@ abstract class Module {
 			if ( imports == null ) imports = [:]
 			exports = doLoad(imports)
             if ( name == 'app' )
-                //
-                // initialize logging
-                //
-                initLogging(config) // TODO move this to Module - only executed for 'app'
+                initLogging(config)
 
         }
 		catch ( all ) {
@@ -90,7 +87,7 @@ abstract class Module {
             console.setTarget('System.out')
             console.activateOptions()
             Logger microsauce = Logger.getLogger('org.microsauce')
-            microsauce.setLevel(Level.OFF)
+            microsauce.setLevel(Level.ERROR)
             Logger.getRootLogger().removeAllAppenders()
             Logger.getRootLogger().addAppender(console)
             Logger.getRootLogger().setLevel(Level.DEBUG)

@@ -63,7 +63,7 @@ class JSHandler extends Handler {
 
 	@Override
 	@CompileStatic public Object doExecute(HttpServletRequest req, HttpServletResponse res,
-			FilterChain chain, HandlerBinding handlerBinding, Map parms) {  // TODO chase parms into rhino
+			FilterChain chain, HandlerBinding handlerBinding, Map parms) {
 
 		ctx = org.mozilla.javascript.Context.enter() 
 		try {

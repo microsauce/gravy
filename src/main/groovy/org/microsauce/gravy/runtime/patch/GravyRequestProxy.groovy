@@ -34,7 +34,7 @@ class GravyRequestProxy<T extends HttpServletRequest> extends BaseEnterpriseProx
 
 	@CompileStatic Object get(String key) {
 		CommonObject obj = (CommonObject)((T)target).getAttribute(key)
-		obj.value(context())
+		obj ? obj.value(context()) : null
 	}
 	
 	@CompileStatic void put(String key, Object value) {
@@ -56,6 +56,11 @@ class GravyRequestProxy<T extends HttpServletRequest> extends BaseEnterpriseProx
     @CompileStatic protected Module context() {
         module
     }
-	
+
+    Object getIn() {
+        input
+    }
+
+    Object setIn(Object _in) {}
 }
 

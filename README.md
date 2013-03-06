@@ -8,7 +8,7 @@ on the Java Enterprise (a.k.a the meat-and-potatoes).
 Hello Groovy:
 
 	get '/hello/:name', { 
-		out << "Hello $name!"
+		res.out << "Hello $name!"
 	}
 
 Hello JavaScript:
