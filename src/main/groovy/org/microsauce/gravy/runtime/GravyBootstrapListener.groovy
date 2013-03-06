@@ -88,17 +88,12 @@ class GravyBootstrapListener implements ServletContextListener {
 		this.context = context
 		Module app = contextBuilder.application
 
-		if (config.gravy.refresh) {
+		if ( System.getProperty('gravy.devMode') ) {
 			startSourceObserver app
 		}
 					
 		initEnterpriseRuntime context, resourceRoots, appRoot, sce, config.gravy.view.errorUri
 		initCronRuntime context
-
-        //
-        // initialize logging
-        //
-        initLogging(config)
 
     }
 
@@ -162,8 +157,7 @@ class GravyBootstrapListener implements ServletContextListener {
 			dispatch: EnumSet.copyOf([DispatcherType.REQUEST, DispatcherType.FORWARD])]), servletContext)
 
 	}
-	
-	
+
 	private void addFilter(String name, FilterWrapper filter, ServletContext context) {
 		def filterReg = context.addFilter(name, filter.filter)
 		filterReg.addMappingForUrlPatterns(filter.dispatch, true, filter.mapping) 
@@ -172,24 +166,6 @@ class GravyBootstrapListener implements ServletContextListener {
 	private void addServlet(String name, ServletWrapper servlet, ServletContext context) {
 		def servletReg = context.addServlet(name, servlet.servlet)
 		servletReg.addMapping(servlet.mapping)
-	}
-
-	@CompileStatic
-	private void initLogging(ConfigObject config) {
-		if (config.log4j) {
-			PropertyConfigurator.configure(config.toProperties())
-		} else {
-            ConsoleAppender console = new ConsoleAppender()
-            console.setLayout(new PatternLayout('%d{HH:mm:ss,SSS} [%p|%c] :: %m%n'))
-            console.setThreshold(Level.DEBUG)
-            console.setTarget('System.out')
-            console.activateOptions()
-            Logger microsauce = Logger.getLogger('org.microsauce')
-            microsauce.setLevel(Level.OFF)
-            Logger.getRootLogger().removeAllAppenders()
-            Logger.getRootLogger().addAppender(console)
-            Logger.getRootLogger().setLevel(Level.DEBUG)
-        }
 	}
 
 }

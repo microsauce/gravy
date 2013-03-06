@@ -19,6 +19,7 @@ class GravyRequestProxy<T extends HttpServletRequest> extends BaseEnterpriseProx
 	HttpServletResponse response
 	HttpSession session
 	Module module
+    BufferedReader reader
     Object input
 	
 	GravyRequestProxy(Object target, HttpServletResponse res, HttpSession session, FilterChain chain, Module module) {
@@ -28,6 +29,7 @@ class GravyRequestProxy<T extends HttpServletRequest> extends BaseEnterpriseProx
 		this.chain = chain
 		this.module = module
         this.input = ((T)target).getInputStream()
+        this.reader = new BufferedReader(new InputStreamReader(this.input))
 	}
 
 	@CompileStatic Object get(String key) {

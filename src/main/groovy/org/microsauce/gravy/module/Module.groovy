@@ -2,7 +2,11 @@ package org.microsauce.gravy.module
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j
+import org.apache.log4j.ConsoleAppender
+import org.apache.log4j.Level
 import org.apache.log4j.Logger
+import org.apache.log4j.PatternLayout
+import org.apache.log4j.PropertyConfigurator
 import org.microsauce.gravy.lang.object.GravyType
 
 import javax.servlet.DispatcherType
@@ -60,16 +64,41 @@ abstract class Module {
 	@CompileStatic void load() {
 		try {
 			if ( imports == null ) imports = [:]
-			exports = doLoad(imports) 
-		}
+			exports = doLoad(imports)
+            if ( name == 'app' )
+                //
+                // initialize logging
+                //
+                initLogging(config) // TODO move this to Module - only executed for 'app'
+
+        }
 		catch ( all ) {
 			log.error "failed to load module: ${name}", all
 			all.printStackTrace()
 			throw all
 		}
 	}
-	
-	/**
+
+    @CompileStatic
+    private void initLogging(ConfigObject config) {
+        if (config.log4j) {
+            PropertyConfigurator.configure(config.toProperties())
+        } else {
+            ConsoleAppender console = new ConsoleAppender()
+            console.setLayout(new PatternLayout('%d{HH:mm:ss,SSS} [%p|%c] :: %m%n'))
+            console.setThreshold(Level.DEBUG)
+            console.setTarget('System.out')
+            console.activateOptions()
+            Logger microsauce = Logger.getLogger('org.microsauce')
+            microsauce.setLevel(Level.OFF)
+            Logger.getRootLogger().removeAllAppenders()
+            Logger.getRootLogger().addAppender(console)
+            Logger.getRootLogger().setLevel(Level.DEBUG)
+        }
+    }
+
+
+    /**
 	 * 
 	 * @return module script return value
 	 */

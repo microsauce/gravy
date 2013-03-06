@@ -34,11 +34,6 @@ log4j {
 	appender.'appLog.append'='true'
 	appender.'appLog.layout'='org.apache.log4j.PatternLayout'
 	appender.'appLog.layout.ConversionPattern'='%d{ABSOLUTE} %5p %c{1}:%L - %m%n'
-
-	appender.console='org.apache.log4j.ConsoleAppender'
-	appender.'console.Target'='System.out'
-	appender.'console.layout'='org.apache.log4j.PatternLayout'
-	appender.'console.layout.ConversionPattern'='%d{ABSOLUTE} %5p %c{1}:%L - %m%n'
 }
 
 //

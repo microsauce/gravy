@@ -79,9 +79,9 @@ class JSHandler extends Handler {
 			GravyHttpServletResponse jsRes = patchResponse(req, res, module)
 			executeHandler.call(ctx, scope, scope, [callBack, jsReq, jsRes, handlerBinding.paramMap, handlerBinding.paramList, objectBinding, parms] as Object[])
 		}
-catch(Throwable t) {
-    t.printStackTrace()
-}
+        catch(Throwable t) {
+            t.printStackTrace()
+        }
 		finally {
 			ctx.exit()
 		}

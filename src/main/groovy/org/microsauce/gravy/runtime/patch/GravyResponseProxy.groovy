@@ -25,7 +25,7 @@ class GravyResponseProxy<T extends HttpServletResponse> extends BaseEnterprisePr
 		this.renderUri = renderUri
 		this.module = module
         this.out = ((T)target).getOutputStream()
-        this.print = new PrintWriter(new OutputStreamWriter(this.out, 'utf-8'))
+        this.print = new PrintWriter(new OutputStreamWriter(this.out, 'utf-8'))   // TODO make character encoding configurable
 	}
 	
 	@CompileStatic void render(String _viewUri, Object model) {
