@@ -11,6 +11,7 @@ import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
+import org.microsauce.gravy.util.MimeTable
 
 import org.microsauce.gravy.runtime.resolver.ResourceResolver
 
@@ -20,10 +21,12 @@ class GravyResourceFilter implements Filter {
 //	static final Pattern resourcePattern = ~/.*\.[a-zA-Z0-9]+/
 
 	ResourceResolver resolver
+    MimeTable mimeTable
 
 	GravyResourceFilter(List<String> roots, String resourceRoot) {
 		resolver = new ResourceResolver(resourceRoot)
 		resolver.roots.addAll(roots)
+        mimeTable = new MimeTable()
 	}
 
 	@CompileStatic
@@ -31,19 +34,17 @@ class GravyResourceFilter implements Filter {
 		HttpServletRequest req = (HttpServletRequest) request
 		HttpServletResponse res = (HttpServletResponse) response
 		String uri = req.requestURI
-/*		if ( uri ==~ jspPattern ) {
-			String realUri = resolver.realUri uri
-			RequestDispatcher dispatcher = req.getRequestDispatcher realUri
-			dispatcher.forward(request, response)
-		} else*/ 
-		// TODO this filter is the last 'native' filter in the chain, at this
-//		if ( uri ==~ resourcePattern ) {
-			// handle static resources
-			res.outputStream.write resolver.retrieve(uri)
-			res.outputStream.flush()
-	//	} else chain.doFilter request, response
 
+        res.contentType = mimeTable.mimeType(extension(uri)) ?: 'application/octet-stream'  // TODO - what should the default be ???
+        res.outputStream.write resolver.retrieve(uri)
+        res.outputStream.flush()
 	}
+
+    @CompileStatic private String extension(String uri) {
+        int ndx = uri.lastIndexOf('.')
+        if ( ndx != -1 ) return uri.substring(ndx+1, uri.length())
+        else null
+    }
 
 	void destroy() {}
 
