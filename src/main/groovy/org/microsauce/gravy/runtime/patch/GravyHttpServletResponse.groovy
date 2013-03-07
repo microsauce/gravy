@@ -13,4 +13,6 @@ interface GravyHttpServletResponse extends HttpServletResponse {
 	void redirect(String url)
     Object getOut()
     void setOut(Object out)
+    PrintWriter getPrinter()
+    void setPrinter(PrintWriter out)
 }

@@ -14,7 +14,7 @@ Hello Groovy:
 Hello JavaScript:
 
 	get('hello/:name', function(req, res) {
-		res.write("Hello " + this.name + "!")
+		res.out.write("Hello " + this.name + "!")
 	})
 
 Hello CoffeeScript:

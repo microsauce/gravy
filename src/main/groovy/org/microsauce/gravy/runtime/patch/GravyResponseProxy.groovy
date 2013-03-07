@@ -16,7 +16,7 @@ class GravyResponseProxy<T extends HttpServletResponse> extends BaseEnterprisePr
 	HttpServletRequest request
 	String renderUri
 	Module module
-    public PrintWriter print
+    public PrintWriter printer
     public Object out
 	
 	GravyResponseProxy(HttpServletResponse res, HttpServletRequest request, String renderUri, Module module) {
@@ -25,7 +25,7 @@ class GravyResponseProxy<T extends HttpServletResponse> extends BaseEnterprisePr
 		this.renderUri = renderUri
 		this.module = module
         this.out = ((T)target).getOutputStream()
-        this.print = new PrintWriter(new OutputStreamWriter(this.out, 'utf-8'))   // TODO make character encoding configurable
+        this.printer = new PrintWriter(new OutputStreamWriter(this.out, 'utf-8'))   // TODO make character encoding configurable
 	}
 	
 	@CompileStatic void render(String _viewUri, Object model) {
@@ -42,8 +42,8 @@ class GravyResponseProxy<T extends HttpServletResponse> extends BaseEnterprisePr
      * @param bytes
      */
 	@CompileStatic void print(String outputStr) {
-		this.print.write(outputStr)
-        this.print.flush() // TODO
+		this.printer.write(outputStr)
+        this.printer.flush() // TODO
 	}
     @CompileStatic void println(String outputStr) {
         print(outputStr+'\n')
@@ -60,17 +60,23 @@ class GravyResponseProxy<T extends HttpServletResponse> extends BaseEnterprisePr
 	}
 	@CompileStatic void renderJson(Object model) {
 		((T) target).contentType = 'application/json'
-		print << new CommonObject(model, context()).toString()
-		print.flush()
+		printer << new CommonObject(model, context()).toString()
+		printer.flush()
 	}
 
     Object getOut() {out}
 
     void setOut(Object out) {/*do nothing*/}
 
+    PrintWriter getPrinter() {printer}
+
+    void setPrinter(PrintWriter printer) {/*do nothing*/}
+
     protected Module context() {
         module
     }
+
+
 	
 }
 

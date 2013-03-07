@@ -2,8 +2,6 @@ package org.microsauce.gravy.runtime
 
 import groovy.transform.CompileStatic
 
-import java.util.regex.*
-
 import javax.servlet.Filter
 import javax.servlet.FilterChain
 import javax.servlet.RequestDispatcher
@@ -17,9 +15,6 @@ import org.microsauce.gravy.runtime.resolver.ResourceResolver
 
 class GravyResourceFilter implements Filter { 
 
-//	static final Pattern jspPattern = ~/.*\.jsp/
-//	static final Pattern resourcePattern = ~/.*\.[a-zA-Z0-9]+/
-
 	ResourceResolver resolver
     MimeTable mimeTable
 
@@ -29,11 +24,11 @@ class GravyResourceFilter implements Filter {
         mimeTable = new MimeTable()
 	}
 
-	@CompileStatic
-	void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)  {
+	@CompileStatic void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)  {
 		HttpServletRequest req = (HttpServletRequest) request
 		HttpServletResponse res = (HttpServletResponse) response
 		String uri = req.requestURI
+
 
         res.contentType = mimeTable.mimeType(extension(uri)) ?: 'application/octet-stream'  // TODO - what should the default be ???
         res.outputStream.write resolver.retrieve(uri)
@@ -42,7 +37,7 @@ class GravyResourceFilter implements Filter {
 
     @CompileStatic private String extension(String uri) {
         int ndx = uri.lastIndexOf('.')
-        if ( ndx != -1 ) return uri.substring(ndx+1, uri.length())
+        if ( ndx != -1 ) return uri.substring(ndx+1, uri.length()).toLowerCase()
         else null
     }
 

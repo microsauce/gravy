@@ -8,8 +8,6 @@ import java.util.concurrent.ConcurrentHashMap
 @Log4j
 class ResourceResolver {
 
-//	static final short READ_INDICATOR = -1
-
 	Map<String,RealPath> resolvedPaths = new ConcurrentHashMap()	// uri - real path
 	Map<String,String> resolvedUris = new ConcurrentHashMap()		// uri - real path
 	Map<String,byte[]> cachedFiles = new ConcurrentHashMap() 		// real path - file content // TODO 
@@ -30,16 +28,16 @@ class ResourceResolver {
 
 	@CompileStatic
 	private RealPath resolveUri(String uri) throws FileNotFoundException {
-		log.debug "resolve $uri to real path"
+        log.debug "resolve $uri to real path"
 		RealPath realPath = resolvedPaths[uri]
-		if ( !realPath ) {
+        if ( !realPath ) {
 			log.debug "real path not cached - resolve from resource path"
 
 			for ( String thisRoot in this.roots ) {
 				File file = new File(thisRoot+uri)
-				log.debug "checking source path ${thisRoot+uri}"				
+				log.debug "checking source path ${thisRoot+uri}"
 				if ( file.exists() ) {
-					realPath = new RealPath() 
+					realPath = new RealPath()
 					realPath.path = file.absolutePath
 					resolvedPaths[uri] = realPath
 					log.debug "uri $uri resolved to real path ${realPath.path}"
@@ -64,7 +62,6 @@ class ResourceResolver {
 			resolvedUris[uri] = realUri
 			log.debug "$uri resolved to real uri $realUri"
 		}
-
 		realUri
 	}
 

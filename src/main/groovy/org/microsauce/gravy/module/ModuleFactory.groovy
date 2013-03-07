@@ -45,7 +45,7 @@ abstract class ModuleFactory {
 		def appRoot = System.getProperty('gravy.appRoot')
 		config.appRoot 				= appRoot
 		config.gravy.refresh		= false
-		config.gravy.view.renderUri		= config.gravy.view.renderUri	 ?: '/view/gstring'
+		config.gravy.view.renderUri		= config.gravy.view.renderUri	 ?: '/view/freemarker'
 		config.gravy.view.documentRoot  = config.gravy.view.documentRoot ?: '/WEB-INF/view'
 		config.gravy.view.errorUri		= config.gravy.view.errorUri	 ?: '/error'
 

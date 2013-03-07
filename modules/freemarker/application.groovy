@@ -27,11 +27,13 @@ route serviceUri, {
 	def model = req.get '_model'
 	def viewUri = req.getAttribute '_view' 	// not serialized
 	def module = req.getAttribute '_module'	// not serialized
-	def moduleName = module.name
 	res.contentType = 'text/html'
 
-	Template temp = templateEngine(module.name).getTemplate(viewUri)
-	temp.process(model, out)
+	def template = templateEngine(module.name).getTemplate(viewUri)
+    if ( template )	template.process(model, res.printer)
+    else {
+        // TODO
+    }
 	out.flush()
 }
 
