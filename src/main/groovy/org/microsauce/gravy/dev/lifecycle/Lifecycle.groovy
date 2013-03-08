@@ -9,8 +9,8 @@ import org.jruby.embed.LocalVariableBehavior
 import org.jruby.embed.ScriptingContainer
 import org.microsauce.gravy.dev.DevUtils
 import org.microsauce.gravy.lang.coffeescript.CoffeeC
-import org.microsauce.gravy.lang.javascript.CoreJSRunner
-import org.microsauce.gravy.lang.javascript.JSRunner
+import org.microsauce.gravy.lang.javascript.CoreJSRuntime
+import org.microsauce.gravy.lang.javascript.JSRuntime
 
 class Lifecycle {
 
@@ -200,7 +200,7 @@ class Lifecycle {
 
 	private void compileCoffee() {
 		// if JS module type
-		JSRunner js = new CoreJSRunner(null)
+		JSRuntime js = new CoreJSRuntime(null)
 		def engine = js.engine
 		def compiler = new CoffeeC(engine)
 
@@ -245,7 +245,7 @@ class Lifecycle {
 		println '========================================================================='
 	
 		def jsScriptRoot = new File(projectBasedir, '/src/test/javascript')
-		JSRunner testRunner = new CoreJSRunner([jsScriptRoot, new File(projectBasedir, '/lib')])
+		JSRuntime testRunner = new CoreJSRuntime([jsScriptRoot, new File(projectBasedir, '/lib')])
 		jsScriptRoot.eachFileRecurse { thisFile -> 
 			if ( thisFile.isFile() && !thisFile.name.endsWith('.coffee.js') ) {
 				testRunner.run(thisFile.absolutePath, null)

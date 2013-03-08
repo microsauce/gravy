@@ -14,14 +14,21 @@ import org.ringojs.repository.Repository
 import org.ringojs.repository.ZipRepository
 
 @Log4j
-abstract class JSRunner { 
-	
+abstract class JSRuntime {
+
+//    private static JSRuntime instance
+//
+//    public static JSRuntime getInstance() {
+//        if ( !instance ) instance = new JSRuntime()
+//        instance
+//    }
+
 	RhinoEngine engine 
 	Global global
 	List<File> roots
     Logger scriptLogger
-	
-	JSRunner(List<File> roots, Logger logger) {
+
+    JSRuntime(List<File> roots, Logger logger) {
 		this.roots = roots
         this.scriptLogger = logger
 

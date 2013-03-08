@@ -4,9 +4,9 @@ import groovy.transform.CompileStatic
 
 import org.mozilla.javascript.ScriptableObject
 
-class CoreJSRunner extends JSRunner {
+class CoreJSRuntime extends JSRuntime {
 	
-	public CoreJSRunner(List<File> roots) {
+	public CoreJSRuntime(List<File> roots) {
 		super(roots)
 	}
 

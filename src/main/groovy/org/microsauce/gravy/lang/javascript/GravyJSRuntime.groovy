@@ -4,9 +4,9 @@ import groovy.transform.CompileStatic
 import org.apache.log4j.Logger
 import org.mozilla.javascript.ScriptableObject
 
-class GravyJSRunner extends JSRunner {
+class GravyJSRuntime extends JSRuntime {
 	
-	public GravyJSRunner(List<File> roots, Logger logger) {
+	public GravyJSRuntime(List<File> roots, Logger logger) {
 		super(roots, logger)
 	}
 
