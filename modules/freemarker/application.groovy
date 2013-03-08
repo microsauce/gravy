@@ -6,8 +6,6 @@ import java.util.concurrent.ConcurrentHashMap
 def documentRoot =  config.gravy.documentRoot ?: System.getProperty('gravy.viewRoot')
 def serviceUri = config.serviceUri ?: '/view/freemarker'
 def engines = new ConcurrentHashMap()
-// TODO test caching behavior in WAR mode
-def templates = new ConcurrentHashMap()
 
 //
 // lazy load a template engine instance for each module
@@ -20,6 +18,7 @@ def templateEngine = { moduleName ->
 		engine = new Configuration()
 		engine.setObjectWrapper(new DefaultObjectWrapper())
 		engine.setTemplateLoader(templateLoader)
+        engines[moduleName] = engine
 	}
 	engine
 }
@@ -31,17 +30,11 @@ route serviceUri, {
     def module = req.getAttribute '_module'	// not serialized
     res.contentType = 'text/html'
 
-    def template = templates[viewUri]
-    if ( !template ) {
-        template = templateEngine(module.name).getTemplate(viewUri)
-        templates[viewUri] = template
-    }
+    def template = templateEngine(module.name).getTemplate(viewUri)
     if ( template )	{
         template.process(model, res.printer)
         res.printer.flush()
     }
-    else {
-        // TODO
-    }
+    else throw new RuntimeException("Template not found for uri $viewUri")
 }
 
