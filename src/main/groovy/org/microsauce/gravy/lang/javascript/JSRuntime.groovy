@@ -16,13 +16,6 @@ import org.ringojs.repository.ZipRepository
 @Log4j
 abstract class JSRuntime {
 
-//    private static JSRuntime instance
-//
-//    public static JSRuntime getInstance() {
-//        if ( !instance ) instance = new JSRuntime()
-//        instance
-//    }
-
 	RhinoEngine engine 
 	Global global
 	List<File> roots

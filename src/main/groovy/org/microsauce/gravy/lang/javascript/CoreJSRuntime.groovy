@@ -7,7 +7,7 @@ import org.mozilla.javascript.ScriptableObject
 class CoreJSRuntime extends JSRuntime {
 	
 	public CoreJSRuntime(List<File> roots) {
-		super(roots)
+		super(roots, null)
 	}
 
 	@CompileStatic String[] getCoreScripts() {

@@ -245,12 +245,14 @@ class Lifecycle {
 		println '========================================================================='
 	
 		def jsScriptRoot = new File(projectBasedir, '/src/test/javascript')
-		JSRuntime testRunner = new CoreJSRuntime([jsScriptRoot, new File(projectBasedir, '/lib')])
-		jsScriptRoot.eachFileRecurse { thisFile -> 
-			if ( thisFile.isFile() && !thisFile.name.endsWith('.coffee.js') ) {
-				testRunner.run(thisFile.absolutePath, null)
-			}
-		}
+        if ( jsScriptRoot.exists() ) {
+            JSRuntime testRunner = new CoreJSRuntime([jsScriptRoot, new File(projectBasedir, '/lib')])
+            jsScriptRoot.eachFileRecurse { thisFile ->
+                if ( thisFile.isFile() && !thisFile.name.endsWith('.coffee.js') ) {
+                    testRunner.run(thisFile.absolutePath, null)
+                }
+            }
+        }
 		
 		println '========================================================================='
 		println '= execute ruby test scripts                                             ='
@@ -259,9 +261,11 @@ class Lifecycle {
 		List<String> rubyLoadPath = [projectBasedir+'/lib']
 		container.setLoadPaths(rubyLoadPath)
 		def rubyScriptRoot = new File(projectBasedir, '/src/test/ruby')
-		rubyScriptRoot.eachFileRecurse { thisFile ->
-			container.runScriptlet(new FileInputStream(thisFile), thisFile.absolutePath)
-		}
+        if ( rubyScriptRoot.exists() ) {
+            rubyScriptRoot.eachFileRecurse { thisFile ->
+                container.runScriptlet(new FileInputStream(thisFile), thisFile.absolutePath)
+            }
+        }
 		
 		true // TODO handle errors
 	}

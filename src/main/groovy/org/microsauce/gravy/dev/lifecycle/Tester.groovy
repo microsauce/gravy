@@ -23,7 +23,7 @@ class Tester {
 
 			return TestRunner.run(allTests).wasSuccessful()
 		} else {
-			ant.echo "there are no unit test scripts defined for application $appName"
+			ant.echo "there are no unit test scripts defined"
 			return true
 		}
 	}
