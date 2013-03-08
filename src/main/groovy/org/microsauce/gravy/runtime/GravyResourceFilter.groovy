@@ -13,36 +13,38 @@ import org.microsauce.gravy.util.MimeTable
 
 import org.microsauce.gravy.runtime.resolver.ResourceResolver
 
-class GravyResourceFilter implements Filter { 
+class GravyResourceFilter implements Filter {
 
-	ResourceResolver resolver
+    ResourceResolver resolver
     MimeTable mimeTable
 
-	GravyResourceFilter(List<String> roots, String resourceRoot) {
-		resolver = new ResourceResolver(resourceRoot)
-		resolver.roots.addAll(roots)
+    GravyResourceFilter(List<String> roots, String resourceRoot) {
+        resolver = new ResourceResolver(resourceRoot)
+        resolver.roots.addAll(roots)
         mimeTable = new MimeTable()
-	}
+    }
 
-	@CompileStatic void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)  {
-		HttpServletRequest req = (HttpServletRequest) request
-		HttpServletResponse res = (HttpServletResponse) response
-		String uri = req.requestURI
+    @CompileStatic
+    void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) {
+        HttpServletRequest req = (HttpServletRequest) request
+        HttpServletResponse res = (HttpServletResponse) response
+        String uri = req.requestURI
 
 
         res.contentType = mimeTable.mimeType(extension(uri)) ?: 'application/octet-stream'  // TODO - what should the default be ???
         res.outputStream.write resolver.retrieve(uri)
         res.outputStream.flush()
-	}
+    }
 
-    @CompileStatic private String extension(String uri) {
+    @CompileStatic
+    private String extension(String uri) {
         int ndx = uri.lastIndexOf('.')
-        if ( ndx != -1 ) return uri.substring(ndx+1, uri.length()).toLowerCase()
+        if (ndx != -1) return uri.substring(ndx + 1, uri.length()).toLowerCase()
         else null
     }
 
-	void destroy() {}
+    void destroy() {}
 
-	void init(javax.servlet.FilterConfig config) {}
+    void init(javax.servlet.FilterConfig config) {}
 
 }

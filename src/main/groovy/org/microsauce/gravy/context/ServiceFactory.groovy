@@ -14,39 +14,41 @@ import org.microsauce.gravy.util.pattern.RegExUtils
 
 class ServiceFactory {
 
-	Module module
+    Module module
 
-	ServiceFactory(Module module) {
-		this.module = module
-	}
-		
-	@CompileStatic public EnterpriseService makeEnterpriseService(Object scriptContext, String uriPattern, Map<String, Object> methodHandlers, List<DispatcherType> dispatch) { 
+    ServiceFactory(Module module) {
+        this.module = module
+    }
 
-		EnterpriseService service = new EnterpriseService()
-		Map<String, Object> parseRoute = RegExUtils.parseRoute(uriPattern)
-		
-		HandlerFactory handlerFactory = HandlerFactory.getHandlerFactory(module.class.name)	
-		service.uriPattern = (Pattern) parseRoute.uriPattern
-		service.uriString = uriPattern
-	 	service.params = parseRoute.params as List<String>
-		service.dispatch = dispatch
+    @CompileStatic
+    public EnterpriseService makeEnterpriseService(Object scriptContext, String uriPattern, Map<String, Object> methodHandlers, List<DispatcherType> dispatch) {
 
-		methodHandlers.each { String method, Object rawHandler ->
-			Handler handler = handlerFactory.makeHandler(rawHandler, scriptContext)
-			handler.module = module
-			service.handlers.put(method, handler)
-		}
-		
-		service
-	}
-	
-	@CompileStatic CronService makeCronService(Object scriptContext, String cronString, Object rawHandler) {
-		CronService cronService = new CronService()
-		HandlerFactory handlerFactory = HandlerFactory.getHandlerFactory(module.class.name)	
-		cronService.cronString = cronString
-		cronService.handlers['default'] = handlerFactory.makeHandler(rawHandler, scriptContext)
-		cronService.module = module
-		cronService
-	}
-	
+        EnterpriseService service = new EnterpriseService()
+        Map<String, Object> parseRoute = RegExUtils.parseRoute(uriPattern)
+
+        HandlerFactory handlerFactory = HandlerFactory.getHandlerFactory(module.class.name)
+        service.uriPattern = (Pattern) parseRoute.uriPattern
+        service.uriString = uriPattern
+        service.params = parseRoute.params as List<String>
+        service.dispatch = dispatch
+
+        methodHandlers.each { String method, Object rawHandler ->
+            Handler handler = handlerFactory.makeHandler(rawHandler, scriptContext)
+            handler.module = module
+            service.handlers.put(method, handler)
+        }
+
+        service
+    }
+
+    @CompileStatic
+    CronService makeCronService(Object scriptContext, String cronString, Object rawHandler) {
+        CronService cronService = new CronService()
+        HandlerFactory handlerFactory = HandlerFactory.getHandlerFactory(module.class.name)
+        cronService.cronString = cronString
+        cronService.handlers['default'] = handlerFactory.makeHandler(rawHandler, scriptContext)
+        cronService.module = module
+        cronService
+    }
+
 }

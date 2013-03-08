@@ -18,60 +18,62 @@ import org.microsauce.gravy.context.Context;
 import org.microsauce.gravy.context.EnterpriseService;
 
 class RouteFilter implements Filter {
-	
-	Logger log = Logger.getLogger(RouteFilter.class);
 
-	Context context;
-	String errorUri;
+    Logger log = Logger.getLogger(RouteFilter.class);
 
-	RouteFilter(Context context, String errorUri) {
-		this.context = context;
-		this.errorUri = errorUri;
-	}
+    Context context;
+    String errorUri;
 
-	public void doFilter(ServletRequest request, ServletResponse res, FilterChain chain) 
-			throws ServletException, IOException {
-		HttpServletRequest req = (HttpServletRequest) request;
-		FilterChain routeChain = buildChain(chain, req);
-		if ( routeChain == null ) {
-			log.debug("no routes defined for uri "+req.getRequestURI());
-			chain.doFilter(req, res);
-		}
-		else {
-			try {
-				routeChain.doFilter(req, res);
-			}
-			catch (Exception all) {
-				all.printStackTrace();
-				Error error = new Error(all);
-				RequestDispatcher dispatcher = req.getRequestDispatcher(errorUri);
-				dispatcher.forward(request, res);
-			}
-		}
-	}
+    RouteFilter(Context context, String errorUri) {
+        this.context = context;
+        this.errorUri = errorUri;
+    }
 
-	public void destroy(){}
-	public void init(javax.servlet.FilterConfig config){}
+    public void doFilter(ServletRequest request, ServletResponse res, FilterChain chain)
+            throws ServletException, IOException {
+        HttpServletRequest req = (HttpServletRequest) request;
+        FilterChain routeChain = buildChain(chain, req);
+        if (routeChain == null) {
+            log.debug("no routes defined for uri " + req.getRequestURI());
+            chain.doFilter(req, res);
+        } else {
+            try {
+                routeChain.doFilter(req, res);
+            } catch (Exception all) {
+                all.printStackTrace();
+                Error error = new Error(all);
+                RequestDispatcher dispatcher = req.getRequestDispatcher(errorUri);
+                dispatcher.forward(request, res);
+            }
+        }
+    }
 
-	private FilterChain buildChain(FilterChain chain, ServletRequest req) {
+    public void destroy() {
+    }
 
-		HttpServletRequest _req = (HttpServletRequest)req;
-		List<EnterpriseService> matchingRoutes = context.findService(
-			getUri((HttpServletRequest)req), _req.getDispatcherType());
-		FilterChain routeChain = null;
-		if ( matchingRoutes.size() > 0 ) 
-			routeChain = new RouteChain(chain, matchingRoutes);
-		
-		return routeChain;
-	}
-	
-	@CompileStatic String getUri(HttpServletRequest req) {
-		String uri;
-		if ( !"/".equals(req.getContextPath())  )
-			uri = req.getRequestURI().substring(req.getContextPath().length());
-		else uri = req.getRequestURI();
+    public void init(javax.servlet.FilterConfig config) {
+    }
 
-		return uri;
-	}
+    private FilterChain buildChain(FilterChain chain, ServletRequest req) {
+
+        HttpServletRequest _req = (HttpServletRequest) req;
+        List<EnterpriseService> matchingRoutes = context.findService(
+                getUri((HttpServletRequest) req), _req.getDispatcherType());
+        FilterChain routeChain = null;
+        if (matchingRoutes.size() > 0)
+            routeChain = new RouteChain(chain, matchingRoutes);
+
+        return routeChain;
+    }
+
+    @CompileStatic
+    String getUri(HttpServletRequest req) {
+        String uri;
+        if (!"/".equals(req.getContextPath()))
+            uri = req.getRequestURI().substring(req.getContextPath().length());
+        else uri = req.getRequestURI();
+
+        return uri;
+    }
 
 }

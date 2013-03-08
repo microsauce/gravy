@@ -13,29 +13,31 @@ import groovy.util.logging.Log4j
 @Log4j
 class MimeTable {
 
-    private Map<String,String> fileExtensionMimeTypeMap = new HashMap<String,String>()
+    private Map<String, String> fileExtensionMimeTypeMap = new HashMap<String, String>()
 
     MimeTable() {
         init()
     }
 
-    @CompileStatic private void init() {
+    @CompileStatic
+    private void init() {
         log.info 'loading mime table . . .'
         InputStream is = MimeTable.class.getResourceAsStream('/mime.table')
         BufferedReader reader = new BufferedReader(new InputStreamReader(is))
 
         reader.eachLine { String line ->
             String[] tokens = line.split(' ')
-            if ( tokens.length > 1 ) {
+            if (tokens.length > 1) {
                 String typeIdentifier = tokens[0]
-                for ( int i = 1; i < tokens.length; i++ )
+                for (int i = 1; i < tokens.length; i++)
                     fileExtensionMimeTypeMap[tokens[i]] = typeIdentifier
             }
         }
         log.info '\tcomplete'
     }
 
-    @CompileStatic String mimeType(String fileExtension) {
+    @CompileStatic
+    String mimeType(String fileExtension) {
         fileExtensionMimeTypeMap[fileExtension]
     }
 }

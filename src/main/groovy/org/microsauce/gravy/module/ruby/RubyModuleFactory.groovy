@@ -13,16 +13,16 @@ class RubyModuleFactory extends ModuleFactory {
     }
 
     @Override
-	@CompileStatic
-	public String moduleClassName() {
-		'org.microsauce.gravy.module.ruby.RubyModule'
-	}
+    @CompileStatic
+    public String moduleClassName() {
+        'org.microsauce.gravy.module.ruby.RubyModule'
+    }
 
-	@Override
-	@CompileStatic
-	public String moduleScriptName() {
-		'application.rb'
-	}
+    @Override
+    @CompileStatic
+    public String moduleScriptName() {
+        'application.rb'
+    }
 
 }
 

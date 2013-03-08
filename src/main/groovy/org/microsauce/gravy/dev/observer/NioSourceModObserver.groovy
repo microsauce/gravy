@@ -9,33 +9,33 @@ import static groovy.io.FileType.DIRECTORIES
 import static java.nio.file.StandardWatchEventKinds.*
 
 /**
-* Currently we only observe application.groovy
-* TODO utilize nio or Jnotify
-* TODO add registerSource - observe more than just the root script
-*	register module and script folders
-*	compiled source folders
-*/
+ * Currently we only observe application.groovy
+ * TODO utilize nio or Jnotify
+ * TODO add registerSource - observe more than just the root script
+ * 	register module and script folders
+ * 	compiled source folders
+ */
 
 @Log4j
 class NioSourceModObserver implements SourceModObserver {
 
-	private static int pollInterval = 500
-	def private static scriptSources
+    private static int pollInterval = 500
+    def private static scriptSources
 
-	def config
-	def scriptPaths 
-	def compileSourcePaths
+    def config
+    def scriptPaths
+    def compileSourcePaths
 
-	def scriptPatterns = [
-		/application\.groovy/,
-		/scripts.*\.groovy/,
-		/modules.*\.groovy/
-	]
-	def compiledSourcePattern = /src.main.(java|groovy|resources)/
+    def scriptPatterns = [
+            /application\.groovy/,
+            /scripts.*\.groovy/,
+            /modules.*\.groovy/
+    ]
+    def compiledSourcePattern = /src.main.(java|groovy|resources)/
 
-	NioSourceModObserver(config) {
-		this.config = config
-	}
+    NioSourceModObserver(config) {
+        this.config = config
+    }
 
 /*
 	def start() {
@@ -57,90 +57,90 @@ class NioSourceModObserver implements SourceModObserver {
 		}
 
 	}
-*/		
+*/
 
-	def compiledSourceHandlers = []
-	def scriptHandlers = []
+    def compiledSourceHandlers = []
+    def scriptHandlers = []
 
-	void addScriptHandler(SourceModHandler handler) {
-		scriptHandlers << handler
-	}
+    void addScriptHandler(SourceModHandler handler) {
+        scriptHandlers << handler
+    }
 
-	void addCompiledSourceHandler(SourceModHandler handler) {
-		compiledSourceHandlers << handler
-	}
+    void addCompiledSourceHandler(SourceModHandler handler) {
+        compiledSourceHandlers << handler
+    }
 
-	void start() {
-		WatchService watcher = 
+    void start() {
+        WatchService watcher =
             FileSystems.getDefault().newWatchService()
         registerTree(config.appRoot, watcher)
 
-		// start watcher thread
-		Thread.start {
-			while (true) {
-				handleEvents(watcher, scriptHandlers, compiledSourceHandlers)
-			}
-		}
+        // start watcher thread
+        Thread.start {
+            while (true) {
+                handleEvents(watcher, scriptHandlers, compiledSourceHandlers)
+            }
+        }
 
-	}
+    }
 
-	def private registerPath(file, watcher) {
-		log.info "observing path ${file.absolutePath}"
-		Path path = Paths.get(file.absolutePath)
-		path.register(
-            watcher,
-            StandardWatchEventKinds.ENTRY_MODIFY)
-	}
+    def private registerPath(file, watcher) {
+        log.info "observing path ${file.absolutePath}"
+        Path path = Paths.get(file.absolutePath)
+        path.register(
+                watcher,
+                StandardWatchEventKinds.ENTRY_MODIFY)
+    }
 
-	def private registerTree(pathName, watcher) {
-		File file = new File(pathName)
-		if (file.exists() && file.isDirectory()) {
-			file.eachFileRecurse(DIRECTORIES) { subFolder ->
-				registerPath(subFolder, watcher)
-			}						
-		}
-	}
+    def private registerTree(pathName, watcher) {
+        File file = new File(pathName)
+        if (file.exists() && file.isDirectory()) {
+            file.eachFileRecurse(DIRECTORIES) { subFolder ->
+                registerPath(subFolder, watcher)
+            }
+        }
+    }
 
-	def private handleEvents(watcher, scriptHandlers, compiledSourceHandlers) {
-		WatchKey key = watcher.take()
-		Path path = (Path)key.watchable();
+    def private handleEvents(watcher, scriptHandlers, compiledSourceHandlers) {
+        WatchKey key = watcher.take()
+        Path path = (Path) key.watchable();
 
-        for ( WatchEvent<?> event: key.pollEvents()){
-			Path fullPath = path.resolve(event.context())
+        for (WatchEvent<?> event : key.pollEvents()) {
+            Path fullPath = path.resolve(event.context())
 
             WatchEvent.Kind kind = event.kind()
             if (kind == OVERFLOW) continue
 
-            switch (kind.name()){
+            switch (kind.name()) {
                 case "ENTRY_MODIFY":
                     if (isScript(fullPath.toString())) {
-                    	log.info "Modified script: $fullPath"
-	                    scriptHandlers.each { thisHandler ->
-	                    	thisHandler.handle()
-	                    }
-	                } else if (isCompiledSource(fullPath.toString())) {
-                    	log.info "Modified source: $fullPath"
-	                    compiledSourceHandlers.each { thisHandler ->
-	                    	thisHandler.handle()
-	                    }
-	                }
+                        log.info "Modified script: $fullPath"
+                        scriptHandlers.each { thisHandler ->
+                            thisHandler.handle()
+                        }
+                    } else if (isCompiledSource(fullPath.toString())) {
+                        log.info "Modified source: $fullPath"
+                        compiledSourceHandlers.each { thisHandler ->
+                            thisHandler.handle()
+                        }
+                    }
 
             }
         }
 
         key.reset()
-	}
+    }
 
-	private boolean isCompiledSource(String path) {
-		path ==~ compiledSourcePattern
-	}
+    private boolean isCompiledSource(String path) {
+        path ==~ compiledSourcePattern
+    }
 
-	private boolean isScript(String path) {
-		for (thisPattern in scriptPatterns) {
-			if (path ==~ thisPattern) return true
-		}
+    private boolean isScript(String path) {
+        for (thisPattern in scriptPatterns) {
+            if (path ==~ thisPattern) return true
+        }
 
-		false
-	}
+        false
+    }
 
 }

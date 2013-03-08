@@ -15,49 +15,51 @@ import org.mozilla.javascript.ScriptableObject
 @Log4j
 class JSModule extends Module {
 
-	JSRuntime jsRunner
+    JSRuntime jsRunner
 
-	@Override
-	@CompileStatic
-	protected Object doLoad(Map<String, Handler> imports) {
+    @Override
+    @CompileStatic
+    protected Object doLoad(Map<String, Handler> imports) {
 
-		jsRunner = new GravyJSRuntime([this.folder, new File(folder, '/lib')] as List<File>,
+        jsRunner = new GravyJSRuntime([this.folder, new File(folder, '/lib')] as List<File>,
                 moduleLogger)
-		scriptContext = jsRunner.global
-		JSSerializer.initInstance(jsRunner.global)
+        scriptContext = jsRunner.global
+        JSSerializer.initInstance(jsRunner.global)
 
-		Map<String, Object> jsBinding = [:]
-		jsBinding.gravyModule = this
-		jsBinding.config = config.toProperties()
+        Map<String, Object> jsBinding = [:]
+        jsBinding.gravyModule = this
+        jsBinding.config = config.toProperties()
 
-		// add module exports to the script scope (app only)
-		if ( imports ) prepareImports(imports)
+        // add module exports to the script scope (app only)
+        if (imports) prepareImports(imports)
 
-		ScriptableObject exports = (ScriptableObject)jsRunner.run(scriptFile.name, jsBinding)
+        ScriptableObject exports = (ScriptableObject) jsRunner.run(scriptFile.name, jsBinding)
 
-		prepareExports exports
-	}
+        prepareExports exports
+    }
 
-	@CompileStatic private void prepareImports(Map<String, Handler> imports) {
-		Context ctx = Context.enter()
-		try {
-			NativeFunction prepareImports = (NativeFunction)((ScriptableObject)scriptContext).get('prepareImports', (ScriptableObject)scriptContext)
-			prepareImports.call(ctx, (ScriptableObject)scriptContext, (ScriptableObject)scriptContext, [imports, scriptContext] as Object[])
-		}
-		finally {
-			ctx.exit()
-		}
-	}
+    @CompileStatic
+    private void prepareImports(Map<String, Handler> imports) {
+        Context ctx = Context.enter()
+        try {
+            NativeFunction prepareImports = (NativeFunction) ((ScriptableObject) scriptContext).get('prepareImports', (ScriptableObject) scriptContext)
+            prepareImports.call(ctx, (ScriptableObject) scriptContext, (ScriptableObject) scriptContext, [imports, scriptContext] as Object[])
+        }
+        finally {
+            ctx.exit()
+        }
+    }
 
-	@CompileStatic private Map<String, Handler> prepareExports(ScriptableObject exports) {
-		Context ctx = Context.enter()
-		try {
-			NativeFunction prepareExports = (NativeFunction)((ScriptableObject)scriptContext).get('prepareExports', (ScriptableObject)scriptContext)
-			(Map<String, Handler>) ctx.jsToJava(prepareExports.call(ctx, (ScriptableObject)scriptContext, (ScriptableObject)scriptContext, [exports] as Object[]), Map.class)
-		}
-		finally {
-			ctx.exit()
-		}
-	}
+    @CompileStatic
+    private Map<String, Handler> prepareExports(ScriptableObject exports) {
+        Context ctx = Context.enter()
+        try {
+            NativeFunction prepareExports = (NativeFunction) ((ScriptableObject) scriptContext).get('prepareExports', (ScriptableObject) scriptContext)
+            (Map<String, Handler>) ctx.jsToJava(prepareExports.call(ctx, (ScriptableObject) scriptContext, (ScriptableObject) scriptContext, [exports] as Object[]), Map.class)
+        }
+        finally {
+            ctx.exit()
+        }
+    }
 
 }

@@ -7,7 +7,7 @@ import groovy.transform.CompileStatic
     an instance of this classloader to the GroovyScriptEngine.  
 */
 public class GravyDevModeClassLoader extends ClassLoader {
-	
+
     private Map classes = new HashMap<String, Class>()
     private String folder
 
@@ -18,8 +18,8 @@ public class GravyDevModeClassLoader extends ClassLoader {
 
     @CompileStatic
     public Class findClass(String className) {
-        String path = className.replaceAll("\\.", '/')+".class"
-        File classFile = new File(folder+'/'+path)
+        String path = className.replaceAll("\\.", '/') + ".class"
+        File classFile = new File(folder + '/' + path)
         if (classFile.exists()) {
             try {
                 Class result
@@ -35,5 +35,5 @@ public class GravyDevModeClassLoader extends ClassLoader {
             }
         } else return null
 
-    } 
+    }
 }

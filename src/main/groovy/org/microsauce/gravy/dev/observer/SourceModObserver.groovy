@@ -1,21 +1,20 @@
 package org.microsauce.gravy.dev.observer
 
-
 /**
-* Currently we only observe application.groovy
-* TODO utilize nio or Jnotify
-* TODO add registerSource - observe more than just the root script
-*	register module and script folders
-*	compiled source folders
-*/
+ * Currently we only observe application.groovy
+ * TODO utilize nio or Jnotify
+ * TODO add registerSource - observe more than just the root script
+ * 	register module and script folders
+ * 	compiled source folders
+ */
 
 interface SourceModObserver {
 
-	public void  addScriptHandler(SourceModHandler handler) 
+    public void addScriptHandler(SourceModHandler handler)
 
-	public void addCompiledSourceHandler(SourceModHandler handler)
+    public void addCompiledSourceHandler(SourceModHandler handler)
 
-	public void start()
+    public void start()
 
 /*
 	def start() {
@@ -37,7 +36,7 @@ interface SourceModObserver {
 		}
 
 	}
-*/		
+*/
 
 
 }

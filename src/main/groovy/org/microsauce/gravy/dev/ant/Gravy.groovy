@@ -5,79 +5,79 @@ import org.apache.tools.ant.Project
 import org.microsauce.gravy.dev.lifecycle.Lifecycle;
 /**
  * Gravy Ant task. TODO status: untested
- * 
+ *
  * @author jboone
  *
  */
 class Gravy extends Task {
 
-	Set<String> noArgGoals 
-	Set<String> allGoals 
+    Set<String> noArgGoals
+    Set<String> allGoals
 
-	//
-	// life-cycle goals
-	// 
-	static String CLEAN 	= 'clean'
-	static String RESOLVE	= 'resolve'
-	static String COMPILE   = 'compile'
-	static String TEST  	= 'test'
-	static String ASSEMBLE  = 'assemble'
-	static String WAR 		= 'war'		// takes args
-	static String DEPLOY 	= 'deploy'	// takes args
-	static String PUBLISH = 'publish'	// TODO
-	
-	//
-	// tools
-	//
-	static String MOD_IFY = 'modIfy'
-	static String JAR_MOD = 'jarMod'
-	
+    //
+    // life-cycle goals
+    //
+    static String CLEAN = 'clean'
+    static String RESOLVE = 'resolve'
+    static String COMPILE = 'compile'
+    static String TEST = 'test'
+    static String ASSEMBLE = 'assemble'
+    static String WAR = 'war'        // takes args
+    static String DEPLOY = 'deploy'    // takes args
+    static String PUBLISH = 'publish'    // TODO
 
-	String projectPath
-	String deployPath
-	String goal = DEPLOY 				// default goal
-	String skipTests = 'false'
-	String warName = null
+    //
+    // tools
+    //
+    static String MOD_IFY = 'modIfy'
+    static String JAR_MOD = 'jarMod'
 
-	Gravy() {
 
-		goals = new HashSet<String>()
-		noArgGoals = new HashSet<String>()
+    String projectPath
+    String deployPath
+    String goal = DEPLOY                 // default goal
+    String skipTests = 'false'
+    String warName = null
 
-		noArgGoals << CLEAN
-		noArgGoals << RESOLVE
-		noArgGoals << COMPILE
-		noArgGoals << TEST
-		noArgGoals << ASSEMBLE
-		noArgGoals << MOD_IFY
+    Gravy() {
 
-		goals.addAll noArgGoals
-		goals << WAR
-		goals << DEPLOY
-		goals << PUBLISH
-	}
+        goals = new HashSet<String>()
+        noArgGoals = new HashSet<String>()
 
-	void execute() {
-		if ( !goals.contains(goal) ) {
-			log( "executing gravy goal $goal", Project.MSG_INFO )
-			Lifecycle lifecycle = new Lifecycle()
-			if ( !noArgGoals.contains(goal) ) {
-				lifecycle[goal]()
-			} else if ( goal == WAR ) {
-				lifecycle.war(warName, _skipTests())
-			} else if ( goal == DEPLOY ) {
-				lifecycle.deploy(warName, deployPath, _skipTests())
-			} else if ( goal == PUBLISH ) {
-				lifecycle.publish(deployPath)
-			}
-		} else {
-			log( "unknown goal: $goal", Project.MSG_ERR )
-		}
-	}
+        noArgGoals << CLEAN
+        noArgGoals << RESOLVE
+        noArgGoals << COMPILE
+        noArgGoals << TEST
+        noArgGoals << ASSEMBLE
+        noArgGoals << MOD_IFY
 
-	private boolean _skipTests() {
-		if (!skipTests) return false
+        goals.addAll noArgGoals
+        goals << WAR
+        goals << DEPLOY
+        goals << PUBLISH
+    }
 
-		Boolean.parseBoolean(skipTests)
-	}
+    void execute() {
+        if (!goals.contains(goal)) {
+            log("executing gravy goal $goal", Project.MSG_INFO)
+            Lifecycle lifecycle = new Lifecycle()
+            if (!noArgGoals.contains(goal)) {
+                lifecycle[goal]()
+            } else if (goal == WAR) {
+                lifecycle.war(warName, _skipTests())
+            } else if (goal == DEPLOY) {
+                lifecycle.deploy(warName, deployPath, _skipTests())
+            } else if (goal == PUBLISH) {
+                lifecycle.publish(deployPath)
+            }
+        } else {
+            log("unknown goal: $goal", Project.MSG_ERR)
+        }
+    }
+
+    private boolean _skipTests() {
+        if (!skipTests) return false
+
+        Boolean.parseBoolean(skipTests)
+    }
 }

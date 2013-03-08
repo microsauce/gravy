@@ -13,16 +13,16 @@ class GroovyModuleFactory extends ModuleFactory {
     }
 
 
-	@Override
-	@CompileStatic
-	public String moduleClassName() {
-		'org.microsauce.gravy.module.groovy.GroovyModule'
-	}
+    @Override
+    @CompileStatic
+    public String moduleClassName() {
+        'org.microsauce.gravy.module.groovy.GroovyModule'
+    }
 
-	@Override
-	@CompileStatic
-	public String moduleScriptName() {
-		'application.groovy'
-	}
+    @Override
+    @CompileStatic
+    public String moduleScriptName() {
+        'application.groovy'
+    }
 
 }

@@ -9,10 +9,10 @@ import org.microsauce.gravy.context.HandlerFactory
 
 class RubyHandlerFactory extends HandlerFactory {
 
-	@Override
-	@CompileStatic
-	public Handler makeHandler(Object rawHandler, Object scriptContext) {
-		new RubyHandler((RubyObject) rawHandler, (ScriptingContainer) scriptContext)
-	}
+    @Override
+    @CompileStatic
+    public Handler makeHandler(Object rawHandler, Object scriptContext) {
+        new RubyHandler((RubyObject) rawHandler, (ScriptingContainer) scriptContext)
+    }
 
 }

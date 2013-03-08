@@ -15,7 +15,7 @@ import sun.org.mozilla.javascript.internal.Scriptable
  * Time: 2:40 PM
  * To change this template use File | Settings | File Templates.
  */
-class JSYamlSerializer implements Serializer  {
+class JSYamlSerializer implements Serializer {
 
     private static JSYamlSerializer instance
     private ScriptableObject scope
@@ -31,30 +31,32 @@ class JSYamlSerializer implements Serializer  {
 
 
     @Override
-    @CompileStatic Object parse(String string) {
+    @CompileStatic
+    Object parse(String string) {
         Context currentCtx = Context.getCurrentContext()
         Context ctx = null
         try {
-            if ( !currentCtx ) ctx = Context.enter()
+            if (!currentCtx) ctx = Context.enter()
             else ctx = currentCtx
             return parseYaml.call(ctx, scope, scope, [string] as Object[])
         }
         finally {
-            if ( !currentCtx ) ctx.exit()
+            if (!currentCtx) ctx.exit()
         }
     }
 
     @Override
-    @CompileStatic String toString(Object object) {
+    @CompileStatic
+    String toString(Object object) {
         Context currentCtx = Context.getCurrentContext()
         Context ctx = null
         try {
-            if ( !currentCtx ) ctx = Context.enter()
+            if (!currentCtx) ctx = Context.enter()
             else ctx = currentCtx
             toYaml.call ctx, scope, scope, [object] as Object[]
         }
         finally {
-            if ( !currentCtx ) ctx.exit()
+            if (!currentCtx) ctx.exit()
         }
     }
 }

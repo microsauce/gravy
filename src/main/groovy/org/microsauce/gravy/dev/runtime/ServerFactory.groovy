@@ -5,13 +5,13 @@ import groovy.util.logging.Log4j
 @Log4j
 class ServerFactory {
 
-	def static private wrappers = [
-		jetty : JettyWrapper
+    def static private wrappers = [
+            jetty: JettyWrapper
 //		tomcat : TomcatWrapper,
 //		resin : ResinWrapper
-	]
+    ]
 
-	static ServerWrapper getServer(config) {
-		return wrappers[ config.server ?: 'jetty' ].newInstance(config)
-	}
+    static ServerWrapper getServer(config) {
+        return wrappers[config.server ?: 'jetty'].newInstance(config)
+    }
 }

@@ -11,21 +11,21 @@ import org.microsauce.gravy.module.Module
 import groovy.transform.CompileStatic
 
 class RedeploySourceModHandler implements SourceModHandler {
-	
-	Module app
-	
-	RedeploySourceModHandler(Module app) {
-		this.app = app
-	}
 
-	@CompileStatic
-	void handle() { 
-		try {
-			app.context.clearApplicationServices()
-			app.load()
-		}
-		catch(all) {
-			all.printStackTrace()
-		}
-	}
+    Module app
+
+    RedeploySourceModHandler(Module app) {
+        this.app = app
+    }
+
+    @CompileStatic
+    void handle() {
+        try {
+            app.context.clearApplicationServices()
+            app.load()
+        }
+        catch (all) {
+            all.printStackTrace()
+        }
+    }
 }

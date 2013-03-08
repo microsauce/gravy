@@ -15,73 +15,73 @@ import org.microsauce.gravy.util.CommandLine
 @Log4j
 class StartUp {
 
-	def static main(args) {
+    def static main(args) {
 
-		//
-		// parse command line
-		//
-		def commandLine = new CommandLine(args)
-		def environment = (commandLine.optionValue('env') ?: System.getProperty('gravy.env')) ?: 'dev'
+        //
+        // parse command line
+        //
+        def commandLine = new CommandLine(args)
+        def environment = (commandLine.optionValue('env') ?: System.getProperty('gravy.env')) ?: 'dev'
 
-		System.setProperty('gravy.env', environment)
-		System.setProperty('gravy.devMode', 'true')
-		
-		def port = commandLine.optionValue 'port'
-		if (port) System.setProperty('jetty.port', port)
-		def host = commandLine.optionValue 'host'
-		if (host) System.setProperty('jetty.host', host)
-		def cp = commandLine.optionValue 'cp'
-		if (cp) System.setProperty('jetty.cp', cp)
-		def clConfig = commandLineEnv(commandLine)
+        System.setProperty('gravy.env', environment)
+        System.setProperty('gravy.devMode', 'true')
 
-		def projectPath = System.getProperty('user.dir')
+        def port = commandLine.optionValue 'port'
+        if (port) System.setProperty('jetty.port', port)
+        def host = commandLine.optionValue 'host'
+        if (host) System.setProperty('jetty.host', host)
+        def cp = commandLine.optionValue 'cp'
+        if (cp) System.setProperty('jetty.cp', cp)
+        def clConfig = commandLineEnv(commandLine)
 
-		clConfig.each {key, value ->
-			System.setProperty(key, value)
-		}
-		def config = Config.getInstance(environment).get()
+        def projectPath = System.getProperty('user.dir')
 
-		//
-		// start the application server
-		//
-		startApplicationServer(config)
-	}
+        clConfig.each { key, value ->
+            System.setProperty(key, value)
+        }
+        def config = Config.getInstance(environment).get()
 
-	def static commandLineEnv(commandLine) {
-		def clConfiguration = [:]
-		def clConf = commandLine.listOptionValue('conf')
-		if(clConf.size() > 0) {
-			for (option in clConf) {
-				def keyValue = option.split('=')
-				if (keyValue.length < 2) throw Exception("unable to parse command line configuration: -conf ${option}")
-				clConfiguration[keyValue[0]] = keyValue[1]
-			}
-		}
+        //
+        // start the application server
+        //
+        startApplicationServer(config)
+    }
 
-		clConfiguration
-	}
+    def static commandLineEnv(commandLine) {
+        def clConfiguration = [:]
+        def clConf = commandLine.listOptionValue('conf')
+        if (clConf.size() > 0) {
+            for (option in clConf) {
+                def keyValue = option.split('=')
+                if (keyValue.length < 2) throw Exception("unable to parse command line configuration: -conf ${option}")
+                clConfiguration[keyValue[0]] = keyValue[1]
+            }
+        }
 
-	def static startApplicationServer(ConfigObject config) {
+        clConfiguration
+    }
 
-		//
-		// instantiate the server
-		//
-		def server = ServerFactory.getServer(config) 
+    def static startApplicationServer(ConfigObject config) {
 
-		//
-		// initialize the server
-		//
-		server.initialize()
+        //
+        // instantiate the server
+        //
+        def server = ServerFactory.getServer(config)
 
-		//
-		// cleanup code
-		//
-		addShutdownHook {
-		    log.info 'Server is shutting down . . .'
-		    server.stop()
-		    log.info 'Shutdown complete.'
-		}
+        //
+        // initialize the server
+        //
+        server.initialize()
 
-		server.start()
-	}
+        //
+        // cleanup code
+        //
+        addShutdownHook {
+            log.info 'Server is shutting down . . .'
+            server.stop()
+            log.info 'Shutdown complete.'
+        }
+
+        server.start()
+    }
 }

@@ -8,6 +8,7 @@ import static groovy.json.JsonTokenType.NULL;
 import static groovy.json.JsonTokenType.OPEN_BRACKET;
 import static groovy.json.JsonTokenType.OPEN_CURLY;
 import static groovy.json.JsonTokenType.STRING;
+
 import groovy.io.LineColumnReader;
 import groovy.json.JsonException;
 import groovy.json.JsonLexer;
@@ -24,12 +25,12 @@ import java.util.Map;
 
 /**
  * JSON slurper which parses text or reader content into a data structure of lists and maps.
- * <p>
+ * <p/>
  * Example usage:
  * <code><pre>
  * def slurper = new JsonSlurper()
  * def result = slurper.parseText('{"person":{"name":"Guillaume","age":33,"pets":["dog","cat"]}}')
- *
+ * <p/>
  * assert result.person.name == "Guillaume"
  * assert result.person.age == 33
  * assert result.person.pets.size() == 2
@@ -67,28 +68,28 @@ public class GravyJsonSlurper {
 
         GravyJsonLexer lexer = new GravyJsonLexer(reader);
         JsonToken token = lexer.nextToken();
-        
+
         if (token.getType() == OPEN_CURLY) {
             content = parseObject(lexer, reviver);
         } else if (token.getType() == OPEN_BRACKET) {
             content = parseArray(lexer, reviver);
-        } else if (token.getType().ordinal() >= NULL.ordinal()) { 
-        	Object value = token.getValue();
-        	if ( reviver != null ) {
-        		List params = new ArrayList();
-        		params.add(null);
-        		params.add(token.getValue());
-            	value = reviver.call(params);
-        	}
+        } else if (token.getType().ordinal() >= NULL.ordinal()) {
+            Object value = token.getValue();
+            if (reviver != null) {
+                List params = new ArrayList();
+                params.add(null);
+                params.add(token.getValue());
+                value = reviver.call(params);
+            }
             content = value;
 
         } else {
             throw new JsonException(
                     "A JSON payload should start with " + OPEN_CURLY.getLabel() +
-                    " or " + OPEN_BRACKET.getLabel() + ".\n" +
-                    "Instead, '" + token.getText() + "' was found " +
-                    "on line: " + token.getStartLine() + ", " +
-                    "column: " + token.getStartColumn()
+                            " or " + OPEN_BRACKET.getLabel() + ".\n" +
+                            "Instead, '" + token.getText() + "' was found " +
+                            "on line: " + token.getStartLine() + ", " +
+                            "column: " + token.getStartColumn()
             );
         }
 
@@ -106,14 +107,14 @@ public class GravyJsonSlurper {
 
         JsonToken currentToken;
 
-        for(;;) {
+        for (; ; ) {
             currentToken = lexer.nextToken();
 
             if (currentToken == null) {
                 throw new JsonException(
                         "Expected a value on line: " + lexer.getReader().getLine() + ", " +
-                        "column: " + lexer.getReader().getColumn() + ".\n" +
-                        "But got an unterminated array."
+                                "column: " + lexer.getReader().getColumn() + ".\n" +
+                                "But got an unterminated array."
                 );
             }
 
@@ -122,22 +123,22 @@ public class GravyJsonSlurper {
             } else if (currentToken.getType() == OPEN_BRACKET) {
                 content.add(parseArray(lexer, reviver));
             } else if (currentToken.getType().ordinal() >= NULL.ordinal()) {
-            	Object value = currentToken.getValue();
-            	if ( reviver != null ) {
-            		List params = new ArrayList();
-            		params.add(null);
-            		params.add(currentToken.getValue());
-                	value = reviver.call(params);
-            	}
+                Object value = currentToken.getValue();
+                if (reviver != null) {
+                    List params = new ArrayList();
+                    params.add(null);
+                    params.add(currentToken.getValue());
+                    value = reviver.call(params);
+                }
                 content.add(value);
             } else if (currentToken.getType() == CLOSE_BRACKET) {
                 return content;
             } else {
                 throw new JsonException(
                         "Expected a value, an array, or an object " +
-                        "on line: " + currentToken.getStartLine() + ", " +
-                        "column: " + currentToken.getStartColumn() + ".\n" +
-                        "But got '" + currentToken.getText() + "' instead."
+                                "on line: " + currentToken.getStartLine() + ", " +
+                                "column: " + currentToken.getStartColumn() + ".\n" +
+                                "But got '" + currentToken.getText() + "' instead."
                 );
             }
 
@@ -146,10 +147,10 @@ public class GravyJsonSlurper {
             if (currentToken == null) {
                 throw new JsonException(
                         "Expected " + CLOSE_BRACKET.getLabel() + " " +
-                        "or " + COMMA.getLabel() + " " +
-                        "on line: " + lexer.getReader().getLine() + ", " +
-                        "column: " + lexer.getReader().getColumn() + ".\n" +
-                        "But got an unterminated array."
+                                "or " + COMMA.getLabel() + " " +
+                                "on line: " + lexer.getReader().getLine() + ", " +
+                                "column: " + lexer.getReader().getColumn() + ".\n" +
+                                "But got an unterminated array."
                 );
             }
 
@@ -160,9 +161,9 @@ public class GravyJsonSlurper {
             } else if (currentToken.getType() != COMMA) {
                 throw new JsonException(
                         "Expected a value or " + CLOSE_BRACKET.getLabel() + " " +
-                        "on line: " + currentToken.getStartLine() + " " +
-                        "column: " + currentToken.getStartColumn() + ".\n" +
-                        "But got '" + currentToken.getText() + "' instead."
+                                "on line: " + currentToken.getStartLine() + " " +
+                                "column: " + currentToken.getStartColumn() + ".\n" +
+                                "But got '" + currentToken.getText() + "' instead."
                 );
             }
         }
@@ -182,14 +183,14 @@ public class GravyJsonSlurper {
         JsonToken previousToken = null;
         JsonToken currentToken = null;
 
-        for(;;) {
+        for (; ; ) {
             currentToken = lexer.nextToken();
 
             if (currentToken == null) {
                 throw new JsonException(
                         "Expected a String key on line: " + lexer.getReader().getLine() + ", " +
-                        "column: " + lexer.getReader().getColumn() + ".\n" +
-                        "But got an unterminated object."
+                                "column: " + lexer.getReader().getColumn() + ".\n" +
+                                "But got an unterminated object."
                 );
             }
 
@@ -200,9 +201,9 @@ public class GravyJsonSlurper {
             } else if (currentToken.getType() != STRING) {
                 throw new JsonException(
                         "Expected " + STRING.getLabel() + " key " +
-                        "on line: " + currentToken.getStartLine() + ", " +
-                        "column: " + currentToken.getStartColumn() + ".\n" +
-                        "But got '" + currentToken.getText() + "' instead."
+                                "on line: " + currentToken.getStartLine() + ", " +
+                                "column: " + currentToken.getStartColumn() + ".\n" +
+                                "But got '" + currentToken.getText() + "' instead."
                 );
             }
 
@@ -213,9 +214,9 @@ public class GravyJsonSlurper {
             if (currentToken == null) {
                 throw new JsonException(
                         "Expected a " + COLON.getLabel() + " " +
-                        "on line: " + lexer.getReader().getLine() + ", " +
-                        "column: " + lexer.getReader().getColumn() + ".\n" +
-                        "But got an unterminated object."
+                                "on line: " + lexer.getReader().getLine() + ", " +
+                                "column: " + lexer.getReader().getColumn() + ".\n" +
+                                "But got an unterminated object."
                 );
             }
 
@@ -224,9 +225,9 @@ public class GravyJsonSlurper {
             if (currentToken.getType() != COLON) {
                 throw new JsonException(
                         "Expected " + COLON.getLabel() + " " +
-                        "on line: " + currentToken.getStartLine() + ", " +
-                        "column: " + currentToken.getStartColumn() + ".\n" +
-                        "But got '" + currentToken.getText() +  "' instead."
+                                "on line: " + currentToken.getStartLine() + ", " +
+                                "column: " + currentToken.getStartColumn() + ".\n" +
+                                "But got '" + currentToken.getText() + "' instead."
                 );
             }
 
@@ -234,10 +235,10 @@ public class GravyJsonSlurper {
 
             if (currentToken == null) {
                 throw new JsonException(
-                        "Expected a value " + 
-                        "on line: " + lexer.getReader().getLine() + ", " +
-                        "column: " + lexer.getReader().getColumn() + ".\n" +
-                        "But got an unterminated object."
+                        "Expected a value " +
+                                "on line: " + lexer.getReader().getLine() + ", " +
+                                "column: " + lexer.getReader().getColumn() + ".\n" +
+                                "But got an unterminated object."
                 );
             }
 
@@ -248,20 +249,20 @@ public class GravyJsonSlurper {
             } else if (currentToken.getType() == OPEN_BRACKET) {
                 content.put(mapKey, parseArray(lexer, reviver));
             } else if (currentToken.getType().ordinal() >= NULL.ordinal()) {
-            	Object value = currentToken.getValue();
-            	if ( reviver != null ) {
-            		List params = new ArrayList();
-            		params.add(mapKey);
-            		params.add(currentToken.getValue());
-                	value = reviver.call(params);
-            	}
+                Object value = currentToken.getValue();
+                if (reviver != null) {
+                    List params = new ArrayList();
+                    params.add(mapKey);
+                    params.add(currentToken.getValue());
+                    value = reviver.call(params);
+                }
                 content.put(mapKey, value);
             } else {
                 throw new JsonException(
                         "Expected a value, an array, or an object " +
-                        "on line: " + currentToken.getStartLine() + ", " +
-                        "column: " + currentToken.getStartColumn() + ".\n" +
-                        "But got '" + currentToken.getText() + "' instead."
+                                "on line: " + currentToken.getStartLine() + ", " +
+                                "column: " + currentToken.getStartColumn() + ".\n" +
+                                "But got '" + currentToken.getText() + "' instead."
                 );
             }
 
@@ -273,9 +274,9 @@ public class GravyJsonSlurper {
             if (currentToken == null) {
                 throw new JsonException(
                         "Expected " + CLOSE_CURLY.getLabel() + " or " + COMMA.getLabel() + " " +
-                        "on line: " + previousToken.getEndLine() + ", " +
-                        "column: " + previousToken.getEndColumn() + ".\n" +
-                        "But got an unterminated object."
+                                "on line: " + previousToken.getEndLine() + ", " +
+                                "column: " + previousToken.getEndColumn() + ".\n" +
+                                "But got an unterminated object."
                 );
             }
 
@@ -286,9 +287,9 @@ public class GravyJsonSlurper {
             } else if (currentToken.getType() != COMMA) {
                 throw new JsonException(
                         "Expected a value or " + CLOSE_CURLY.getLabel() + " " +
-                        "on line: " + currentToken.getStartLine() + ", " +
-                        "column: " + currentToken.getStartColumn() + ".\n" +
-                        "But got '" + currentToken.getText() + "' instead."
+                                "on line: " + currentToken.getStartLine() + ", " +
+                                "column: " + currentToken.getStartColumn() + ".\n" +
+                                "But got '" + currentToken.getText() + "' instead."
                 );
             }
         }

@@ -10,19 +10,19 @@ import org.microsauce.gravy.dev.GravyDevModeClassLoader
 
 class ScriptDecorator {
 
-	protected ConfigObject config
-	protected Context context
+    protected ConfigObject config
+    protected Context context
 
-	ScriptDecorator(ConfigObject config, Context context) {
-		this.config = config
-		this.context = context
-	}
+    ScriptDecorator(ConfigObject config, Context context) {
+        this.config = config
+        this.context = context
+    }
 
-	void decorate(Script script) {
-		script.binding << [
-			config : config
-		]
-	}
+    void decorate(Script script) {
+        script.binding << [
+                config: config
+        ]
+    }
 
 //	def protected getClassLoader() {
 //		if ( config.gravy.refresh ) 

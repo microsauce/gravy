@@ -9,10 +9,10 @@ import org.mozilla.javascript.ScriptableObject
 
 class JSHandlerFactory extends HandlerFactory {
 
-	@Override
-	@CompileStatic
-	public Handler makeHandler(Object rawHandler, Object scriptContext) {
-		new JSHandler((NativeFunction) rawHandler, (ScriptableObject) scriptContext)
-	}
+    @Override
+    @CompileStatic
+    public Handler makeHandler(Object rawHandler, Object scriptContext) {
+        new JSHandler((NativeFunction) rawHandler, (ScriptableObject) scriptContext)
+    }
 
 }

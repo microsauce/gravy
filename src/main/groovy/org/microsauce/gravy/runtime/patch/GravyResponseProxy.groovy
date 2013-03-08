@@ -12,71 +12,79 @@ import org.microsauce.gravy.lang.patch.BaseEnterpriseProxy
 import org.microsauce.gravy.module.Module
 
 class GravyResponseProxy<T extends HttpServletResponse> extends BaseEnterpriseProxy {
-	
-	HttpServletRequest request
-	String renderUri
-	Module module
+
+    HttpServletRequest request
+    String renderUri
+    Module module
     public PrintWriter printer
     public Object out
-	
-	GravyResponseProxy(HttpServletResponse res, HttpServletRequest request, String renderUri, Module module) {
-		super(res)
-		this.request = request
-		this.renderUri = renderUri
-		this.module = module
-        this.out = ((T)target).getOutputStream()
+
+    GravyResponseProxy(HttpServletResponse res, HttpServletRequest request, String renderUri, Module module) {
+        super(res)
+        this.request = request
+        this.renderUri = renderUri
+        this.module = module
+        this.out = ((T) target).getOutputStream()
         this.printer = new PrintWriter(new OutputStreamWriter(this.out, 'utf-8'))   // TODO make character encoding configurable
-	}
-	
-	@CompileStatic void render(String _viewUri, Object model) {
-		request.setAttribute('_view', _viewUri)
-		Object attrModel = model
-		request.setAttribute('_model', new CommonObject(model, context())) 
-		request.setAttribute('_module', module)
-		RequestDispatcher dispatcher = request.getRequestDispatcher(renderUri)
-		((T) target).contentType = 'text/html'
-		dispatcher.forward(request, (T) target)
-	}
+    }
+
+    @CompileStatic
+    void render(String _viewUri, Object model) {
+        request.setAttribute('_view', _viewUri)
+        Object attrModel = model
+        request.setAttribute('_model', new CommonObject(model, context()))
+        request.setAttribute('_module', module)
+        RequestDispatcher dispatcher = request.getRequestDispatcher(renderUri)
+        ((T) target).contentType = 'text/html'
+        dispatcher.forward(request, (T) target)
+    }
     /**
      * convenience for js / ruby
      * @param bytes
      */
-	@CompileStatic void print(String outputStr) {
-		this.printer.write(outputStr)
+    @CompileStatic
+    void print(String outputStr) {
+        this.printer.write(outputStr)
         this.printer.flush() // TODO
-	}
-    @CompileStatic void println(String outputStr) {
-        print(outputStr+'\n')
+    }
+
+    @CompileStatic
+    void println(String outputStr) {
+        print(outputStr + '\n')
     }
     /**
      * convenience for js / ruby - TODO provide wrapper in sub-class to extract binary for JS / RB
      * @param bytes
      */
-    @CompileStatic void write(byte[] bytes) {
-        ((OutputStream)out).write(bytes)
+    @CompileStatic
+    void write(byte[] bytes) {
+        ((OutputStream) out).write(bytes)
     }
-	@CompileStatic void redirect(String url) {
-		((T) target).sendRedirect(url)
-	}
-	@CompileStatic void renderJson(Object model) {
-		((T) target).contentType = 'application/json'
-		printer << new CommonObject(model, context()).toString()
-		printer.flush()
-	}
 
-    Object getOut() {out}
+    @CompileStatic
+    void redirect(String url) {
+        ((T) target).sendRedirect(url)
+    }
 
-    void setOut(Object out) {/*do nothing*/}
+    @CompileStatic
+    void renderJson(Object model) {
+        ((T) target).contentType = 'application/json'
+        printer << new CommonObject(model, context()).toString()
+        printer.flush()
+    }
 
-    PrintWriter getPrinter() {printer}
+    Object getOut() { out }
 
-    void setPrinter(PrintWriter printer) {/*do nothing*/}
+    void setOut(Object out) {/*do nothing*/ }
+
+    PrintWriter getPrinter() { printer }
+
+    void setPrinter(PrintWriter printer) {/*do nothing*/ }
 
     protected Module context() {
         module
     }
 
 
-	
 }
 

@@ -1,5 +1,4 @@
-
 engine = 'slim'
 view {
-	renderUri = "/render/$engine"  
+    renderUri = "/render/$engine"
 }

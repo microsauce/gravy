@@ -16,37 +16,37 @@ import groovy.util.logging.Log4j
 @Log4j
 class JettyWrapper extends ServerWrapper {
 
-	def private server
+    def private server
 
-	JettyWrapper(config) {
-		super(config)
-	}
+    JettyWrapper(config) {
+        super(config)
+    }
 
-	void initialize() {
-		log.info 'initializing embedded jetty'
-		server = new Server(config.jetty.port)
+    void initialize() {
+        log.info 'initializing embedded jetty'
+        server = new Server(config.jetty.port)
 
         WebAppContext context = new WebAppContext()
-		String deployPath = DevUtils.appDeployPath(System.getProperty('user.dir'))
+        String deployPath = DevUtils.appDeployPath(System.getProperty('user.dir'))
         context.setDescriptor(getDescriptorURI(deployPath))
-        context.setResourceBase(deployPath) 
+        context.setResourceBase(deployPath)
         context.setContextPath(config.jetty.contextPath)
         context.setParentLoaderPriority(true)
- 
+
         server.setHandler(context);
-	}
+    }
 
-	void start() {
-		server.start()
-		server.join()
-	}
+    void start() {
+        server.start()
+        server.join()
+    }
 
-	void stop() {
-		server.stop()
-	}
+    void stop() {
+        server.stop()
+    }
 
-	private String getDescriptorURI(appRoot) { 
-		appRoot+'/WEB-INF/web.xml'
-	}
+    private String getDescriptorURI(appRoot) {
+        appRoot + '/WEB-INF/web.xml'
+    }
 
 }

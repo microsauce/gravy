@@ -1,6 +1,6 @@
 /********************************************************************
  ********************************************************************
- * 
+ *
  * This file is a modification to GStringTemplateEngine.groovy as 
  * published in the Groovy 2.0.1 source distribution.
  *
@@ -193,10 +193,9 @@ public class GStringTemplateEngine extends TemplateEngine {
                     }
                 } else if (c == '`') {
                     c = reader.read();
-                    if(c == '`') {
+                    if (c == '`') {
                         writingString = true;
-                    }
-                    else {
+                    } else {
                         parseGraveAccentSection(c, reader, writingString, templateExpressions);
                         writingString = false;
                         continue;
@@ -204,11 +203,10 @@ public class GStringTemplateEngine extends TemplateEngine {
                 } else if (c == '@') {
                     reader.mark(1);
                     c = reader.read();
-                    if(c == '@') {
+                    if (c == '@') {
                         templateExpressions.append("${_.contextPath(req)}");
                         continue;
-                    }
-                    else {
+                    } else {
                         appendCharacter('@', templateExpressions, writingString);
                         reader.reset();
                         writingString = true;
@@ -225,7 +223,7 @@ public class GStringTemplateEngine extends TemplateEngine {
 
             templateExpressions.append("}.asWritable()}");
 
-            final GroovyClassLoader loader = parentLoader instanceof GroovyClassLoader?(GroovyClassLoader)parentLoader:(
+            final GroovyClassLoader loader = parentLoader instanceof GroovyClassLoader ? (GroovyClassLoader) parentLoader : (
                     (GroovyClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
                         public Object run() {
                             return new GroovyClassLoader(parentLoader);
@@ -257,6 +255,7 @@ public class GStringTemplateEngine extends TemplateEngine {
             }
             templateExpressions.append(c);
         }
+
         private void parseGStringRaw(Reader reader, boolean writingString, StringBuilder templateExpressions) throws IOException {
             if (!writingString) {
                 templateExpressions.append("\"\"\"; ");
@@ -270,6 +269,7 @@ public class GStringTemplateEngine extends TemplateEngine {
                 }
             }
         }
+
         private void parseGSstring(Reader reader, boolean writingString, StringBuilder templateExpressions) throws IOException {
             if (!writingString) {
                 templateExpressions.append("\"\"\"; ");
@@ -278,9 +278,9 @@ public class GStringTemplateEngine extends TemplateEngine {
             while (true) {
                 int c = reader.read();
                 if (c == -1) break;
-                
+
                 if (c == '}') {
-                    templateExpressions.append(").toString())"); 
+                    templateExpressions.append(").toString())");
                     templateExpressions.append((char) c);
                     break;
                 } else templateExpressions.append((char) c);
@@ -323,9 +323,9 @@ public class GStringTemplateEngine extends TemplateEngine {
         }
 
         private static void parseGraveAccentSection(final int pendingC,
-                                         final Reader reader,
-                                         final boolean writingString,
-                                         final StringBuilder templateExpressions)
+                                                    final Reader reader,
+                                                    final boolean writingString,
+                                                    final StringBuilder templateExpressions)
                 throws IOException {
             if (writingString) {
                 templateExpressions.append("\"\"\"; ");
@@ -335,7 +335,7 @@ public class GStringTemplateEngine extends TemplateEngine {
             while (true) {
                 int c = reader.read();
                 if (c == -1) break;
-                if (c == '\n') break; 
+                if (c == '\n') break;
                 templateExpressions.append((char) c);
             }
 

@@ -9,35 +9,38 @@ import org.microsauce.gravy.runtime.GravyThreadLocal
 
 class RubySerializer implements Serializer {
 
-	static RubySerializer instance
-	
-	static RubySerializer getInstance() {
-		instance
-	}
-	
-	static void initInstance(ScriptingContainer container) {
-		instance = new RubySerializer()
-		instance.serializerContainer = container
-		instance.serializer = container.get 'serializer'
-	}
+    static RubySerializer instance
 
-	private ScriptingContainer serializerContainer;
-	private RubyObject serializer;
+    static RubySerializer getInstance() {
+        instance
+    }
 
-	@Override
-	@CompileStatic public Object parse(String string) {
-		ScriptingContainer parseContainer = parserContainer()
-		RubyObject parser = (RubyObject)parseContainer.get('serializer')
-		parserContainer().callMethod(parser, 'parse', [string] as Object[])
-	}
+    static void initInstance(ScriptingContainer container) {
+        instance = new RubySerializer()
+        instance.serializerContainer = container
+        instance.serializer = container.get 'serializer'
+    }
 
-	@Override
-	@CompileStatic public String toString(Object object) {
-		(String)serializerContainer.callMethod(serializer, 'to_string', [object] as Object[])
-	}
-	
-	@CompileStatic ScriptingContainer parserContainer() {
-		(ScriptingContainer)GravyThreadLocal.SCRIPT_CONTEXT.get() ?: serializerContainer
-	}
+    private ScriptingContainer serializerContainer;
+    private RubyObject serializer;
+
+    @Override
+    @CompileStatic
+    public Object parse(String string) {
+        ScriptingContainer parseContainer = parserContainer()
+        RubyObject parser = (RubyObject) parseContainer.get('serializer')
+        parserContainer().callMethod(parser, 'parse', [string] as Object[])
+    }
+
+    @Override
+    @CompileStatic
+    public String toString(Object object) {
+        (String) serializerContainer.callMethod(serializer, 'to_string', [object] as Object[])
+    }
+
+    @CompileStatic
+    ScriptingContainer parserContainer() {
+        (ScriptingContainer) GravyThreadLocal.SCRIPT_CONTEXT.get() ?: serializerContainer
+    }
 
 }

@@ -14,64 +14,64 @@ import org.apache.ivy.plugins.resolver.ChainResolver
 import org.apache.ivy.plugins.resolver.URLResolver
 
 class DependencyResolver {
-    
-    private static final mavenPattern = ~ /(.+)-[0-9\.]+/
-    
+
+    private static final mavenPattern = ~/(.+)-[0-9\.]+/
+
     boolean returnFirst = false
-    
+
     String projectLibPath
     String projectModPath
     String uriPattern = '/[organisation]/[module]/[revision]/[artifact](-[revision]).[ext]'
-    
+
     private List<String> resolverUrls = []
     private projectBase = null
     private ChainResolver chain
     private AntBuilder ant
 
-    DependencyResolver(String projectBase) { 
+    DependencyResolver(String projectBase) {
         this.projectBase = projectBase
         this.returnFirst = false
-        
+
         ant = new AntBuilder()
     }
 
     File resolveDependency(String coordinates) {
-        if ( coordinates == null || coordinates.length() == 0 ) return null
-        
+        if (coordinates == null || coordinates.length() == 0) return null
+
         String[] coords = coordinates.split(':')
-        if ( coords.length != 3 ) 
+        if (coords.length != 3)
             throw new Exception('Invalid maven coordinates.  They must be in the form \'group:artifactId:version\'')
-        
+
         resolveArtifact(
-            coords[0] /*group*/, 
-            coords[1] /*artifactId*/, 
-            coords[2] /*version*/)
+                coords[0] /*group*/,
+                coords[1] /*artifactId*/,
+                coords[2] /*version*/)
     }
 
     File installDependency(String coordinates, String installPath) {
         File file = resolveDependency(coordinates)
         File installFolder = new File(installPath)
-        if ( !installFolder.exists() )
+        if (!installFolder.exists())
             installFolder.mkdirs()
-        
-        ant.copy(file:"${file.absolutePath}", todir:"${installPath}")
+
+        ant.copy(file: "${file.absolutePath}", todir: "${installPath}")
         new File("${installPath}/${file.name}")
     }
-    
+
     void installModule(String coordinates, String installPath) {
         File file = resolveDependency(coordinates)
         extractModule(moduleJar, installPath)
     }
-    
+
     void extractModule(File moduleJar, String installPath) {
         String fileName = moduleJar.name
         String moduleName = null
-        if ( fileName ==~ mavenPattern ) {
+        if (fileName ==~ mavenPattern) {
             def matches = fileName =~ mavenPattern
             moduleName = matches[0][1]
         }
 
-        ant.unzip(src:"${moduleJar}", dest:"${installPath}+'/'+${moduleName}")
+        ant.unzip(src: "${moduleJar}", dest: "${installPath}+'/'+${moduleName}")
     }
 
     private void addResolver(String url) {
@@ -82,10 +82,10 @@ class DependencyResolver {
         URLResolver resolver = new URLResolver()
         resolver.setM2compatible(true)
         resolver.name = name
-        resolver.addArtifactPattern url+uriPattern
+        resolver.addArtifactPattern url + uriPattern
         resolver
     }
-    
+
     private File resolveArtifact(String groupId, String artifactId, String version) throws Exception {
 
         IvySettings ivySettings = new IvySettings()
@@ -93,10 +93,10 @@ class DependencyResolver {
         chainResolver.returnFirst = returnFirst // false by default
         chainResolver.name = 'chain'
         def ndx = 0
-        resolverUrls.each { url -> 
-            chainResolver.add(newURLResolver('repository'+(ndx++), url)) 
+        resolverUrls.each { url ->
+            chainResolver.add(newURLResolver('repository' + (ndx++), url))
         }
-        chainResolver.add(newURLResolver('repository'+(ndx++), 'http://repo1.maven.org/maven2'))  // add a base resolver
+        chainResolver.add(newURLResolver('repository' + (ndx++), 'http://repo1.maven.org/maven2'))  // add a base resolver
         ivySettings.addResolver chainResolver
         ivySettings.setDefaultResolver('chain')
         Ivy ivy = Ivy.newInstance(ivySettings)
@@ -108,8 +108,8 @@ class DependencyResolver {
         dep = [groupId, artifactId, version]
 
         DefaultModuleDescriptor md =
-                DefaultModuleDescriptor.newDefaultInstance(
-                    ModuleRevisionId.newInstance(dep[0], dep[1]+'-caller', 'working'))
+            DefaultModuleDescriptor.newDefaultInstance(
+                    ModuleRevisionId.newInstance(dep[0], dep[1] + '-caller', 'working'))
 
         DefaultDependencyDescriptor dd = new DefaultDependencyDescriptor(md,
                 ModuleRevisionId.newInstance(dep[0], dep[1], dep[2]), false, false, true)
@@ -119,10 +119,10 @@ class DependencyResolver {
         String[] confs = ['default']
         ResolveOptions resolveOptions = new ResolveOptions().setConfs(confs)
         ResolveReport report = ivy.resolve(ivyfile.toURI().toURL(), resolveOptions)
-    
-        if ( report.getAllArtifactsReports().length == 0 ) 
+
+        if (report.getAllArtifactsReports().length == 0)
             throw new Exception("Unable to resolve dependency $groupId:$artifactId:$version")
-        
+
         File jarArtifactFile = report.getAllArtifactsReports()[0].getLocalFile()
         return jarArtifactFile;
     }

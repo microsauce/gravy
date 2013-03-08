@@ -13,15 +13,15 @@ class JSModuleFactory extends ModuleFactory {
     }
 
     @Override
-	@CompileStatic
-	public String moduleClassName() {
-		'org.microsauce.gravy.module.javascript.JSModule'
-	}
+    @CompileStatic
+    public String moduleClassName() {
+        'org.microsauce.gravy.module.javascript.JSModule'
+    }
 
-	@Override
-	@CompileStatic
-	public String moduleScriptName() {
-		'application.js'
-	}
+    @Override
+    @CompileStatic
+    public String moduleScriptName() {
+        'application.js'
+    }
 
 }
