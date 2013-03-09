@@ -7,27 +7,27 @@ JavaScript, CoffeeScript, and/or Ruby on top of the Java Servlet API (the meat-a
 
 Hello Groovy:
 ```groovy
-	get '/hello/:name', { 
-		res.print "Hello $name!"
-	}
-
+get '/hello/:name', {
+    res.print "Hello $name!"
+}
+```
 Hello JavaScript:
 ```js
-	get('hello/:name', function(req, res) {
-		res.print("Hello " + this.name + "!")
-	})
-
+get('hello/:name', function(req, res) {
+    res.print("Hello " + this.name + "!")
+})
+```
 Hello CoffeeScript:
 ```coffee
-	get '/hello/:name', (req, res) ->
-		res.print "Hello #{@name}!"
-		
+get '/hello/:name', (req, res) ->
+    res.print "Hello #{@name}!"
+```
 Hello Ruby:
 ```ruby
-	get '/hello/:name' do
-		res.print "Hello #{name}!"
-	end	
-		
+get '/hello/:name' do
+    res.print "Hello #{name}!"
+end
+```
 ## Status
 
 Gravy is currently Alpha software.  Programming and tooling API's are still evolving, but near completion. 
