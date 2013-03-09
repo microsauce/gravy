@@ -2,30 +2,30 @@
 Gravy
 ===
 
-Gravy is a framework for rapid development of web applications in Groovy, JavaScript, CoffeeScript, and/or Ruby 
-on the Java Enterprise (a.k.a the meat-and-potatoes).  
+Gravy is a framework for scripting web applications (a la Sinatra/express.js) in Groovy,
+JavaScript, CoffeeScript, and/or Ruby on top of the Java Servlet API (the meat-and-potatoes).
 
 Hello Groovy:
-
+```groovy
 	get '/hello/:name', { 
-		res.out << "Hello $name!"
+		res.print "Hello $name!"
 	}
 
 Hello JavaScript:
-
+```js
 	get('hello/:name', function(req, res) {
-		res.out.write("Hello " + this.name + "!")
+		res.print("Hello " + this.name + "!")
 	})
 
 Hello CoffeeScript:
-
+```coffee
 	get '/hello/:name', (req, res) ->
-		res.write "Hello #{@name}!"
+		res.print "Hello #{@name}!"
 		
 Hello Ruby:
-
+```ruby
 	get '/hello/:name' do
-		res.write "Hello #{name}!"
+		res.print "Hello #{name}!"
 	end	
 		
 ## Status
@@ -60,28 +60,28 @@ these additional components run the following command:
 This command generates a sample application in a folder named [app-name].  The application folder layout 
 is as follows:
 
-	[app-name]                             - root application folder
-	    |- application.(groovy|js|coffee)  - main application script
-	    |_ src                             - java and groovy sources   
+	[app-name]                                - root application folder
+	    |- application.(groovy|js|coffee|rb)  - main application script
+	    |_ src                                - java and groovy sources
 	    |   |_ main
 	    |   |   |- java
 	    |   |   |- groovy
-	    |   |   |_ resources               - static resources to add to the application 
-	    |   |                                classpath
+	    |   |   |_ resources                  - static resources to add to the application
+	    |   |                                   classpath
 	    |   |_ test 
-	    |       |_ groovy                  - groovy test scripts
-	    |       |_ javascript              - javascript/coffeescript test scripts
-	    |       |_ ruby                    - ruby test scripts
-	    |- view                            - view templates
-	    |- conf                            - configuration (config.groovy)
-	    |- webroot                         - static resources (html, css, js, images, etc)
+	    |       |_ groovy                     - groovy test scripts
+	    |       |_ javascript                 - javascript/coffeescript test scripts
+	    |       |_ ruby                       - ruby test scripts
+	    |- view                               - view templates
+	    |- conf                               - configuration (config.groovy)
+	    |- webroot                            - static resources (html, css, js, images, etc)
 	    |   |_ WEB-INF         
-	    |       |_ web.xml                 - the application deployment descriptor, for most
+	    |       |_ web.xml                    - the application deployment descriptor, for most
 	    |
-	    |- modules                         - modules (application fragments)
-	    |_ lib                             - jar files, JS
+	    |- modules                            - modules (application fragments)
+	    |_ lib                                - jar files, JS/Ruby libraries
 
-To run your new Gravy app execute the gravy command:
+To run your new Gravy app execute the gravy commands:
 
 	$ cd <app-name>
 	$ gravy
