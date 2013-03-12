@@ -282,11 +282,11 @@ add_scheduled_task = Proc.new { |cron_string, &call_back|
 
 module GravyModule
   
-  def self.init(add_service, add_scheduled_task, conf)
+  def self.init(add_service, add_scheduled_task, conf, log)
     @@add_service = add_service
     @@add_scheduled_task = add_scheduled_task
-puts "conf: #{conf}"    
     @@conf = conf
+    @@log = log
   end
 
   #
@@ -323,7 +323,7 @@ puts "conf: #{conf}"
 
 end
 
-GravyModule.init(add_service, add_scheduled_task, j_properties)
+GravyModule.init(add_service, add_scheduled_task, j_properties, j_log)
 
 include GravyModule
 

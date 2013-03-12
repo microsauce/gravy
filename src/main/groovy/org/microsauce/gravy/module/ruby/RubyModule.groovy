@@ -20,21 +20,12 @@ public class RubyModule extends Module {
         container = new ScriptingContainer(LocalContextScope.SINGLETHREAD, LocalVariableBehavior.PERSISTENT);
     }
 
-    private void setLoadPaths(List<String> loadPaths) {
-        if (!container.loadPaths) container.loadPaths = new ArrayList<String>()
-        container.loadPaths.addAll(loadPaths)
-        if (app && new File(app.folder, 'lib').exists()) {
-            container.loadPaths.add(new File(app.folder, 'lib').absolutePath) // TODO make configurable
-        }
-    }
-
     @Override
     @CompileStatic
     protected Object doLoad(Map imports) {
 
         List<String> paths = [this.folder.absolutePath + '/lib']
         container.loadPaths.addAll(paths)
-//		setLoadPaths(paths)
 
         scriptContext = container;
 
@@ -43,6 +34,7 @@ public class RubyModule extends Module {
         container.put("j_mod_lib_path", folder.getAbsolutePath() + "/lib");
         container.put("j_gem_home", config.get("gem_home"));
         container.put("j_container", container);
+        container.put("j_log", moduleLogger)
 
         try {
             InputStream scriptStream = this.getClass().getResourceAsStream("/gravy.rb");
@@ -75,7 +67,7 @@ public class RubyModule extends Module {
     private Reader assembleModuleScript(String moduleName, File scriptFile) {
         String rawScriptText = scriptFile.text
         // to preserve line numbering in user script define all of this on the first line
-        return new StringReader("""module Gravy_Module_$moduleName; extend self; include GravyModule; exp = OpenStruct.new; @@exp = exp; def self.get_exp(); @@exp; end; $rawScriptText
+        return new StringReader("""module Gravy_Module_$moduleName; extend self; include GravyModule; exp = OpenStruct.new; @@exp = exp; def self.get_exp(); @@exp; end; log = @@log; $rawScriptText
           end
 		  Gravy_Module_$moduleName
 		""".toString())
