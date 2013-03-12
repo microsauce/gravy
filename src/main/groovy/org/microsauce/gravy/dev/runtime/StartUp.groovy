@@ -1,5 +1,3 @@
-// TODO move this to correct folder - rename to Startup
-
 package org.microsauce.gravy.dev.runtime
 
 import groovy.util.logging.Log4j

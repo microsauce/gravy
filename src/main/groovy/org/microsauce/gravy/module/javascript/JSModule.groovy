@@ -15,16 +15,18 @@ import org.mozilla.javascript.ScriptableObject
 @Log4j
 class JSModule extends Module {
 
-    JSRuntime jsRunner
+    JSRuntime jsRuntime
 
     @Override
     @CompileStatic
     protected Object doLoad(Map<String, Handler> imports) {
 
-        jsRunner = new GravyJSRuntime([this.folder, new File(folder, '/lib')] as List<File>,
-                moduleLogger)
-        scriptContext = jsRunner.global
-        JSSerializer.initInstance(jsRunner.global)
+        if ( !jsRuntime )
+            jsRuntime = new GravyJSRuntime(
+                    [this.folder, new File(folder, '/lib')] as List<File>,
+                    moduleLogger)
+        scriptContext = jsRuntime.global
+        JSSerializer.initInstance(jsRuntime.global)
 
         Map<String, Object> jsBinding = [:]
         jsBinding.gravyModule = this
@@ -33,7 +35,7 @@ class JSModule extends Module {
         // add module exports to the script scope (app only)
         if (imports) prepareImports(imports)
 
-        ScriptableObject exports = (ScriptableObject) jsRunner.run(scriptFile.name, jsBinding)
+        ScriptableObject exports = (ScriptableObject) jsRuntime.run(scriptFile.name, jsBinding)
 
         prepareExports exports
     }

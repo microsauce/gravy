@@ -17,11 +17,11 @@ import org.ringojs.repository.ZipRepository
 abstract class JSRuntime {
 
     RhinoEngine engine
-    Global global
+    Scriptable global
     List<File> roots
     Logger scriptLogger
 
-    JSRuntime(List<File> roots, Logger logger) {
+    @CompileStatic JSRuntime(List<File> roots, Logger logger) {
         this.roots = roots
         this.scriptLogger = logger
 

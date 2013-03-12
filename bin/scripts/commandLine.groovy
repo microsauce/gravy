@@ -2,11 +2,13 @@
 
 import org.microsauce.gravy.dev.lifecycle.Lifecycle;
 import org.microsauce.gravy.util.CommandLine;
+import org.microsauce.gravy.dev.runtime.StartUp;
 
 //
 // parse command line
 //
 def subCommands = [
+    /*lifecycle goals*/
 	'clean',
 	'resolve',
 	'compile',
@@ -14,11 +16,12 @@ def subCommands = [
 	'assemble',
 	'run',
 	'war',
-	'create',
-	'mod-ify',
-	'list-mods',
-	'install-mod',
-	'jar-mod'
+    /*tools*/
+	'create',           // create a new app
+	'mod-ify',          // convert top-level app into a module
+	'list-mods',        // list core modules
+	'install-mod',      // install a core module in this application
+	'jar-mod'           // package a module in a jar
 ]
 def commandLine = new CommandLine(args, subCommands)
 commandLine.defaultCommand = 'run'
@@ -170,8 +173,19 @@ if ( command == 'run' ) {
 	//
 	// start the dev server
 	//
-	def gse = new GroovyScriptEngine(["$gravyHome/bin/scripts"] as String[])
-	gse.run('bootstrap.groovy', [args : args] as Binding)
+    println ''
+    println '========================================================================='
+    println '= launch application server  ;)                                         ='
+    println '========================================================================='
+    println ''
+    StartUp.main(args)
+//    this.getClass().classLoader.rootLoader.loadClass('org.microsauce.gravy.dev.runtime.StartUp')
+//            .getMethod('main', String[].class)
+//            .invoke(null, [args as String[]] as Object[])
+
+
+//	def gse = new GroovyScriptEngine(["$gravyHome/bin/scripts"] as String[])
+//	gse.run('bootstrap.groovy', [args : args] as Binding)
 }
 
 //

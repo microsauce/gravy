@@ -4,11 +4,11 @@
  */
 
 console.log("adding CoffeeScript extension . . .");
-if ( devMode == 'true' ) { 
+if ( devMode == 'true' ) {
 	var engine = require('ringo/engine')
 	engine.setOptimizationLevel(-1) // necessary for coffee-script.js
 	var fs = require('fs');
-	var coffeec = require('coffee-script'); 
+	var coffeec = require('coffee-script');
 }
 
 require.extensions[".coffee"] = function(coffee) {

@@ -10,7 +10,7 @@ if [ "$JAVA_HOME" = "" ]; then
 fi
 
 # build classpath
-cp=$GRAVY_HOME/lib/*:$GRAVY_HOME/lib/groovy/*:$GRAVY_HOME/lib/rhino/*:$GRAVY_HOME/lib/ringojs/*:$GRAVY_HOME/lib/jruby/*:$JAVA_HOME/lib/*
+cp=$GRAVY_HOME/lib/*:$GRAVY_HOME/lib/groovy/*:$GRAVY_HOME/lib/rhino/*:$GRAVY_HOME/lib/ringojs/*:$GRAVY_HOME/lib/jruby/*:$GRAVY_HOME/lib/jetty8/*:$GRAVY_HOME/lib/jnotify/*:$JAVA_HOME/lib/*
 
 # -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=n
 $JAVA_HOME/bin/java -cp $cp org.codehaus.groovy.tools.GroovyStarter --classpath $cp --main groovy.ui.GroovyMain $GRAVY_HOME/bin/scripts/commandLine.groovy "$@"

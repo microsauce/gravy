@@ -1,6 +1,9 @@
 package org.microsauce.gravy.module.javascript
 
 import groovy.transform.CompileStatic
+import org.microsauce.gravy.context.Context
+import org.microsauce.gravy.lang.javascript.JSRuntime
+import org.microsauce.gravy.module.Module
 import org.microsauce.gravy.module.ModuleFactory
 import org.microsauce.gravy.lang.object.GravyType
 

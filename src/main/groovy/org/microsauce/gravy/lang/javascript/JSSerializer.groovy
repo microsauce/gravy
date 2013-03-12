@@ -6,7 +6,7 @@ import org.microsauce.gravy.lang.object.Serializer
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeFunction
 import org.mozilla.javascript.NativeJSON
-import org.mozilla.javascript.ScriptableObject
+import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.tools.shell.Global
 
 class JSSerializer implements Serializer {
@@ -17,13 +17,13 @@ class JSSerializer implements Serializer {
         instance
     }
 
-    static void initInstance(Global global) {
+    static void initInstance(Scriptable global) {
         instance = new JSSerializer()
         instance.scope = global
         instance.parseJson = global.get('parseJson', global)
     }
 
-    ScriptableObject scope;
+    Scriptable scope;
     NativeFunction parseJson;
 
     JSSerializer() {}
