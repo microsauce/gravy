@@ -9,6 +9,9 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload
 import org.microsauce.gravy.lang.object.CommonObject
 import org.microsauce.gravy.lang.object.GravyType
 import org.microsauce.gravy.module.Module
+import org.microsauce.gravy.runtime.patch.GravyHttpServletRequest
+import org.microsauce.gravy.runtime.patch.GravyHttpServletResponse
+import org.microsauce.gravy.runtime.patch.GravyHttpSession
 
 import javax.servlet.FilterChain
 import javax.servlet.RequestDispatcher
@@ -27,7 +30,7 @@ abstract class Handler {
 
     protected Module module
 
-    abstract Object doExecute(HttpServletRequest req, HttpServletResponse res, FilterChain chain, HandlerBinding handlerBinding, Map parms)
+    abstract Object doExecute(GravyServletWrapper wrapper)
 
     abstract Object doExecute(Object params)
 
@@ -69,16 +72,14 @@ abstract class Handler {
         new CommonObject(result, module).toNative()
     }
 
-    @CompileStatic
-    private Object nativeObj(CommonObject obj) {
+    @CompileStatic private Object nativeObj(CommonObject obj) {
         obj ? obj.value(module) : null
     }
 
-    @CompileStatic
-    Object execute(HttpServletRequest req, HttpServletResponse res, FilterChain chain, Pattern uriPattern, List<String> params) {
-        HandlerBinding handlerBinding = new HandlerBinding(req, res, uriPattern, params)
+    @CompileStatic Object execute(HttpServletRequest req, HttpServletResponse res, FilterChain chain, Pattern uriPattern, List<String> params) {
         try {
-            doExecute(req, res, chain, handlerBinding, parseRequest(req))
+            GravyServletWrapper servletWrapper = servletWrapperCache(req, res, chain, uriPattern, params)
+            doExecute(servletWrapper)
         }
         catch (Throwable t) {
             org.microsauce.gravy.runtime.Error error = new org.microsauce.gravy.runtime.Error(t)
@@ -89,36 +90,20 @@ abstract class Handler {
         }
     }
 
-    protected abstract Object wrapInputStream(InputStream inputStream);
-
-    @CompileStatic
-    private Map parseRequest(HttpServletRequest req) {
-        Map map = [:]
-        if ((req.method == 'POST' || req.method == 'PUT') && ServletFileUpload.isMultipartContent(req)) {
-            try {
-                List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(req); // TODO add config options
-                for (item in items) {
-                    if (item.isFormField()) map[item.getFieldName()] = item.getString()
-                    else map[item.getFieldName()] = wrapInputStream(item.getInputStream())
-                }
-            } catch (FileUploadException e) {
-                throw new ServletException("Failed to parse multi-part request.", e);
-            }
-        } else {
-            req.getParameterNames().each { String key ->
-                map[key] = req.getParameter(key)
-            }
+    @CompileStatic private GravyServletWrapper servletWrapperCache(HttpServletRequest req, HttpServletResponse res, FilterChain chain, Pattern uriPattern, List<String> params) {
+        GravyServletWrapper wrapper = (GravyServletWrapper)req.getAttribute('_wrapper')
+        if ( !wrapper ) {
+            wrapper = new GravyServletWrapper(req, res, chain, uriPattern, params)
+            req.setAttribute('_wrapper', wrapper)
         }
-        return map
+        wrapper
     }
 
-    @CompileStatic
-    Object execute(Object... parms) {
+    @CompileStatic Object execute(Object... parms) {
         doExecute(parms)
     }
 
-    @CompileStatic
-    Object execute() {
+    @CompileStatic Object execute() {
         doExecute([] as Object[])
     }
 

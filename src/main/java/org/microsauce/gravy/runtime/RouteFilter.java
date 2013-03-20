@@ -48,11 +48,9 @@ class RouteFilter implements Filter {
         }
     }
 
-    public void destroy() {
-    }
+    public void destroy() {}
 
-    public void init(javax.servlet.FilterConfig config) {
-    }
+    public void init(javax.servlet.FilterConfig config) {}
 
     private FilterChain buildChain(FilterChain chain, ServletRequest req) {
 
@@ -66,7 +64,6 @@ class RouteFilter implements Filter {
         return routeChain;
     }
 
-    @CompileStatic
     String getUri(HttpServletRequest req) {
         String uri;
         if (!"/".equals(req.getContextPath()))

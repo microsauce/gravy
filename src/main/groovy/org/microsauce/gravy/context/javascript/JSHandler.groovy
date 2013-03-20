@@ -1,6 +1,7 @@
 package org.microsauce.gravy.context.javascript
 
 import groovy.transform.CompileStatic
+import org.microsauce.gravy.runtime.patch.ServletWrapper
 import org.ringojs.wrappers.Stream
 
 import java.lang.reflect.Proxy
@@ -11,7 +12,7 @@ import javax.servlet.http.HttpServletResponse
 import javax.servlet.http.HttpSession
 
 import org.microsauce.gravy.context.Handler
-import org.microsauce.gravy.context.HandlerBinding
+import org.microsauce.gravy.context.GravyServletWrapper
 import org.microsauce.gravy.lang.object.CommonObject
 import org.microsauce.gravy.lang.object.GravyType
 import org.microsauce.gravy.module.Module
@@ -64,22 +65,18 @@ class JSHandler extends Handler {
 
     @Override
     @CompileStatic
-    public Object doExecute(HttpServletRequest req, HttpServletResponse res,
-                            FilterChain chain, HandlerBinding handlerBinding, Map parms) {
+    public Object doExecute(GravyServletWrapper wrapper) {
 
         ctx = org.mozilla.javascript.Context.enter()
         try {
-            Map<String, Object> objectBinding = null
-            if (handlerBinding.json) {
-                objectBinding = [:]
-                CommonObject json = new CommonObject(null, module)
-                json.serializedRepresentation = handlerBinding.json
-                objectBinding.json = json.toNative()
-            }
-            GravyHttpSession jsSess = patchSession(req, module)
-            GravyHttpServletRequest jsReq = patchRequest(req, res, jsSess, chain, module)
-            GravyHttpServletResponse jsRes = patchResponse(req, res, module)
-            executeHandler.call(ctx, scope, scope, [callBack, jsReq, jsRes, handlerBinding.paramMap, handlerBinding.paramList, objectBinding, parms] as Object[])
+            executeHandler.call ctx, scope, scope, [
+                    callBack,
+                    wrapper.getReq(module.type),
+                    wrapper.getRes(module.type),
+                    wrapper.paramMap,
+                    wrapper.paramList,
+                    wrapper.json,      // TODO verify this was more generic before 'objectBinding'
+                    wrapper.params] as Object[]
         }
         catch (Throwable t) {
             t.printStackTrace()
@@ -89,50 +86,5 @@ class JSHandler extends Handler {
         }
     }
 
-    @CompileStatic
-    protected GravyType context() {
-        GravyType.JAVASCRIPT
-    }
-
-    @CompileStatic
-    GravyHttpServletRequest patchRequest(HttpServletRequest req, HttpServletResponse res, GravyHttpSession sess, FilterChain chain, Module module) {
-        GravyHttpServletRequest jsReq = (GravyHttpServletRequest) Proxy.newProxyInstance(
-                this.class.getClassLoader(),
-                [GravyHttpServletRequest.class] as Class[],
-                new JSRequestProxy(req, res, sess, chain, module))
-        jsReq
-    }
-
-    @CompileStatic
-    GravyHttpServletResponse patchResponse(HttpServletRequest req, HttpServletResponse res, Module module) {
-        GravyHttpServletResponse jsRes = (GravyHttpServletResponse) Proxy.newProxyInstance(
-                this.class.getClassLoader(),
-                [GravyHttpServletResponse.class] as Class[],
-                new JSResponseProxy(res, req, module.renderUri, module))
-        return jsRes
-    }
-
-    @CompileStatic
-    GravyHttpSession patchSession(HttpServletRequest req, Module module) {
-        GravyHttpSession jsSess = (GravyHttpSession) Proxy.newProxyInstance(
-                this.class.getClassLoader(),
-                [GravyHttpSession.class] as Class[],
-                new GravySessionProxy(req.session, module))
-        return jsSess
-    }
-
-    class JSResponseProxy extends GravyResponseProxy {
-        JSResponseProxy(HttpServletResponse res, HttpServletRequest request, String renderUri, Module module) {
-            super(res, request, renderUri, module)
-            out = new Stream(scope, out, null)
-        }
-    }
-
-    class JSRequestProxy extends GravyRequestProxy {
-        JSRequestProxy(Object target, HttpServletResponse res, HttpSession session, FilterChain chain, Module module) {
-            super(target, res, session, chain, module)
-            input = new Stream(module.scriptContext, input, null)
-        }
-    }
 
 }

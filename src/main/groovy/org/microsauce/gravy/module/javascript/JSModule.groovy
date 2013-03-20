@@ -10,6 +10,7 @@ import org.microsauce.gravy.module.Module
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeFunction
 import org.mozilla.javascript.ScriptableObject
+import org.ringojs.wrappers.Stream
 
 
 @Log4j
@@ -63,5 +64,10 @@ class JSModule extends Module {
             ctx.exit()
         }
     }
+
+    Object wrapInputStream(InputStream inputStream) {
+        return new Stream(scriptContext, inputStream, null)
+    }
+
 
 }

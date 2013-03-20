@@ -14,8 +14,8 @@ import javax.servlet.http.HttpSession;
 import org.jruby.RubyIO;
 import org.jruby.RubyObject;
 import org.jruby.embed.ScriptingContainer;
+import org.microsauce.gravy.context.GravyServletWrapper;
 import org.microsauce.gravy.context.Handler;
-import org.microsauce.gravy.context.HandlerBinding;
 import org.microsauce.gravy.lang.object.CommonObject;
 import org.microsauce.gravy.lang.object.GravyType;
 import org.microsauce.gravy.module.Module;
@@ -25,7 +25,6 @@ import org.microsauce.gravy.runtime.patch.GravyHttpSession;
 import org.microsauce.gravy.runtime.patch.GravyRequestProxy;
 import org.microsauce.gravy.runtime.patch.GravyResponseProxy;
 import org.microsauce.gravy.runtime.patch.GravySessionProxy;
-import org.ringojs.wrappers.Stream;
 
 /**
  * @author microsuace
@@ -49,65 +48,17 @@ class RubyHandler extends Handler {
     }
 
     @Override
-    public Object doExecute(HttpServletRequest req, HttpServletResponse res,
-                            FilterChain chain, HandlerBinding handlerBinding, Map parms) {
-        Map<String, Object> objectBinding = null;
-        if (handlerBinding.getJson() != null) {
-            objectBinding = new HashMap<String, Object>();
-            CommonObject json = new CommonObject(null, module);
-            json.setSerializedRepresentation(handlerBinding.getJson());
-            objectBinding.put("json", json.toNative());
-        }
-        GravyHttpSession jsSess = patchSession(req, module);
-        GravyHttpServletRequest jsReq = patchRequest(req, res, jsSess, chain, module);
-        GravyHttpServletResponse jsRes = patchResponse(req, res, module);
-
+    public Object doExecute(GravyServletWrapper wrapper) {
         return container.callMethod(callBack, "invoke",
-                new Object[]{jsReq, jsRes, handlerBinding.getParamMap(), handlerBinding.getParamList(), objectBinding, parms});
+                new Object[] {
+                        wrapper.getReq(GravyType.RUBY),
+                        wrapper.getRes(GravyType.RUBY),
+                        wrapper.getParamMap(),
+                        wrapper.getParamList(),
+                        wrapper.getJson(),          // TODO verify
+                        wrapper.getParams() // TODO verify what is 'params'
+                });
     }
 
-    protected GravyType context() {
-        return GravyType.RUBY;
-    }
-
-    GravyHttpServletRequest patchRequest(HttpServletRequest req, HttpServletResponse res, GravyHttpSession sess, FilterChain chain, Module module) {
-        GravyHttpServletRequest rbReq = (GravyHttpServletRequest) Proxy.newProxyInstance(
-                this.getClass().getClassLoader(),
-                new Class[]{GravyHttpServletRequest.class},
-                new RubyRequestProxy(req, res, sess, chain, module));
-        return rbReq;
-    }
-
-    GravyHttpServletResponse patchResponse(HttpServletRequest req, HttpServletResponse res, Module module) {
-        GravyHttpServletResponse rbRes = (GravyHttpServletResponse) Proxy.newProxyInstance(
-                this.getClass().getClassLoader(),
-                new Class[]{GravyHttpServletResponse.class},
-                new RubyResponseProxy(res, req, module.getRenderUri(), module));
-        return rbRes;
-    }
-
-    GravyHttpSession patchSession(HttpServletRequest req, Module module) {
-        GravyHttpSession rbSess = (GravyHttpSession) Proxy.newProxyInstance(
-                this.getClass().getClassLoader(),
-                new Class[]{GravyHttpSession.class},
-                new GravySessionProxy(req.getSession(), module));
-        return rbSess;
-    }
-
-
-    class RubyResponseProxy extends GravyResponseProxy {
-
-        public RubyResponseProxy(HttpServletResponse res, HttpServletRequest request, String renderUri, Module module) {
-            super(res, request, renderUri, module);
-            out = (new RubyIO(container.getProvider().getRuntime(), (OutputStream) out));
-        }
-    }
-
-    class RubyRequestProxy extends GravyRequestProxy {
-        public RubyRequestProxy(Object target, HttpServletResponse res, HttpSession session, FilterChain chain, Module module) {
-            super(target, res, session, chain, module);
-            setInput(new RubyIO(container.getProvider().getRuntime(), (InputStream) getInput()));
-        }
-    }
 
 }

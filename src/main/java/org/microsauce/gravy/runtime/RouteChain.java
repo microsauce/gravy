@@ -22,7 +22,6 @@ class RouteChain implements FilterChain {
     List<EnterpriseService> routes;
     Integer currentPosition = 0;
     FilterChain serverChain;
-//	Context context;
 
     RouteChain(FilterChain serverChain, List<EnterpriseService> routes) {
         this.serverChain = serverChain;
@@ -39,6 +38,9 @@ class RouteChain implements FilterChain {
             Handler methodHandler = route.getHandlers().get(method);
             Handler handler = methodHandler != null ? methodHandler : route.getHandlers().get(EnterpriseService.DEFAULT);
             try {
+                req.setAttribute("_module", handler.getModule());
+                ((HttpServletRequest) req).getSession().setAttribute("_module", handler.getModule());
+
                 GravyThreadLocal.SCRIPT_CONTEXT.set(handler.getModule().getScriptContext());
                 handler.execute(
                         (HttpServletRequest) req,
@@ -50,7 +52,7 @@ class RouteChain implements FilterChain {
                 t.printStackTrace();
             } finally {
                 if (!res.isCommitted())
-                    res.getOutputStream().flush();  // TODO review the flush here - this will preclude any other service on the chain from writing to the response stream
+                    res.getOutputStream().flush();  // TODO review the flush here - this will preclude any other service on the chain from writing response headers
             }
         }
     }

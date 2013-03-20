@@ -7,13 +7,11 @@ import java.lang.reflect.Proxy
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-import javax.servlet.http.HttpSession
 
 import org.microsauce.gravy.context.Handler
-import org.microsauce.gravy.context.HandlerBinding
+import org.microsauce.gravy.context.GravyServletWrapper
 import org.microsauce.gravy.lang.object.CommonObject
 import org.microsauce.gravy.lang.object.GravyType
-import org.microsauce.gravy.module.Module
 import org.microsauce.gravy.runtime.patch.GravyHttpServletRequest
 import org.microsauce.gravy.runtime.patch.GravyHttpServletResponse
 import org.microsauce.gravy.runtime.patch.GravyHttpSession
@@ -35,57 +33,46 @@ class GroovyHandler extends Handler {
     }
 
     @Override
-    @CompileStatic
-    public Object doExecute(HttpServletRequest req, HttpServletResponse res,
-                            FilterChain chain, HandlerBinding handlerBinding, Map parms) {
+    @CompileStatic public Object doExecute(GravyServletWrapper wrapper) {
+        wrapper.nativeReq.getAttribute('_')
+    // TODO don't forget stage 2 caching
+    // TODO cache the binding 'binding' in the req
+        HttpServletRequest nativeReq = wrapper.nativeReq
+        Map binding = (Map)nativeReq.getAttribute('_groovy_binding')
+        if ( !binding ) {
+            // add the jee runtime to the closure binding
+            binding = [:]
+            nativeReq.setAttribute('_groovy_binding', binding)
 
-        Object jsonObject = null
-        if (handlerBinding.json) {
-            CommonObject json = new CommonObject(null, GravyType.GROOVY)
-            json.serializedRepresentation = handlerBinding.json
-            jsonObject = json.toNative()
+            GravyHttpServletRequest req = wrapper.getReq(GravyType.GROOVY)
+            GravyHttpServletResponse res = wrapper.getRes(GravyType.GROOVY)
+            OutputStream out = (OutputStream)res.getOut()
+            binding.req = req
+            binding.sess = req.getSession()
+            binding.res = res
+            binding.out = out
+            binding.writer = new PrintWriter(new OutputStreamWriter(out, 'utf-8'))
+            binding.chain = wrapper.nativeChain
+            binding.json = wrapper.json
+// TODO review JS and Ruby and GravyServletWrapper parms refers to request parameters (not uri parameters)
+            if (nativeReq.method == 'GET' || nativeReq.method == 'DELETE') binding.query = wrapper.params
+            else if (nativeReq.method == 'POST' || nativeReq.method == 'PUT') binding.form = wrapper.params // TODO verify: not exactly sure what params refers to (most likely servlet request params)
+
+            // add uri parameters
+            wrapper.paramMap.each { String key, String value ->
+                binding[key] = value
+            }
+            String[] splat = wrapper.splat ?: []
+
+            // add the splat
+            binding.splat = splat
         }
-        // patch the JEE runtime
-        GravyHttpSession gSess = (GravyHttpSession) Proxy.newProxyInstance(
-                this.class.getClassLoader(),
-                [GravyHttpSession.class] as Class[],
-                new GravySessionProxy(req.session, module))
-        GravyHttpServletRequest gReq = (GravyHttpServletRequest) Proxy.newProxyInstance(
-                this.class.getClassLoader(),
-                [GravyHttpServletRequest.class] as Class[],
-                new GravyRequestProxy(req, res, gSess, chain, module))
-        GravyHttpServletResponse gRes = (GravyHttpServletResponse) Proxy.newProxyInstance(
-                this.class.getClassLoader(),
-                [GravyHttpServletResponse.class] as Class[],
-                new GravyResponseProxy(res, req, module.renderUri, module))
-
-        // add the jee runtime to the closure binding
-        Map binding = [:]
-        binding.req = gReq
-        binding.sess = gSess
-        binding.res = gRes
-        OutputStream out = res.outputStream // writer
-        binding.out = out
-        binding.writer = new PrintWriter(new OutputStreamWriter(out, 'utf-8'))
-        binding.chain = chain
-        binding.json = jsonObject
-        if (req.method == 'GET' || req.method == 'DELETE') binding.query = parms
-        else if (req.method == 'POST' || req.method == 'PUT') binding.form = parms
-
-        // add uri parameters
-        handlerBinding.paramMap.each { String key, String value ->
-            binding[key] = value
-        }
-        String[] splat = handlerBinding.splat ?: []
-
-        // add the splat
-        binding.splat = splat
 
         Closure closure = (Closure) closure.clone()
 
         String[] _paramList =
-            closure.maximumNumberOfParameters == splat.size() ?
-                handlerBinding.paramList as String[] : [] as String[]
+            closure.maximumNumberOfParameters == wrapper.splat.size() ?
+                wrapper.paramList as String[] : [] as String[]
 
         closure.delegate = binding as Binding
         closure.resolveStrategy = Closure.DELEGATE_FIRST

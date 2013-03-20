@@ -9,6 +9,7 @@ import org.jruby.embed.ScriptingContainer
 import org.microsauce.gravy.context.Handler
 import org.microsauce.gravy.lang.ruby.RubySerializer
 import org.microsauce.gravy.module.Module
+import org.jruby.RubyIO
 
 public class RubyModule extends Module {
 
@@ -72,6 +73,11 @@ public class RubyModule extends Module {
 		  Gravy_Module_$moduleName
 		""".toString())
     }
+
+    @CompileStatic Object wrapInputStream(InputStream inputStream) {
+        new RubyIO(container.getProvider().getRuntime(), inputStream);
+    }
+
 
     private Map<String, Handler> prepareExports(RubyObject exports) {
         RubyObject importExport = (RubyObject) container.get("import_export");

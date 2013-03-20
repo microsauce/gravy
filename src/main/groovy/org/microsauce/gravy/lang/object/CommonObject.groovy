@@ -24,21 +24,21 @@ class CommonObject {
         this.module = module
         this.nativeType = module.type
         nativeRepresentations = new HashMap<String, Object>();
-        nativeRepresentations.put(nativeType.type + module.name, nativeValue);
+        nativeRepresentations.put(getKey(nativeType.type, module.name), nativeValue);
         this.stringer = Stringer.getInstance();
     }
 
     @CompileStatic
     Object value(Module destModule) {
 
-        Object nativeObj = nativeRepresentations.get(destModule.type.type + destModule.name);
+        Object nativeObj = nativeRepresentations.get(getKey(destModule.type.type, destModule.name));
         if (nativeObj) {
             return nativeObj;
         } else if (serializedRepresentation) {
             return stringer.parse(serializedRepresentation, destModule.type);
         } else {
             nativeObj = stringer.parse(this.toString(), destModule.type);
-            nativeRepresentations.put(destModule.type.type + destModule.name, nativeObj);
+            nativeRepresentations.put(getKey(destModule.type.type, destModule.name), nativeObj);
             return nativeObj;
         }
     }
@@ -47,7 +47,7 @@ class CommonObject {
     String toString() {
         if (!serializedRepresentation) {
             serializedRepresentation = stringer.toString(
-                    nativeRepresentations.get(nativeType.type + module.name), nativeType)
+                    nativeRepresentations.get(getKey(nativeType.type, module.name)), nativeType)
         }
 
         serializedRepresentation
@@ -55,11 +55,17 @@ class CommonObject {
 
     @CompileStatic
     Object toNative() {
-        Object nativeObj = nativeRepresentations.get(nativeType.type)
-        if (!nativeRepresentations.containsKey(nativeType.type + module.name)) {
+        Object nativeObj = nativeRepresentations.get(getKey(nativeType.type, module.name))
+        if (!nativeRepresentations.containsKey(getKey(nativeType.type, module.name))) {
             nativeObj = stringer.parse(serializedRepresentation, nativeType)
-            nativeRepresentations.put(nativeType.type + module.name, nativeObj)
+            nativeRepresentations.put(getKey(nativeType.type, module.name), nativeObj)
         }
         nativeObj
+    }
+
+    @CompileStatic private String getKey(String type, String modName) {
+        if ( type == GravyType.RUBY.type ) // jruby objects cannot be shared between jruby runtimes
+            return type +  module.name
+        else return type
     }
 }

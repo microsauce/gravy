@@ -18,16 +18,14 @@ class GravyRequestProxy<T extends HttpServletRequest> extends BaseEnterpriseProx
     FilterChain chain
     HttpServletResponse response
     HttpSession session
-    Module module
     BufferedReader reader
     Object input
 
-    GravyRequestProxy(Object target, HttpServletResponse res, HttpSession session, FilterChain chain, Module module) {
+    GravyRequestProxy(Object target, HttpServletResponse res, HttpSession session, FilterChain chain) {
         super(target)
         this.response = res
         this.session = session
         this.chain = chain
-        this.module = module
         this.input = ((T) target).getInputStream()
         this.reader = new BufferedReader(new InputStreamReader(this.input))
     }
@@ -35,12 +33,14 @@ class GravyRequestProxy<T extends HttpServletRequest> extends BaseEnterpriseProx
     @CompileStatic
     Object get(String key) {
         CommonObject obj = (CommonObject) ((T) target).getAttribute(key)
-        obj ? obj.value(context()) : null
+        Module module = ((HttpServletRequest)target).getAttribute('_module') as Module
+        obj ? obj.value(module) : null
     }
 
     @CompileStatic
     void put(String key, Object value) {
-        CommonObject obj = new CommonObject(value, context())
+        Module module = ((HttpServletRequest)target).getAttribute('_module') as Module
+        CommonObject obj = new CommonObject(value, module)
         ((T) target).setAttribute key, obj
     }
 
@@ -58,11 +58,6 @@ class GravyRequestProxy<T extends HttpServletRequest> extends BaseEnterpriseProx
     @CompileStatic
     HttpSession session() {
         session
-    }
-
-    @CompileStatic
-    protected Module context() {
-        module
     }
 
     Object getIn() {

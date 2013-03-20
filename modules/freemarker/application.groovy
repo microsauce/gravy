@@ -25,8 +25,8 @@ def templateEngine = { moduleName ->
 route serviceUri, {
 
     def model = req.get '_model'
-    def viewUri = req.getAttribute '_view'     // not serialized
-    def module = req.getAttribute '_module'    // not serialized
+    def viewUri = req.getAttribute '_view'                // not serialized
+    def module = req.getAttribute '_render_for_module'    // not serialized
     res.contentType = 'text/html'
 
     def template = templateEngine(module.name).getTemplate(viewUri)

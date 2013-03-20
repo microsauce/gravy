@@ -74,63 +74,60 @@ global.NativeJSHandler = function(handler) {
 	this.handler = handler
 
 	this.invokeHandler = function(req, res, paramMap, paramList, objectBinding, parms) {
+        // TODO cache the binding 'this' in the req
 
-		// add uri parameters to 'this'
-		if (paramMap != null) {
-			var iterator = paramMap.keySet().iterator()
-			while (iterator.hasNext()) {
-				var key = iterator.next()
-				this[key] = paramMap.get(key)
-			}
-		}
+        var binding = req.getAttribute('_js_binding')
+        if ( !binding ) {
 
-		// create the splat array
-		if (paramList != null) {
-			var iterator = paramList.iterator()
-			this.splat = []
-			while (iterator.hasNext()) {
-				var next = iterator.next()
-				this.splat.push(next)
-			}
-		}
+            // add uri parameters to 'this'
+            if (paramMap != null) {
+                var iterator = paramMap.keySet().iterator()
+                while (iterator.hasNext()) {
+                    var key = iterator.next()
+                    this[key] = paramMap.get(key)
+                }
+            }
 
-		// build the parameter array
-		var params = new Array()
-		if (req != null && res != null) {
-			params.push(req)
-			params.push(res)
-		}
-		
-		// set the form/query properties
-		var method = req.getMethod()
-		var parameters = new ScriptableMap(parms) //this.loadParameters(req) //new ScriptableMap(req.getParameterMap())
-		if (method == 'GET' || method == 'DELETE') {
-			this.query = parameters
-		} else if (method == 'POST' || method == 'PUT') {
-			this.form = parameters
-		}
+            // create the splat array
+            if (paramList != null) {
+                var iterator = paramList.iterator()
+                this.splat = []
+                while (iterator.hasNext()) {
+                    var next = iterator.next()
+                    this.splat.push(next)
+                }
+            }
 
-		if (objectBinding != null) {
-			var iterator = objectBinding.keySet().iterator()
-			while (iterator.hasNext()) {
-				var key = iterator.next()
-				this[key] = objectBinding.get(key)
-			}
-		}
+            // set the form/query properties
+            var method = req.getMethod()
+            var parameters = new ScriptableMap(parms)
+            if (method == 'GET' || method == 'DELETE') {
+                this.query = parameters
+            } else if (method == 'POST' || method == 'PUT') {
+                this.form = parameters
+            }
 
-		this.handler.apply(this, params)
+            if (objectBinding != null) {
+                var iterator = objectBinding.keySet().iterator()
+                while (iterator.hasNext()) {
+                    var key = iterator.next()
+                    this[key] = objectBinding.get(key)
+                }
+            }
+            req.setAttribute('_js_binding', this)
+        }
+
+        // build the parameter array
+        var params = new Array()
+        if (req != null && res != null) {
+            params.push(req)
+            params.push(res)
+        }
+
+		this.handler.apply(binding ? binding : this, params)
+
+		res.out.flush()
 	}
-/*
-	this.loadParameters = function(req) {
-		var parms = {}
-		var parameterNames = req.getParameterNames()
-		while (parameterNames.hasMoreElements()) {
-			thisParamaterName = parameterNames.nextElement()
-			parms[thisParamaterName] = req.getParameter(thisParamaterName)
-		}
-		return parms
-	}
-*/
 }
 
 /********************************************************

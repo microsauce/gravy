@@ -61,6 +61,8 @@ abstract class Module {
         return scriptContext;
     }
 
+    abstract Object wrapInputStream(InputStream inputStream)   // TODO probably a better place for this
+
     @CompileStatic
     void load() {
         try {

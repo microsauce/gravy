@@ -2,6 +2,7 @@ package org.microsauce.gravy.runtime.patch
 
 import groovy.transform.CompileStatic
 
+import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpSession
 
 import org.microsauce.gravy.lang.object.CommonObject
@@ -11,28 +12,22 @@ import org.microsauce.gravy.module.Module
 
 class GravySessionProxy<T extends HttpSession> extends BaseEnterpriseProxy {
 
-    Module module
-
-    GravySessionProxy(Object target, Module module) {
+    GravySessionProxy(Object target) {
         super(target)
-        this.module = module
     }
 
     @CompileStatic
     Object get(String key) {
         CommonObject obj = (CommonObject) ((T) target).getAttribute(key)
-        obj.value(context())
+        Module module = ((T)target).getAttribute('_module') as Module
+        obj.value(module)
     }
 
     @CompileStatic
     void put(String key, Object value) {
-        CommonObject obj = new CommonObject(value, context())
+        Module module = ((T)target).getAttribute('_module') as Module
+        CommonObject obj = new CommonObject(value, module)
         ((T) target).setAttribute key, obj
-    }
-
-    @CompileStatic
-    protected Module context() {
-        module
     }
 
 } 

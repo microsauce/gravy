@@ -76,11 +76,11 @@ class GroovyAPI {
         module.addEnterpriseService(uriPattern, DELETE, handler, dispatch)
     }
 
-    static void options(String uriPattern, List<DispatcherType> dispatch, Closure handler) {
-        module.addEnterpriseService(uriPattern, OPTIONS, handler, dispatch)
+    static void route(String uriPattern, List<DispatcherType> dispatch, Closure handler) {
+        module.addEnterpriseService(uriPattern, DEFAULT, handler, dispatch)
     }
 
-    static void route(String uriPattern, List<DispatcherType> dispatch, Closure handler) {
+    static void use(String uriPattern, List<DispatcherType> dispatch, Closure handler) {
         module.addEnterpriseService(uriPattern, DEFAULT, handler, dispatch)
     }
 

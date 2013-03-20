@@ -90,4 +90,8 @@ class GroovyModule extends Module {
         }
     }
 
+    @CompileStatic Object wrapInputStream(InputStream inputStream) {
+        inputStream
+    }
+
 }

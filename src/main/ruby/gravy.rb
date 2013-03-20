@@ -197,57 +197,68 @@ class NativeRubyHandler
 
   def invoke_handler(req, res, param_map, param_list, object_binding, parms)
 
-    # add the req and res to the handler scope
-    self.define_attribute 'req', req
-    self.define_attribute 'res', res
+    #
+    _module = req.get_attribute('_module')
+    binding = req.get_attribute('_ruby_binding_'+_module.name)
 
-    # add uri parameters to 'self'
-    if not param_map.nil?
-      iterator = param_map.keySet().iterator()
-      while iterator.hasNext()
-        key = iterator.next()
-        self.define_attribute key, param_map.get(key)
-      end
+    if binding.nil?
 
-    end # if
+        # add the req and res to the handler scope
+        self.define_attribute 'req', req
+        self.define_attribute 'res', res
 
-    # create the 'splat' array
-    if not param_list.nil? # TODO not equal or not nil
-      iterator = param_list.iterator()
-      splat = Array.new
-      while iterator.hasNext()
-        splat.push(iterator.next())
-      end
-      self.define_attribute 'splat', splat
-    end
+        # add uri parameters to 'self'
+        if not param_map.nil?
+          iterator = param_map.keySet().iterator()
+          while iterator.hasNext()
+            key = iterator.next()
+            self.define_attribute key, param_map.get(key)
+          end
 
-    # add object bindings
-    if object_binding != nil 
-      iterator = object_binding.keySet().iterator()
-      while iterator.hasNext()
-        key = iterator.next()
-        self.define_attribute key, object_binding.get(key)
-      end
-    end
-    
-    # create the query/form binding
-    method = req.getMethod
-    #parameters = load_parameters(req)
-    if method == 'GET' or method == 'DELETE'
-      self.define_attribute 'query', OpenStruct.new(parms) #parameters
-    elsif method == 'POST' or method == 'PUT'
-      self.define_attribute 'form', OpenStruct.new(parms)  #parameters
-    end
+        end # if
+
+        # create the 'splat' array
+        if not param_list.nil? # TODO not equal or not nil
+          iterator = param_list.iterator()
+          splat = Array.new
+          while iterator.hasNext()
+            splat.push(iterator.next())
+          end
+          self.define_attribute 'splat', splat
+        end
+
+        # add object bindings
+        if object_binding != nil
+          iterator = object_binding.keySet().iterator()
+          while iterator.hasNext()
+            key = iterator.next()
+            self.define_attribute key, object_binding.get(key)
+          end
+        end
+
+        # create the query/form binding
+        method = req.getMethod
+        #parameters = load_parameters(req)
+        if method == 'GET' or method == 'DELETE'
+          self.define_attribute 'query', OpenStruct.new(parms) #parameters
+        elsif method == 'POST' or method == 'PUT'
+          self.define_attribute 'form', OpenStruct.new(parms)  #parameters
+        end
+
+        req.set_attribute '_ruby_binding_'+_module.name, self
+    end # if binding.nil?
 
     # call the handler
-    self.instance_exec &block
+    (binding.nil? ? self : binding).instance_exec &block
+
+    res.out.flush()
 
   end
   
   def load_parameters(req)
     parameter_hash = {}
     req.getParameterMap.each do |k,v|
-      parameter_hash[k] = v[0] # TODO why is it an array ??
+      parameter_hash[k] = v[0]
     end
     return OpenStruct.new(parameter_hash)
   end
@@ -312,7 +323,11 @@ module GravyModule
   def route(uri_pattern, dispatch = [], &block)
     @@add_service.call uri_pattern, 'default', dispatch, &block
   end
-  
+
+  def use(uri_pattern, dispatch = [], &block)
+    @@add_service.call uri_pattern, 'default', dispatch, &block
+  end
+
   def schedule(cron_string, &block)
     @@add_scheduled_task.call cron_string, &block
   end
