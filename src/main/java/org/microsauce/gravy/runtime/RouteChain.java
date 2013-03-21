@@ -37,22 +37,26 @@ class RouteChain implements FilterChain {
             String method = ((HttpServletRequest) req).getMethod().toLowerCase();
             Handler methodHandler = route.getHandlers().get(method);
             Handler handler = methodHandler != null ? methodHandler : route.getHandlers().get(EnterpriseService.DEFAULT);
-            try {
-                req.setAttribute("_module", handler.getModule());
-                ((HttpServletRequest) req).getSession().setAttribute("_module", handler.getModule());
+            if ( handler == null ) doFilter(req, res);
+            else {
 
-                GravyThreadLocal.SCRIPT_CONTEXT.set(handler.getModule().getScriptContext());
-                handler.execute(
-                        (HttpServletRequest) req,
-                        (HttpServletResponse) res,
-                        serverChain,
-                        route.getUriPattern(),
-                        route.getParams());
-            } catch (Throwable t) {
-                t.printStackTrace();
-            } finally {
-                if (!res.isCommitted())
-                    res.getOutputStream().flush();  // TODO review the flush here - this will preclude any other service on the chain from writing response headers
+                try {
+                    req.setAttribute("_module", handler.getModule());
+                    ((HttpServletRequest) req).getSession().setAttribute("_module", handler.getModule());
+
+                    GravyThreadLocal.SCRIPT_CONTEXT.set(handler.getModule().getScriptContext());
+                    handler.execute(
+                            (HttpServletRequest) req,
+                            (HttpServletResponse) res,
+                            this,
+                            route.getUriPattern(),
+                            route.getParams());
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                } finally {
+                    if (!res.isCommitted())
+                        res.getOutputStream().flush();  // TODO review the flush here - this will preclude any other service on the chain from writing response headers
+                }
             }
         }
     }

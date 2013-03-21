@@ -1,6 +1,7 @@
 package org.microsauce.gravy.context
 
 import groovy.transform.CompileStatic
+import groovy.util.logging.Log4j
 import org.apache.commons.fileupload.FileItem
 import org.apache.commons.fileupload.FileUploadException
 import org.apache.commons.fileupload.disk.DiskFileItemFactory
@@ -23,8 +24,7 @@ import java.util.regex.Pattern
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-// TODO add Gravy Req, Res, Sess Proxy properties (initializers will remain in Handler and subclasses)
-// TODO add getReq(GravyType) getRes(GravyType) methods
+@Log4j
 class GravyServletWrapper {
 
     HttpServletRequest nativeReq
@@ -48,11 +48,16 @@ class GravyServletWrapper {
     }
 
     @CompileStatic GravyHttpServletRequest getReq(GravyType gravyType) {
-        ServletWrapper servlet = commonServlet[gravyType.type]
+        log.info "check servlet-wrapper cache for module type ${gravyType.type}"
+        Module module = nativeReq.getAttribute('_module') as Module
+        String cacheKey = gravyType.type == GravyType.RUBY.type ? gravyType.type+module.name : gravyType.type
+        ServletWrapper servlet = commonServlet[cacheKey]
         if ( !servlet ) {
-            Module module = nativeReq.getAttribute('_module') as Module
-            servlet = initServlet(module.type)
-            commonServlet[gravyType.type] = servlet
+            log.info "\tservlet-wrapper not found in cache"
+            log.info "\tinitializing on caching servlet-wrapper"
+            servlet = initServlet(gravyType)
+            commonServlet[cacheKey] = servlet
+            log.info "\tcomplete"
         }
         servlet.getReq()
     }

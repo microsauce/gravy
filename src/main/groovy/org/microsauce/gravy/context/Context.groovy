@@ -76,11 +76,20 @@ class Context {
 
     @CompileStatic
     List<EnterpriseService> findService(String uri, DispatcherType dispatcherType) {
+
+//        int chainError = 0
         List<EnterpriseService> matchingServices = [] as List
         for (EnterpriseService service in enterpriseServices) {
             if (service.dispatch.contains(dispatcherType)
-                    && uri ==~ service.uriPattern) matchingServices << service
+                    && uri ==~ service.uriPattern) {
+//                if ( !service.handlers[Service.DEFAULT] ) chainError++
+                matchingServices << service
+            }
         }
+//        if ( chainError > 1 ) {
+//            throw new RuntimeException(
+//                    "Invalid route chain for uri $uri : ${matchingServices.collect { EnterpriseService es -> es.uriString+' => '+ es.handlers.keySet() }}");
+//        }
         matchingServices
     }
 
