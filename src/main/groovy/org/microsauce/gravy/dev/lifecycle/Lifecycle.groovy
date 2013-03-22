@@ -445,16 +445,15 @@ class Lifecycle {
             def viewFolder = deployFolder + '/WEB-INF/view'
             link viewFolder + '/' + modName, viewroot
         }
-        def confroot = modPath + '/conf'
-        if (exists(confroot)) {
-            def confFolder = webInfMod + '/conf'
-            link confFolder, confroot
+        def confFile = modPath + '/conf.groovy'
+        if (exists(confFile)) {
+            link webInfMod + '/conf.groovy', confFile
         }
-//		def scriptsroot = modPath+'/scripts'
-//		if ( exists(scriptsroot) ) {
-//			def scriptsFolder = webInfMod+'/scripts'
-//			link scriptsFolder, scriptsroot
-//		}
+//        def confroot = modPath + '/conf'
+//        if (exists(confroot)) {
+//            def confFolder = webInfMod + '/conf'
+//            link confFolder, confroot
+//        }
         def libroot = modPath + '/lib'
         if (exists(libroot)) {
             def libFolder = webInfMod + '/lib'

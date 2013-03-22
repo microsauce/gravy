@@ -9,7 +9,7 @@ import org.microsauce.gravy.module.Module
  * This class encapsulates an object utilized by any or all supported
  * language environments (Groovy and JavaScript currently).  
  *
- * @author jboone
+ * @author microsauce
  */
 class CommonObject {
 

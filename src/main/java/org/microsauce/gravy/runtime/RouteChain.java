@@ -37,10 +37,14 @@ class RouteChain implements FilterChain {
             String method = ((HttpServletRequest) req).getMethod().toLowerCase();
             Handler methodHandler = route.getHandlers().get(method);
             Handler handler = methodHandler != null ? methodHandler : route.getHandlers().get(EnterpriseService.DEFAULT);
-            if ( handler == null ) doFilter(req, res);
+
+            if ( handler == null ) doFilter(req, res); // there may not be a 'default' handler for this route
             else {
 
                 try {
+                    ////
+                    //
+                    ////
                     req.setAttribute("_module", handler.getModule());
                     ((HttpServletRequest) req).getSession().setAttribute("_module", handler.getModule());
 

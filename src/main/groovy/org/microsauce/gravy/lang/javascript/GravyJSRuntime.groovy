@@ -6,8 +6,8 @@ import org.mozilla.javascript.ScriptableObject
 
 class GravyJSRuntime extends JSRuntime {
 
-    public GravyJSRuntime(List<File> roots, Logger logger) {
-        super(roots, logger)
+    public GravyJSRuntime(List<File> roots, Logger logger, ConfigObject gravyConfig) {
+        super(roots, logger, gravyConfig)
     }
 
     @CompileStatic

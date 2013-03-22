@@ -21,7 +21,7 @@ abstract class JSRuntime {
     List<File> roots
     Logger scriptLogger
 
-    @CompileStatic JSRuntime(List<File> roots, Logger logger) {
+    @CompileStatic JSRuntime(List<File> roots, Logger logger, ConfigObject gravyConfig) {
         this.roots = roots
         this.scriptLogger = logger
 
@@ -47,6 +47,7 @@ abstract class JSRuntime {
         global = engine.getScope()
         global.put('out', global, System.out)
         global.put('log', global, scriptLogger)
+        global.put('config', global, gravyConfig)
         global.put('devMode', global, System.getProperty('gravy.devMode'))
         getCoreScripts().each { String thisScript ->
             engine.runScript(thisScript, [] as String[])

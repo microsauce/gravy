@@ -28,7 +28,7 @@ class ContextBuilder {
     Context build() {
         Module app = instantiateApplication()
         application = app
-        Collection<Module> modules = instantiateModules(app.moduleConfig)
+        Collection<Module> modules = instantiateModules()
 
         Map<String, Object> moduleBindings = [:]
         for (thisModule in modules) {
@@ -43,11 +43,11 @@ class ContextBuilder {
 
 
     @CompileStatic
-    private Collection<Module> instantiateModules(ConfigObject appConfig) {
+    private Collection<Module> instantiateModules() {
         List<Module> modules = []
 
         for (modFolder in ContextBuilder.listModules()) {
-            Module module = instantiateModule(context, modFolder, appConfig, env, false)
+            Module module = instantiateModule(context, modFolder, false)
             if (module) modules << module
         }
 
@@ -55,7 +55,7 @@ class ContextBuilder {
     }
 
     @CompileStatic
-    private Module instantiateModule(Context context, File modFolder, ConfigObject appConfig, String env, Boolean isApp) {
+    private Module instantiateModule(Context context, File modFolder, Boolean isApp) {
         String modName = modFolder.name
         log.info "instantiating module $modName"
         File applicationScript = applicationScript(modFolder)
@@ -67,7 +67,7 @@ class ContextBuilder {
         if (moduleFactory == null)
             throw new Exception("unable to find module loader for file type ${fileExtension}.")
 
-        moduleFactory.createModule(context, modFolder, applicationScript, appConfig, env, isApp)
+        moduleFactory.createModule(context, modFolder, applicationScript, isApp)
     }
 
     @CompileStatic
@@ -115,7 +115,7 @@ class ContextBuilder {
 
     private Module instantiateApplication() {
         File appFolder = new File(new File(System.getProperty('gravy.moduleRoot')), 'app') // TODO refactor as moduleRoot File property
-        instantiateModule(context, appFolder, null, env, true)
+        instantiateModule(context, appFolder, true)
     }
 
 }

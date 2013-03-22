@@ -6,8 +6,12 @@ import org.mozilla.javascript.ScriptableObject
 
 class CoreJSRuntime extends JSRuntime {
 
+    public CoreJSRuntime(List<File> roots, ConfigObject coreConfig) {
+        super(roots, null, coreConfig)
+    }
+
     public CoreJSRuntime(List<File> roots) {
-        super(roots, null)
+        this(roots, null, new ConfigObject())
     }
 
     @CompileStatic

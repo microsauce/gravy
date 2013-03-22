@@ -5,7 +5,6 @@
  * 'out'			- the console PrintStream
  */
 
-
 /**
  * The module services object.
  */
@@ -14,6 +13,25 @@ global.exp = new Object();
 /********************************************************
  * documented utility/convenience functions
  *******************************************************/
+
+function initModuleConfig(config) {
+    var jsObject = {}
+    var iterator = config.keySet().iterator()
+    while ( iterator.hasNext() ) {
+        var thisKey = iterator.next()
+        var thisValue = config.get(thisKey)
+        if ( thisValue instanceof Packages.groovy.util.ConfigObject ) {
+            jsObject[thisKey] = initModuleConfig(thisValue)
+        }
+        else {
+            jsObject[thisKey] = thisValue
+        }
+    }
+
+    return jsObject
+}
+
+global.config = initModuleConfig(config)
 
 /**
  * JavaScript JSON serialization functions
@@ -45,9 +63,9 @@ global.getGlobal = function() {
 /**
  * Retrieve a configuration value (from config.groovy) 
  */
-global.conf = function(key) {
-	return config.getProperty(key)
-}
+//global.conf = function(key) {
+//	return config.getProperty(key)
+//}
 
 /**
  * print a line to the console

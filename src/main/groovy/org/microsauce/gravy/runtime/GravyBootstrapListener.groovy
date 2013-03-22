@@ -3,6 +3,7 @@ package org.microsauce.gravy.runtime
 import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j
 import it.sauronsoftware.cron4j.Scheduler
+import org.microsauce.gravy.module.config.ConfigLoader
 
 import javax.servlet.*
 
@@ -54,7 +55,9 @@ class GravyBootstrapListener implements ServletContextListener {
         // load configuration
         //
         String environment = System.getProperty('gravy.env') ?: 'prod'
-        ConfigObject config = ModuleFactory.loadModuleConfig(new File("${appRoot}/modules/app"), environment) //Config.getInstance(environment).get()
+        ConfigLoader configLoader = ConfigLoader.initInstance(environment, new File("${appRoot}/modules/app"))
+        ConfigObject config =  configLoader.appConfig
+
 
         //
         // initialize error handler

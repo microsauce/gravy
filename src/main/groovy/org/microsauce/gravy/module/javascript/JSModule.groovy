@@ -10,6 +10,7 @@ import org.microsauce.gravy.module.Module
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeFunction
 import org.mozilla.javascript.ScriptableObject
+import org.ringojs.wrappers.ScriptableMap
 import org.ringojs.wrappers.Stream
 
 
@@ -20,18 +21,18 @@ class JSModule extends Module {
 
     @Override
     @CompileStatic
-    protected Object doLoad(Map<String, Handler> imports) {
+    protected Object doLoad(Map<String, Handler> imports) { // TODO consider loading config here (for hot reload of config)
 
         if ( !jsRuntime )
             jsRuntime = new GravyJSRuntime(
                     [this.folder, new File(folder, '/lib')] as List<File>,
-                    moduleLogger)
+                    moduleLogger,
+                    config)
         scriptContext = jsRuntime.global
         JSSerializer.initInstance(jsRuntime.global)
 
         Map<String, Object> jsBinding = [:]
         jsBinding.gravyModule = this
-        jsBinding.config = config.toProperties()
 
         // add module exports to the script scope (app only)
         if (imports) prepareImports(imports)
@@ -45,8 +46,13 @@ class JSModule extends Module {
     private void prepareImports(Map<String, Handler> imports) {
         Context ctx = Context.enter()
         try {
-            NativeFunction prepareImports = (NativeFunction) ((ScriptableObject) scriptContext).get('prepareImports', (ScriptableObject) scriptContext)
-            prepareImports.call(ctx, (ScriptableObject) scriptContext, (ScriptableObject) scriptContext, [imports, scriptContext] as Object[])
+            NativeFunction prepareImports = (NativeFunction) ((ScriptableObject) scriptContext)
+                    .get('prepareImports', (ScriptableObject) scriptContext)
+            prepareImports.call(
+                    ctx,
+                    (ScriptableObject) scriptContext,
+                    (ScriptableObject) scriptContext,
+                    [imports, scriptContext] as Object[])
         }
         finally {
             ctx.exit()

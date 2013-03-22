@@ -34,7 +34,7 @@ abstract class Module {
     String name
     Boolean isApp
     ClassLoader classLoader
-    protected File folder
+    File folder
     File scriptFile
     File lib // TODO follow this through: module factory and any mod implementation that cares about it (Ruby)
 
