@@ -67,9 +67,10 @@ abstract class Module {
     void load() {
         try {
             if (imports == null) imports = [:]
-            exports = doLoad(imports)
             if (name == 'app')
                 initLogging(config)
+
+            exports = doLoad(imports)
 
         }
         catch (all) {
