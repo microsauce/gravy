@@ -2,8 +2,8 @@ import freemarker.cache.*
 import freemarker.template.*
 import java.util.concurrent.ConcurrentHashMap
 
-def documentRoot = config.gravy.documentRoot ?: System.getProperty('gravy.viewRoot')
-def serviceUri = config.serviceUri ?: '/view/freemarker'
+def documentRoot = conf.gravy.documentRoot ?: System.getProperty('gravy.viewRoot')
+def serviceUri = conf.serviceUri ?: '/view/freemarker'
 def engines = new ConcurrentHashMap()
 
 //

@@ -34,23 +34,16 @@ class ConfigLoader {
 
     @CompileStatic ConfigObject loadModConfig(File moduleFolder) {
         ConfigObject modConfig = loadConfig(moduleFolder)
-println "1 modConfig: $modConfig"
         if ( appConfig[moduleFolder.name] ) {
-println "2"
             modConfig = (ConfigObject)modConfig.merge((ConfigObject) appConfig[moduleFolder.name])
-println "3"
         }
-println "4 modConfig: $modConfig"
         setDefaults(modConfig)
-println "5 modConfig: $modConfig"
         modConfig
     }
 
     @CompileStatic private ConfigObject loadConfig(File modFolder) {
         ConfigObject configObject
         File configFile = new File(modFolder, 'conf.groovy')
-println "configFile: $configFile"
-println "exists: ${configFile.exists()}"
         if ( configFile.exists() )
             configObject = new ConfigSlurper(env ?: 'prod').parse(configFile.toURI().toURL())
         else configObject = new ConfigObject()

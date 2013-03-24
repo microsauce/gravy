@@ -31,7 +31,7 @@ public class RubyModule extends Module {
         scriptContext = container;
 
         container.put("j_gravy_module", this);
-        container.put("j_properties", config.toProperties());
+        container.put("j_config", config);
         container.put("j_mod_lib_path", folder.getAbsolutePath() + "/lib");
         container.put("j_gem_home", config.get("gem_home"));
         container.put("j_container", container);
@@ -68,7 +68,7 @@ public class RubyModule extends Module {
     private Reader assembleModuleScript(String moduleName, File scriptFile) {
         String rawScriptText = scriptFile.text
         // to preserve line numbering in user script define all of this on the first line
-        return new StringReader("""module Gravy_Module_$moduleName; extend self; include GravyModule; exp = OpenStruct.new; @@exp = exp; def self.get_exp(); @@exp; end; log = @@log; $rawScriptText
+        return new StringReader("""module Gravy_Module_$moduleName; extend self; include GravyModule; exp = OpenStruct.new; @@exp = exp; def self.get_exp(); @@exp; end; log = @@log; conf = config_to_ostruct_recursive(@@conf); $rawScriptText
           end
 		  Gravy_Module_$moduleName
 		""".toString())

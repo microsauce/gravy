@@ -22,7 +22,7 @@ class GroovyModule extends Module {
         Map exp = [:]
         Map binding = [:]
         binding.root = root
-        binding.config = config
+        binding.conf = config
 
         // create, initialize, and execute the script
         Script script = new Script()

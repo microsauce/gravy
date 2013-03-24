@@ -31,7 +31,7 @@ function initModuleConfig(config) {
     return jsObject
 }
 
-global.config = initModuleConfig(config)
+global.conf = initModuleConfig(config)
 
 /**
  * JavaScript JSON serialization functions

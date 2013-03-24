@@ -173,7 +173,7 @@ class ExportCallbackWrapper
   
 end
 
-class ScheduldTaskCallbackWrapper
+class ScheduledTaskCallbackWrapper
   attr_accessor :call_back
 
   def initialize(&call_back)
@@ -288,7 +288,7 @@ add_service = Proc.new { |uri_pattern, method, dispatch, &block|
 }
 
 add_scheduled_task = Proc.new { |cron_string, &call_back|
-  j_gravy_module.addCronService(cron_string, ScheduldTaskCallbackWrapper.new(&call_back))
+  j_gravy_module.addCronService(cron_string, ScheduledTaskCallbackWrapper.new(&call_back))
 }
 
 module GravyModule
@@ -298,6 +298,7 @@ module GravyModule
     @@add_scheduled_task = add_scheduled_task
     @@conf = conf
     @@log = log
+#    @@conf = self.class.initModuleConfig conf
   end
 
   #
@@ -331,14 +332,21 @@ module GravyModule
   def schedule(cron_string, &block)
     @@add_scheduled_task.call cron_string, &block
   end
-  
-  def conf(key)
-    return @@conf.getProperty key
+
+  def config_to_ostruct_recursive(config)
+    result = config
+    if result.java_kind_of? (Java::GroovyUtil::ConfigObject)
+      result.each do |key, val|
+        result[key] = config_to_ostruct_recursive(val)
+      end
+      result = OpenStruct.new result
+    end
+    return result
   end
 
 end
 
-GravyModule.init(add_service, add_scheduled_task, j_properties, j_log)
+GravyModule.init(add_service, add_scheduled_task, j_config, j_log)
 
 include GravyModule
 
