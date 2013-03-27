@@ -36,7 +36,9 @@ class RouteChain implements FilterChain {
             EnterpriseService route = routes.get(currentPosition++);
             String method = ((HttpServletRequest) req).getMethod().toLowerCase();
             Handler methodHandler = route.getHandlers().get(method);
+
             Handler handler = methodHandler != null ? methodHandler : route.getHandlers().get(EnterpriseService.DEFAULT);
+            handler = handler != null ? handler : route.getHandlers().get(method);
 
             if ( handler == null ) doFilter(req, res); // there may not be a 'default' handler for this route
             else {

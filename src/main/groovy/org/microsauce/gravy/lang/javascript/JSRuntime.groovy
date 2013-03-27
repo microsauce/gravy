@@ -3,7 +3,7 @@ package org.microsauce.gravy.lang.javascript
 import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j
 import org.apache.log4j.Logger
-import org.microsauce.gravy.module.config.Config;
+
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.tools.shell.Global

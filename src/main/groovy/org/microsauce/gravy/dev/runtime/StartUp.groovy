@@ -1,11 +1,8 @@
 package org.microsauce.gravy.dev.runtime
 
 import groovy.util.logging.Log4j
-
-import org.apache.log4j.*
 import org.microsauce.gravy.app.*
-import org.microsauce.gravy.dev.DevUtils
-import org.microsauce.gravy.module.config.Config
+import org.microsauce.gravy.module.config.ConfigLoader
 import org.microsauce.gravy.server.runtime.*
 import org.microsauce.gravy.util.CommandLine
 
@@ -37,7 +34,7 @@ class StartUp {
         clConfig.each { key, value ->
             System.setProperty(key, value)
         }
-        def config = Config.getInstance(environment).get()
+        def config = ConfigLoader.initInstance(environment, new File(projectPath)).appConfig
 
         //
         // start the application server

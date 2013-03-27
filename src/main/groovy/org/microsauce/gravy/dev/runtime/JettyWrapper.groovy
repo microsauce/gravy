@@ -23,7 +23,7 @@ class JettyWrapper extends ServerWrapper {
     }
 
     void initialize() {
-        log.info 'initializing embedded jetty'
+        log.info 'initializing jetty'
         server = new Server(config.jetty.port)
 
         WebAppContext context = new WebAppContext()

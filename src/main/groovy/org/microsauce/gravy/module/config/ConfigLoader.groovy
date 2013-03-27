@@ -10,7 +10,7 @@ class ConfigLoader {
     private static ConfigLoader instance
 
     static ConfigLoader initInstance(String env, File appFolder) {
-        instance = new ConfigLoader(env, appFolder)
+        if ( !instance ) instance = new ConfigLoader(env, appFolder)
         instance
     }
 
@@ -52,15 +52,14 @@ class ConfigLoader {
     }
 
     private void setDefaults(ConfigObject config) {
+        // TODO modRoot, webRoot ???
         def appRoot = System.getProperty('gravy.appRoot')
         config.appRoot = appRoot
-        config.gravy.refresh = false
         config.gravy.view.renderUri = config.gravy.view.renderUri ?: '/view/freemarker'
         config.gravy.view.documentRoot = config.gravy.view.documentRoot ?: '/WEB-INF/view'
         config.gravy.view.errorUri = config.gravy.view.errorUri ?: '/error'
 
         if ( System.getProperty('gravy.devMode') ) {
-            config.gravy.refresh = true // TODO is this used ???
             config.jetty.contextPath = System.getProperty('jetty.contextPath') ?: config.jetty.contextPath ?: '/'
             config.jetty.port = System.getProperty('jetty.port') ?: config.tomcat.port ?: 8080
             config.jetty.host = System.getProperty('jetty.host') ?: config.tomcat.host ?: 'localhost'

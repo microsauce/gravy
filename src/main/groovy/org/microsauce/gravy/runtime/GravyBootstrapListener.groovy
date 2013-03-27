@@ -58,13 +58,6 @@ class GravyBootstrapListener implements ServletContextListener {
         ConfigLoader configLoader = ConfigLoader.initInstance(environment, new File("${appRoot}/modules/app"))
         ConfigObject config =  configLoader.appConfig
 
-
-        //
-        // initialize error handler
-        //
-        String errorPage = config.gravy.errorPage ?: null
-        String viewUri = config.gravy.viewUri ?: null
-
         //
         // configure resource paths
         //
@@ -76,7 +69,7 @@ class GravyBootstrapListener implements ServletContextListener {
             String moduleResoursesFolder = "${appRoot}/${moduleName}".toString()
             if (new File(moduleResoursesFolder).exists())
                 resourceRoots << moduleResoursesFolder
-            String moduleViewFolder = "${appRoot}/WEB-INF/view/${moduleName}".toString()
+//            String moduleViewFolder = "${appRoot}/WEB-INF/view/${moduleName}".toString()
         }
 
         //
@@ -88,6 +81,9 @@ class GravyBootstrapListener implements ServletContextListener {
         this.context = context
         Module app = contextBuilder.application
 
+        //
+        // start source file observer (dev mode only)
+        //
         if (System.getProperty('gravy.devMode')) {
             startSourceObserver app
         }
