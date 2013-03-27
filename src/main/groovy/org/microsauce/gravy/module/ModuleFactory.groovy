@@ -31,7 +31,7 @@ abstract class ModuleFactory {
     }
 
     @CompileStatic
-    Module createModule(Context context, File moduleFolder, File appScript, /*ConfigObject appConfig, String env, */Boolean isApp) {
+    Module createModule(Context context, File moduleFolder, File appScript, Boolean isApp) {
 
         //
         // disable a module without un-installing/deleting it
@@ -45,7 +45,7 @@ abstract class ModuleFactory {
         Class moduleClass = cl.loadClass(moduleClassName())
         Module module = (Module) moduleClass.newInstance()
 
-        module.config = modConfig//module.moduleConfig.merge((ConfigObject) appConfig[moduleFolder.name])
+        module.config = modConfig
 
         // non-config properties
         module.type = type()
@@ -71,6 +71,8 @@ abstract class ModuleFactory {
 
     @CompileStatic
     private ClassLoader createModuleClassLoader(File moduleFolder) {
+//        if ( moduleClassName() == 'org.microsauce.gravy.module.ruby.RubyModule' )
+//            return this.class.classLoader
 
         log.info "initialize ${moduleFolder.name} classloader . . ."
         List<URL> classpath = []
@@ -80,7 +82,7 @@ abstract class ModuleFactory {
             loaderConf.addFile(new File(System.getProperty('user.dir') + '/target/classes'))
         }
 
-        // module lib -- web-inf/moduleName/lib
+        // module lib -- web-inf/moduleName/lib - relevent for Groovy modules only
         File modLib = new File(moduleFolder, 'lib')
         if (modLib.exists()) {
             modLib.eachFile { File thisLib ->

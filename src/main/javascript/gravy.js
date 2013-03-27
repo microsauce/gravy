@@ -118,10 +118,14 @@ global.NativeJSHandler = function(handler) {
         }
 
         // build the parameter array
-        var params = new Array()
+        var params = new Array() // TODO cache this too ???
         if (req != null && res != null) {
             params.push(req)
             params.push(res)
+        }
+        var parmListSize = paramList.size()
+        for ( var i = 0; i<parmListSize; i++ ) {
+            params.push(paramList.get(i))
         }
 
 		this.handler.apply(binding ? binding : this, params)

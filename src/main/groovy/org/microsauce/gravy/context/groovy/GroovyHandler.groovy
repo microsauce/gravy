@@ -70,13 +70,13 @@ class GroovyHandler extends Handler {
 
         Closure closure = (Closure) closure.clone()
 
-        String[] _paramList =
+        List<String> _paramList =
             closure.maximumNumberOfParameters == wrapper.splat.size() ?
-                wrapper.paramList as String[] : [] as String[]
+                wrapper.paramList : [] as List<String>
 
         closure.delegate = binding as Binding
         closure.resolveStrategy = Closure.DELEGATE_FIRST
-        closure.call(_paramList.length == 1 ? _paramList[0] : _paramList)
+        closure.call(_paramList.size() == 1 ? _paramList[0] : _paramList)
     }
 
     @CompileStatic

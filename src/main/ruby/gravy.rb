@@ -248,8 +248,14 @@ class NativeRubyHandler
         req.set_attribute '_ruby_binding_'+_module.name, self
     end # if binding.nil?
 
+    params = []
+    param_iterator = param_list.iterator
+    while param_iterator.has_next
+      params << param_iterator.next
+    end
+
     # call the handler
-    (binding.nil? ? self : binding).instance_exec &block
+    (binding.nil? ? self : binding).instance_exec *params, &block
 
     res.out.flush()
 
