@@ -10,6 +10,7 @@ import org.microsauce.gravy.module.Module
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeFunction
 import org.mozilla.javascript.ScriptableObject
+import org.ringojs.repository.FileResource
 import org.ringojs.wrappers.ScriptableMap
 import org.ringojs.wrappers.Stream
 
@@ -23,21 +24,29 @@ class JSModule extends Module {
     @CompileStatic
     protected Object doLoad(Map<String, Handler> imports) { // TODO consider loading config here (for hot reload of config)
 
-        if ( !jsRuntime )
-            jsRuntime = new GravyJSRuntime(
-                    [this.folder, new File(folder, '/lib')] as List<File>,
-                    moduleLogger,
-                    config)
+//        if ( !jsRuntime )
+//            jsRuntime = new GravyJSRuntime(
+//                    [this.folder, new File(folder, '/lib')] as List<File>)
+        if ( name == 'app' )
+            jsRuntime.prependRoots([this.folder, new File(folder, '/lib')] as List<File>)
+        else
+            jsRuntime.appendRoots([this.folder, new File(folder, '/lib')] as List<File>)
+
         scriptContext = jsRuntime.global
         JSSerializer.initInstance(jsRuntime.global)
 
         Map<String, Object> jsBinding = [:]
-        jsBinding.gravyModule = this
+//        jsBinding["j_${this.name}_module".toString()] = this
+//        jsBinding["j_${this.name}_config".toString()] = config
+//        jsBinding["j_${this.name}_logger".toString()] = moduleLogger
+        jsBinding['j_module'] = this
+        jsBinding['j_config'] = config
+        jsBinding['j_logger'] = moduleLogger
 
         // add module exports to the script scope (app only)
         if (imports) prepareImports(imports)
 
-        ScriptableObject exports = (ScriptableObject) jsRuntime.run(scriptFile.name, jsBinding)
+        ScriptableObject exports = (ScriptableObject) jsRuntime.run(scriptFile, jsBinding)
 
         prepareExports exports
     }

@@ -14,7 +14,7 @@ global.exp = new Object();
  * documented utility/convenience functions
  *******************************************************/
 
-function initModuleConfig(config) {
+global.initModuleConfig = function (config) {
     var jsObject = {}
     var iterator = config.keySet().iterator()
     while ( iterator.hasNext() ) {
@@ -31,7 +31,7 @@ function initModuleConfig(config) {
     return jsObject
 }
 
-global.conf = initModuleConfig(config)
+//global.conf = global.initModuleConfig(config)
 
 /**
  * JavaScript JSON serialization functions

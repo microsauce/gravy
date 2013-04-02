@@ -6,13 +6,13 @@ import org.mozilla.javascript.ScriptableObject
 
 class GravyJSRuntime extends JSRuntime {
 
-    public GravyJSRuntime(List<File> roots, Logger logger, ConfigObject gravyConfig) {
-        super(roots, logger, gravyConfig)
+    public GravyJSRuntime(List<File> roots) {
+        super(roots)
     }
 
     @CompileStatic
     String[] getCoreScripts() {
-        ['coffee-module-loader.js', 'core.js', 'gravy.js']
+        ['ringo-extensions.js','core.js', 'gravy.js']
     }
 
 }

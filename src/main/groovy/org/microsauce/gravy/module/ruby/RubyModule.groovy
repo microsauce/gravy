@@ -19,13 +19,6 @@ public class RubyModule extends Module {
     RubyModule() {
         // SINGLETHREADED - supports multiple ruby instances
         container = new ScriptingContainer(LocalContextScope.SINGLETHREAD, LocalVariableBehavior.PERSISTENT);
-println "************************************************************************************"
-println "************************************************************************************"
-println "************************************************************************************"
-println "jruby - container: $container"
-println "ruby - ${container.provider.runtime}"
-println "************************************************************************************"
-println "************************************************************************************"
     }
 
     @Override

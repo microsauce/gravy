@@ -30,17 +30,17 @@ importPackage(org.microsauce.gravy.lang.object)
  * http methods
  */
 
-var GET = 'get'
-var POST = 'post'
-var PUT = 'put'
-var DELETE = 'delete'
+global.GET = 'get'
+global.POST = 'post'
+global.PUT = 'put'
+global.DELETE = 'delete'
 
 /********************************************************
  * documented global variables
  ********************************************************/
 
 /*
- * dispatch types
+ * define global scope
  */
 
 global.REQUEST = DispatcherType.REQUEST
@@ -48,7 +48,7 @@ global.FORWARD = DispatcherType.FORWARD
 global.ERROR = DispatcherType.ERROR
 global.INCLUDE = DispatcherType.INCLUDE
 
-global.addEnterpriseService = function(uriPattern, method, callBack, dispatch) {
+global.addEnterpriseService = function(gravyModule, uriPattern, method, callBack, dispatch) {
 	var dispatchList = new ArrayList()
 	if (dispatch == null || dispatch.length == 0) {
 		dispatchList.add(REQUEST)
@@ -59,8 +59,7 @@ global.addEnterpriseService = function(uriPattern, method, callBack, dispatch) {
 		}
 	}
 
-	return gravyModule.addEnterpriseService(uriPattern, method, callBack,
-			dispatchList)
+	return gravyModule.addEnterpriseService(uriPattern, method, callBack, dispatchList)
 }
 
 global.executeHandler = function(callBack, req, res, paramMap, paramList,
@@ -134,104 +133,6 @@ global.NativeJSHandler = function(handler) {
 	}
 }
 
-/********************************************************
- * documented service functions
- *******************************************************/
-
-/*
- * define a 'get' request handler
- * 
- * Example: 
- * get '/hello/:name', (req, res) -> 
- * 		res.render '/greeting.html', {name: @name}
- * 
- * get '/hello/:name', (req, res) -> 
- * 		res.render '/greeting.html', {name: @name}
- * , [REQUEST]
- */
-global.get = function(uriPattern, callBack, dispatch) {
-	addEnterpriseService(uriPattern, GET, callBack, dispatch)
-}
-
-/*
- * define a 'post' request handler
- * 
- * Example: 
- * post '/hello/:name', (req, res) -> 
- * 		res.render '/greeting.html', {name: @name}
- * 
- * post '/hello/:name', (req, res) -> 
- * 		log.info "Hello #{@name}"
- * 		res.render '/greeting.html', {name: @name}
- * , [REQUEST]
- */
-global.post = function(uriPattern, callBack, dispatch) {
-	addEnterpriseService(uriPattern, POST, callBack, dispatch)
-}
-
-/*
- * define a 'del' request handler
- * 
- * Example: 
- * del '/hello/:name', (req, res) -> 
- * 		res.render '/greeting.html', {name: @name}
- * 
- * del '/hello/:name', (req, res) -> 
- * 		res.render '/greeting.html', {name: @name}
- * , [REQUEST]
- */
-global.del = function(uriPattern, callBack, dispatch) {
-	addEnterpriseService(uriPattern, DELETE, callBack, dispatch)
-}
-
-/*
- * define a 'put' request handler
- * 
- * Example: 
- * put '/hello/:name', (req, res) -> 
- * 		res.render '/greeting.html', {name: this.name}
- * 
- * put '/hello/:name', (req, res) -> 
- * 		res.render '/greeting.html', {name: this.name}
- * , [REQUEST]
- */
-global.put = function(uriPattern, callBack, dispatch) {
-	addEnterpriseService(uriPattern, PUT, callBack, dispatch)
-}
-
-/*
- * define a catch-all request handler
- * 
- * Example: 
- * route '/hello/:name', (req, res) -> 
- * 		res.render '/greeting.html', {name: this.name}
- * 
- * route '/hello/:name', (req, res) -> 
- * 		res.render '/greeting.html', {name: this.name}
- * , [REQUEST]
- */
-global.route = function(uriPattern, callBack, dispatch) {
-	addEnterpriseService(uriPattern, 'default', callBack, dispatch)
-}
-
-/*
- * alias for 'route' - a la expressjs.
- */
-global.use = function(uriPattern, callBack, dispatch) {
-	route(uriPattern, 'default', callBack, dispatch)
-}
-
-/*
- * schedule a handler on a cron timer
- * 
- * Example:
- * schedule '* * * * * ', ->
- * 		println "Another minute bites the dust"
- */
-global.schedule = function(cronString, callBack) {
-	gravyModule.addCronService(cronString, callBack)
-}
-
 /**
  * undocumented export functions
  */
@@ -272,7 +173,7 @@ global.prepareImports = function(allImports, scope) {
 	}
 }
 
-global.prepareExports = function(exports) { // service exports 
+global.prepareExports = function(exports) { // service exports
 	var preparedExports = new HashMap()
 	for (exp in exports) {
 		if (Object.prototype.toString.call(exports[exp]) == '[object Function]') {
@@ -281,4 +182,109 @@ global.prepareExports = function(exports) { // service exports
 		}
 	}
 	return preparedExports
+}
+
+//
+// define the gravy API for javascript
+//
+
+global.GravyModule = function(j_module, j_config, j_logger) {
+
+    this.gravyModule = j_module
+    this.conf = global.initModuleConfig(j_config)
+    this.log = j_logger
+
+    /*
+     * define a 'get' request handler
+     *
+     * Example:
+     * get '/hello/:name', (req, res) ->
+     * 		res.render '/greeting.html', {name: @name}
+     *
+     * get '/hello/:name', (req, res) ->
+     * 		res.render '/greeting.html', {name: @name}
+     * , [REQUEST]
+     */
+    this.get = function(uriPattern, callBack, dispatch) {
+        addEnterpriseService(this.gravyModule, uriPattern, GET, callBack, dispatch)
+    }
+
+    /*
+     * define a 'post' request handler
+     *
+     * Example:
+     * post '/hello/:name', (req, res) ->
+     * 		res.render '/greeting.html', {name: @name}
+     *
+     * post '/hello/:name', (req, res) ->
+     * 		log.info "Hello #{@name}"
+     * 		res.render '/greeting.html', {name: @name}
+     * , [REQUEST]
+     */
+    this.post = function(uriPattern, callBack, dispatch) {
+        addEnterpriseService(this.gravyModule, uriPattern, POST, callBack, dispatch)
+    }
+
+    /*
+     * define a 'del' request handler
+     *
+     * Example:
+     * del '/hello/:name', (req, res) ->
+     * 		res.render '/greeting.html', {name: @name}
+     *
+     * del '/hello/:name', (req, res) ->
+     * 		res.render '/greeting.html', {name: @name}
+     * , [REQUEST]
+     */
+    this.del = function(uriPattern, callBack, dispatch) {
+        addEnterpriseService(this.gravyModule, uriPattern, DELETE, callBack, dispatch)
+    }
+
+    /*
+     * define a 'put' request handler
+     *
+     * Example:
+     * put '/hello/:name', (req, res) ->
+     * 		res.render '/greeting.html', {name: this.name}
+     *
+     * put '/hello/:name', (req, res) ->
+     * 		res.render '/greeting.html', {name: this.name}
+     * , [REQUEST]
+     */
+    this.put = function(uriPattern, callBack, dispatch) {
+        addEnterpriseService(this.gravyModule, uriPattern, PUT, callBack, dispatch)
+    }
+
+    /*
+     * define a catch-all request handler
+     *
+     * Example:
+     * route '/hello/:name', (req, res) ->
+     * 		res.render '/greeting.html', {name: this.name}
+     *
+     * route '/hello/:name', (req, res) ->
+     * 		res.render '/greeting.html', {name: this.name}
+     * , [REQUEST]
+     */
+    this.route = function(uriPattern, callBack, dispatch) {
+        addEnterpriseService(this.gravyModule, uriPattern, 'default', callBack, dispatch)
+    }
+
+    /*
+     * alias for 'route' - a la expressjs.
+     */
+    this.use = function(uriPattern, callBack, dispatch) {
+        route(uriPattern, 'default', callBack, dispatch)
+    }
+
+    /*
+     * schedule a handler on a cron timer
+     *
+     * Example:
+     * schedule '* * * * * ', ->
+     * 		println "Another minute bites the dust"
+     */
+    this.schedule = function(cronString, callBack) {
+        this.gravyModule.addCronService(cronString, callBack)
+    }
 }

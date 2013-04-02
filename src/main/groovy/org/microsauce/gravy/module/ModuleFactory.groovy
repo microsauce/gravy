@@ -17,17 +17,17 @@ abstract class ModuleFactory {
 
     Logger log = Logger.getLogger(ModuleFactory.class)
 
-    static Map FACTORY_TYPES = [
-            'groovy': GroovyModuleFactory.class,
-            'js': JSModuleFactory.class,
-            'coffee': JSModuleFactory.class,
-            'rb': RubyModuleFactory.class
+    static JSModuleFactory jsModuleFactory = new JSModuleFactory()
+    static Map<String, ModuleFactory> FACTORY_TYPES = [
+            'groovy': new GroovyModuleFactory(),
+            'js': jsModuleFactory,
+            'coffee': jsModuleFactory,
+            'rb': new RubyModuleFactory()
     ]
 
     @CompileStatic
     static ModuleFactory getInstance(String type) {
-        Class moduleClass = FACTORY_TYPES[type]
-        (ModuleFactory) moduleClass.newInstance()
+        FACTORY_TYPES[type]
     }
 
     @CompileStatic
@@ -66,8 +66,12 @@ abstract class ModuleFactory {
         module.errorUri = gravyViewConfig.errorUri
         module.moduleLogger = Logger.getLogger(module.name)
 
+        initializeRuntime(module)
+
         module
     }
+
+    void initializeRuntime(Module module) {}
 
     @CompileStatic
     private ClassLoader createModuleClassLoader(File moduleFolder) {

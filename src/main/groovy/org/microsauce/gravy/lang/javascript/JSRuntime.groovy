@@ -10,6 +10,7 @@ import org.mozilla.javascript.tools.shell.Global
 import org.ringojs.engine.RhinoEngine
 import org.ringojs.engine.RingoConfig
 import org.ringojs.repository.FileRepository
+import org.ringojs.repository.FileResource
 import org.ringojs.repository.Repository
 import org.ringojs.repository.ZipRepository
 
@@ -18,12 +19,13 @@ abstract class JSRuntime {
 
     RhinoEngine engine
     Scriptable global
-    List<File> roots
-    Logger scriptLogger
+//    List<File> roots
 
-    @CompileStatic JSRuntime(List<File> roots, Logger logger, ConfigObject gravyConfig) {
-        this.roots = roots
-        this.scriptLogger = logger
+
+    @CompileStatic JSRuntime(List<File> roots) {
+//        super()
+
+//        this.roots = roots
 
         String ringoJarPath = null
         String appRoot = System.getProperty("gravy.appRoot")
@@ -46,8 +48,7 @@ abstract class JSRuntime {
         engine = new RhinoEngine(config, null)
         global = engine.getScope()
         global.put('out', global, System.out)
-        global.put('log', global, scriptLogger)
-        global.put('config', global, gravyConfig)
+//        global.put('j_logger', global, scriptLogger)
         global.put('devMode', global, System.getProperty('gravy.devMode'))
         getCoreScripts().each { String thisScript ->
             engine.runScript(thisScript, [] as String[])
@@ -55,8 +56,7 @@ abstract class JSRuntime {
 
     }
 
-    @CompileStatic
-    Object run(String scriptUri, Map<String, Object> binding) {
+    @CompileStatic Object run(String scriptUri, Map<String, Object> binding) {
         Object returnValue = null
         if (binding) {
             binding.each { String key, Object value ->
@@ -69,6 +69,34 @@ abstract class JSRuntime {
         Scriptable services = (Scriptable) global.get('exp', global)
         returnValue = services
         returnValue
+    }
+
+    @CompileStatic Object run(File script, Map<String, Object> binding) {
+        Object returnValue = null
+        if (binding) {
+            binding.each { String key, Object value ->
+                global.put(key, global, value)
+            }
+        }
+
+        // evaluate application.js
+        FileResource fileResource = new FileResource(script)
+        engine.runScript(fileResource, [] as String[])
+        Scriptable services = (Scriptable) global.get('exp', global)
+        returnValue = services
+        returnValue
+    }
+
+    @CompileStatic void appendRoots(List<File> roots) {
+        roots.each { File thisRoot ->
+            engine.config.repositories.add(new FileRepository(thisRoot))
+        }
+    }
+
+    @CompileStatic void prependRoots(List<File> roots) {
+        roots.each { File thisRoot ->
+            engine.config.repositories.add(0,new FileRepository(thisRoot))
+        }
     }
 
     abstract String[] getCoreScripts()

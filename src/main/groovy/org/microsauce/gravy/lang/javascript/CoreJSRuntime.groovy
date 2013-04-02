@@ -6,17 +6,13 @@ import org.mozilla.javascript.ScriptableObject
 
 class CoreJSRuntime extends JSRuntime {
 
-    public CoreJSRuntime(List<File> roots, ConfigObject coreConfig) {
-        super(roots, null, coreConfig)
-    }
-
     public CoreJSRuntime(List<File> roots) {
-        this(roots, null, new ConfigObject())
+        super(roots, null)
     }
 
     @CompileStatic
     String[] getCoreScripts() {
-        ['coffee-module-loader.js', 'core.js']
+        ['ringo-extensions.js', 'core.js']
     }
 
 }
