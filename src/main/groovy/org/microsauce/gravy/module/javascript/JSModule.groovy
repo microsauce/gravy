@@ -22,67 +22,23 @@ class JSModule extends Module {
 
     @Override
     @CompileStatic
-    protected Object doLoad(Map<String, Handler> imports) { // TODO consider loading config here (for hot reload of config)
+    protected Object doLoad(Map<String, Handler> imports) {
 
-//        if ( !jsRuntime )
-//            jsRuntime = new GravyJSRuntime(
-//                    [this.folder, new File(folder, '/lib')] as List<File>)
-        if ( name == 'app' )
-            jsRuntime.prependRoots([this.folder, new File(folder, '/lib')] as List<File>)
-        else
+        if ( name != 'app' )
             jsRuntime.appendRoots([this.folder, new File(folder, '/lib')] as List<File>)
-
         scriptContext = jsRuntime.global
         JSSerializer.initInstance(jsRuntime.global)
 
         Map<String, Object> jsBinding = [:]
-//        jsBinding["j_${this.name}_module".toString()] = this
-//        jsBinding["j_${this.name}_config".toString()] = config
-//        jsBinding["j_${this.name}_logger".toString()] = moduleLogger
         jsBinding['j_module'] = this
         jsBinding['j_config'] = config
         jsBinding['j_logger'] = moduleLogger
 
-        // add module exports to the script scope (app only)
-        if (imports) prepareImports(imports)
-
-        ScriptableObject exports = (ScriptableObject) jsRuntime.run(scriptFile, jsBinding)
-
-        prepareExports exports
-    }
-
-    @CompileStatic
-    private void prepareImports(Map<String, Handler> imports) {
-        Context ctx = Context.enter()
-        try {
-            NativeFunction prepareImports = (NativeFunction) ((ScriptableObject) scriptContext)
-                    .get('prepareImports', (ScriptableObject) scriptContext)
-            prepareImports.call(
-                    ctx,
-                    (ScriptableObject) scriptContext,
-                    (ScriptableObject) scriptContext,
-                    [imports, scriptContext] as Object[])
-        }
-        finally {
-            ctx.exit()
-        }
-    }
-
-    @CompileStatic
-    private Map<String, Handler> prepareExports(ScriptableObject exports) {
-        Context ctx = Context.enter()
-        try {
-            NativeFunction prepareExports = (NativeFunction) ((ScriptableObject) scriptContext).get('prepareExports', (ScriptableObject) scriptContext)
-            (Map<String, Handler>) ctx.jsToJava(prepareExports.call(ctx, (ScriptableObject) scriptContext, (ScriptableObject) scriptContext, [exports] as Object[]), Map.class)
-        }
-        finally {
-            ctx.exit()
-        }
+        jsRuntime.run(scriptFile, jsBinding)
     }
 
     Object wrapInputStream(InputStream inputStream) {
         return new Stream(scriptContext, inputStream, null)
     }
-
 
 }

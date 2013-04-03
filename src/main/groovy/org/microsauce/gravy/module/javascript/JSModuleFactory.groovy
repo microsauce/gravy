@@ -10,7 +10,17 @@ import org.microsauce.gravy.lang.object.GravyType
 
 class JSModuleFactory extends ModuleFactory {
 
-    JSRuntime runtime = new GravyJSRuntime([])
+    JSRuntime runtime
+
+    JSModuleFactory() {
+        super()
+        // TODO this will clutter the load path when app is not a JS module
+        File appFolder = new File(new File(System.getProperty('gravy.moduleRoot')), 'app')
+        File appLibFolder =  new File(appFolder, 'lib')
+        List<File> libs = [appFolder]
+        if (appLibFolder.exists()) libs.add(appLibFolder)
+        runtime = new GravyJSRuntime(libs)
+    }
 
     @Override
     @CompileStatic

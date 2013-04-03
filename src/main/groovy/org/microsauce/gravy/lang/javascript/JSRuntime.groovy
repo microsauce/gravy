@@ -19,13 +19,9 @@ abstract class JSRuntime {
 
     RhinoEngine engine
     Scriptable global
-//    List<File> roots
 
 
     @CompileStatic JSRuntime(List<File> roots) {
-//        super()
-
-//        this.roots = roots
 
         String ringoJarPath = null
         String appRoot = System.getProperty("gravy.appRoot")
@@ -48,12 +44,10 @@ abstract class JSRuntime {
         engine = new RhinoEngine(config, null)
         global = engine.getScope()
         global.put('out', global, System.out)
-//        global.put('j_logger', global, scriptLogger)
         global.put('devMode', global, System.getProperty('gravy.devMode'))
         getCoreScripts().each { String thisScript ->
             engine.runScript(thisScript, [] as String[])
         }
-
     }
 
     @CompileStatic Object run(String scriptUri, Map<String, Object> binding) {
@@ -72,6 +66,7 @@ abstract class JSRuntime {
     }
 
     @CompileStatic Object run(File script, Map<String, Object> binding) {
+
         Object returnValue = null
         if (binding) {
             binding.each { String key, Object value ->
@@ -88,14 +83,17 @@ abstract class JSRuntime {
     }
 
     @CompileStatic void appendRoots(List<File> roots) {
+
         roots.each { File thisRoot ->
-            engine.config.repositories.add(new FileRepository(thisRoot))
+            FileRepository frepo = new FileRepository(thisRoot)
+            engine.config.repositories.add(frepo)
         }
     }
 
     @CompileStatic void prependRoots(List<File> roots) {
-        roots.each { File thisRoot ->
-            engine.config.repositories.add(0,new FileRepository(thisRoot))
+        roots.reverse().each { File thisRoot ->
+            FileRepository frepo = new FileRepository(thisRoot)
+            engine.config.repositories.add(0,frepo)
         }
     }
 

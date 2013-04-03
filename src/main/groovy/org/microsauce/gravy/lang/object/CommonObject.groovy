@@ -64,8 +64,9 @@ class CommonObject {
     }
 
     @CompileStatic private String getKey(String type, String modName) {
-        if ( type == GravyType.RUBY.type ) // jruby objects cannot be shared between jruby runtimes
-            return type +  module.name
-        else return type
+//        if ( type == GravyType.RUBY.type ) // jruby objects cannot be shared between jruby runtimes
+//            return type +  module.name
+//        else return type
+        type
     }
 }

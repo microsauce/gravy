@@ -28,13 +28,32 @@ class ContextBuilder {
     Context build() {
         Module app = instantiateApplication()
         application = app
-        Collection<Module> modules = instantiateModules()
+        Map<String,Module> modules = instantiateModules()
 
         Map<String, Object> moduleBindings = [:]
-        for (thisModule in modules) {
-            thisModule.app = application
-            thisModule.load()
-            moduleBindings[thisModule.name] = thisModule.exports
+        if ( app.config.moduleOrder )  {
+            Set<String> loadedModules = new HashSet<String>()
+            app.config.moduleOrder.each { String moduleName ->
+                Module thisModule = modules[moduleName]
+                thisModule.load()
+                moduleBindings[thisModule.name] = thisModule.exports
+                loadedModules << thisModule.name
+            }
+            if ( modules.size() > loadedModules.size() ) {
+                // load the remaining modules
+                Set<String> xor = new HashSet<String>(modules.keySet())
+                xor.removeAll(loadedModules)
+                xor.each { String moduleName ->
+                    Module thisModule = modules[moduleName]
+                    thisModule.load()
+                    moduleBindings[thisModule.name] = thisModule.exports
+                }
+            }
+        } else {
+            for (thisModule in modules.values()) {
+                thisModule.load()
+                moduleBindings[thisModule.name] = thisModule.exports
+            }
         }
         app.imports = moduleBindings
         app.load()
@@ -43,12 +62,12 @@ class ContextBuilder {
 
 
     @CompileStatic
-    private Collection<Module> instantiateModules() {
-        List<Module> modules = []
+    private Map<String, Module> instantiateModules() {
+        Map<String, Module> modules = [:]
 
         for (modFolder in ContextBuilder.listModules()) {
             Module module = instantiateModule(context, modFolder, false)
-            if (module) modules << module
+            if (module) modules[module.name] = module
         }
 
         modules
@@ -67,7 +86,9 @@ class ContextBuilder {
         if (moduleFactory == null)
             throw new Exception("unable to find module loader for file type ${fileExtension}.")
 
-        moduleFactory.createModule(context, modFolder, applicationScript, isApp)
+        Module thisModule = moduleFactory.createModule(context, modFolder, applicationScript, isApp)
+        thisModule.app = application
+        thisModule
     }
 
     @CompileStatic

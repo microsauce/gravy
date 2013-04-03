@@ -2,11 +2,8 @@ package org.microsauce.gravy.module.ruby;
 
 import groovy.transform.CompileStatic
 
-import org.jruby.RubyObject
-import org.jruby.embed.LocalContextScope
-import org.jruby.embed.LocalVariableBehavior
 import org.jruby.embed.ScriptingContainer
-import org.microsauce.gravy.context.Handler
+import org.microsauce.gravy.lang.ruby.RubyRuntime
 import org.microsauce.gravy.lang.ruby.RubySerializer
 import org.microsauce.gravy.module.Module
 import org.jruby.RubyIO
@@ -15,73 +12,47 @@ public class RubyModule extends Module {
 
     private ScriptingContainer container;
     private org.jruby.RubyModule rubyModule;
+    private RubyRuntime runtime
 
-    RubyModule() {
-        // SINGLETHREADED - supports multiple ruby instances
-        container = new ScriptingContainer(LocalContextScope.SINGLETHREAD, LocalVariableBehavior.PERSISTENT);
-    }
+    RubyModule() {}
 
     @Override
     @CompileStatic
     protected Object doLoad(Map imports) {
 
-        List<String> paths = [this.folder.absolutePath + '/lib']
-        container.loadPaths.addAll(paths)
+        if ( name != 'app' )
+            runtime.appendRoots([this.folder.absolutePath, new File(folder, '/lib').absolutePath] as List<String>)
 
-        scriptContext = container;
-
-        container.put("j_gravy_module", this);
-        container.put("j_config", config);
-        container.put("j_mod_lib_path", folder.getAbsolutePath() + "/lib");
-        container.put("j_gem_home", config.get("gem_home"));
-        container.put("j_container", container);
-        container.put("j_log", moduleLogger)
+        scriptContext = runtime.container
+        container = runtime.container
 
         try {
-            InputStream scriptStream = this.getClass().getResourceAsStream("/gravy.rb");
-            container.runScriptlet(scriptStream, "gravy.rb");
-            // add module exports to the script scope (app only)
-            if (imports != null && imports.size() > 0) prepareImports(imports);
-
-            rubyModule = (org.jruby.RubyModule) container.runScriptlet(assembleModuleScript(name, new File(folder, "application.rb")), "${folder.absolutePath}/application.rb");
+            rubyModule = (org.jruby.RubyModule) runtime.run(
+                assembleModuleScript(name, new File(folder, "application.rb")),
+                "${folder.absolutePath}/application.rb", [
+                    ("j_${name}_module".toString()) : this,
+                    ("j_${name}_conf".toString()) : config,
+                    ("j_${name}_log".toString()) : moduleLogger
+            ]);
             RubySerializer.initInstance(container);
         }
         catch (Throwable t) {
             throw new RuntimeException(t);
         }
-
-        RubyObject exports = (RubyObject) container.callMethod(rubyModule, "get_exp");
-        return prepareExports(exports);
     }
 
     @CompileStatic
-    private void prepareImports(Map<String, Handler> imports) {
-        RubyObject importExport = (RubyObject) container.get("import_export");
-        RubyObject scope = (RubyObject) container.get("scope");
-        Object importMap = (Map) container.callMethod(importExport, "prepare_imports", [imports, scope] as Object[]);
-        importMap.each { String modName, Object modImport ->
-            container.put(modName, modImport)
-        }
-    }
-
-    @CompileStatic
-    private Reader assembleModuleScript(String moduleName, File scriptFile) {
+    private String assembleModuleScript(String moduleName, File scriptFile) {
         String rawScriptText = scriptFile.text
         // to preserve line numbering in user script define all of this on the first line
-        return new StringReader("""module Gravy_Module_$moduleName; extend self; include GravyModule; exp = OpenStruct.new; @@exp = exp; def self.get_exp(); @@exp; end; log = @@log; conf = config_to_ostruct_recursive(@@conf); $rawScriptText
+        """\$j_${moduleName}_log = j_${moduleName}_log; \$j_${moduleName}_conf = j_${moduleName}_conf; \$j_${moduleName}_module = j_${moduleName}_module; module Gravy_Module_$moduleName; include GravyModule; extend self; @j_module = \$j_${moduleName}_module; log = \$j_${moduleName}_log; conf = config_to_ostruct_recursive(\$j_${moduleName}_conf); $rawScriptText
           end
 		  Gravy_Module_$moduleName
-		""".toString())
+		""".toString()
     }
 
     @CompileStatic Object wrapInputStream(InputStream inputStream) {
         new RubyIO(container.getProvider().getRuntime(), inputStream);
-    }
-
-
-    private Map<String, Handler> prepareExports(RubyObject exports) {
-        RubyObject importExport = (RubyObject) container.get("import_export");
-        return (Map<String, Handler>) container.callMethod(importExport, "prepare_exports", [exports] as Object[]);
     }
 
 }
