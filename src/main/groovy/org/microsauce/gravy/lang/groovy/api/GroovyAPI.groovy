@@ -23,8 +23,6 @@ class GroovyAPI {
 
     static DispatcherType REQUEST = DispatcherType.REQUEST
     static DispatcherType FORWARD = DispatcherType.FORWARD
-    static DispatcherType INCLUDE = DispatcherType.INCLUDE
-    static DispatcherType ERROR = DispatcherType.ERROR
 
     static List<GroovyAPI.Route> ROUTES = []
 
@@ -49,6 +47,10 @@ class GroovyAPI {
     }
 
     static void route(String uriPattern, Closure handler) {
+        module.addEnterpriseService(uriPattern, DEFAULT, handler, [REQUEST, FORWARD])
+    }
+
+    static void use(String uriPattern, Closure handler) {
         module.addEnterpriseService(uriPattern, DEFAULT, handler, [REQUEST, FORWARD])
     }
 

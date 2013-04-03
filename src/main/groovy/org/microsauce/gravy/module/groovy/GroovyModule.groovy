@@ -2,9 +2,6 @@ package org.microsauce.gravy.module.groovy
 
 import groovy.transform.CompileStatic
 
-import org.microsauce.gravy.context.Context
-import org.microsauce.gravy.context.Handler
-import org.microsauce.gravy.context.groovy.GroovyHandler
 import org.microsauce.gravy.lang.groovy.api.GroovyAPI
 import org.microsauce.gravy.lang.groovy.script.Script
 import org.microsauce.gravy.lang.groovy.script.ScriptDecorator
@@ -26,7 +23,6 @@ class GroovyModule extends Module {
 
         // create, initialize, and execute the script
         Script script = new Script()
-        script.binding.putAll(prepareImports(imports))
         script.binding.putAll(binding)
         script.binding.exp = exp
         script.classLoader = classLoader
@@ -42,39 +38,6 @@ class GroovyModule extends Module {
         GroovyAPI.module = this
 
         ScriptUtils.run script
-        prepareExports exp
-    }
-
-    @CompileStatic
-    Map<String, GroovyHandler> prepareExports(Map exports) {
-        Map<String, GroovyHandler> preparedExports = new HashMap<String, GroovyHandler>()
-        exports.each { String name, Closure export ->
-            preparedExports[name] = new GroovyHandler(export)
-        }
-        preparedExports
-    }
-
-    @CompileStatic
-    Map<String, Map<String, Closure>> prepareImports(Map<String, Map<String, Handler>> allImports) {
-        Map<String, Map<String, Closure>> preparedImports = new HashMap<String, Map<String, Closure>>()
-        allImports.each { String moduleName, Map<String, Handler> imports ->
-            imports.each { Object name, Handler handler ->
-                if (!preparedImports.get(moduleName)) preparedImports.put(moduleName, new HashMap<String, Closure>())
-                Closure closure = { Object p1 = null, Object p2 = null, Object p3 = null, Object p4 = null, Object p5 = null, Object p6 = null, Object p7 = null ->
-                    handler.call(
-                            commonObj(p1),
-                            commonObj(p2),
-                            commonObj(p3),
-                            commonObj(p4),
-                            commonObj(p5),
-                            commonObj(p6),
-                            commonObj(p7))
-                }
-                preparedImports.get(moduleName).put(name.toString(), closure)
-            }
-        }
-
-        preparedImports
     }
 
     private CommonObject commonObj(Object obj) {
