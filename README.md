@@ -39,7 +39,6 @@ end
 - 'Web-fragement' modules
 - Single-file environment based configuration
 - Hot reload
--
 
 ## Status
 
