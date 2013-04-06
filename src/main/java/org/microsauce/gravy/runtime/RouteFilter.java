@@ -42,6 +42,7 @@ class RouteFilter implements Filter {
             } catch (Exception all) {
                 all.printStackTrace();
                 Error error = new Error(all);
+                req.setAttribute("error", error);
                 RequestDispatcher dispatcher = req.getRequestDispatcher(errorUri);
                 dispatcher.forward(request, res);
             }

@@ -47,8 +47,8 @@ require.extensions[".coffee"] = function(coffee) {
 console.log("\tComplete.");
 
 /**
- * This section defines a RingoJS extension for loading modules written
- * in CoffeeScript.
+ * This section defines a RingoJS extension for loading gravy
+ * application scripts.
  */
 
 console.log("adding gravy extension . . .");

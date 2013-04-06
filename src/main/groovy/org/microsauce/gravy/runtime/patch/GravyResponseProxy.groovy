@@ -18,9 +18,10 @@ class GravyResponseProxy<T extends HttpServletResponse> extends BaseEnterprisePr
 
     GravyResponseProxy(HttpServletResponse res, HttpServletRequest request) {
         super(res)
+        res.setContentType('text/html') // set default // TODO make this configurable ???
         this.request = request
         this.out = ((T) target).getOutputStream()
-        this.printer = new PrintWriter(new OutputStreamWriter(this.out, 'utf-8'))   // TODO make character encoding configurable
+        this.printer = new PrintWriter(new OutputStreamWriter(this.out, 'UTF-8'))   // TODO make character encoding configurable
     }
 
     @CompileStatic void render(String _viewUri, Object model) {

@@ -18,7 +18,7 @@ public class RubyModule extends Module {
 
     @Override
     @CompileStatic
-    protected Object doLoad(Map imports) {
+    protected Object doLoad() {
 
         if ( name != 'app' )
             runtime.appendRoots([this.folder.absolutePath, new File(folder, '/lib').absolutePath] as List<String>)

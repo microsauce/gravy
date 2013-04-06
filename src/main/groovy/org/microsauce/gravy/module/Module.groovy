@@ -44,16 +44,38 @@ abstract class Module {
     String renderUri
     String errorUri
 
-    Module app // TODO flesh this out contextbuilder and any mod implementation that cares about it
-
-    Object exports // TODO refactor as exports
-    Map imports // TODO refactor as imports
+    Module app
 
     // the application context
     Context context
     Object scriptContext
     Logger moduleLogger
 
+    @CompileStatic static List<String> moduleLoadOrder(Collection<String> availableModules, Object order) {
+        List<String> moduleLoadOrder = new ArrayList<String>()
+        if ( order && order instanceof List<String> ) {
+            List<String> moduleOrder = (List<String>) order
+            log.info "load modules in order: ${moduleOrder}"
+            moduleOrder.each { String moduleName ->
+                if ( availableModules.contains(moduleName) )
+                    moduleLoadOrder << moduleName
+            }
+            if ( availableModules.size() > moduleLoadOrder.size() ) {
+                Set<String> xor = new HashSet<String>(availableModules)
+                xor.removeAll(moduleLoadOrder)
+                xor.each { String moduleName ->
+                    availableModules << moduleName
+                }
+            }
+        } else {
+            for (String thisModule in availableModules) {
+                moduleLoadOrder << thisModule
+            }
+        }
+
+        moduleLoadOrder.remove('app')   // app requires special handling
+        moduleLoadOrder
+    }
 
     Module() {}
 
@@ -66,12 +88,10 @@ abstract class Module {
     @CompileStatic
     void load() {
         try {
-            if (imports == null) imports = [:]
             if (name == 'app')
                 initLogging(config)
 
-            exports = doLoad(imports)
-
+            doLoad()
         }
         catch (all) {
             log.error "failed to load module: ${name}", all
@@ -102,7 +122,7 @@ abstract class Module {
      *
      * @return module script return value
      */
-    abstract protected Object doLoad(Map imports)
+    abstract protected Object doLoad()
 
     @CompileStatic
     public void addEnterpriseService(String uriPattern, String method, Object rawHandler, List<DispatcherType> dispatch) {

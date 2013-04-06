@@ -83,7 +83,7 @@ abstract class Handler {
         }
         catch (Throwable t) {
             org.microsauce.gravy.runtime.Error error = new org.microsauce.gravy.runtime.Error(t)
-            log.error "${error.errorCode} - ${error.errorMessage}", t
+            log.error "${error.errorCode} - ${error.message}", t
             req.setAttribute("error", error)
             RequestDispatcher dispatcher = req.getRequestDispatcher(module.errorUri)
             dispatcher.forward(req, res)

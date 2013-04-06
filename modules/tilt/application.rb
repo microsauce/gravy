@@ -1,21 +1,16 @@
 
-#
-# TODO - 0.2
-#   add support for layouts and partials
-#
-
 # java imports
 java_import java.lang.System
 java_import java.util.concurrent.ConcurrentHashMap
 java_import java.util.HashMap
 
-# module configuration
-engine = conf 'engine'
-render_uri = conf 'view.renderUri'
-document_root = System.getProperty 'gravy.viewRoot' 
+# configure the module
+engine = conf.engine
+render_uri = conf.view.renderUri
+document_root = System.get_property 'gravy.viewRoot'
 
 # ruby imports
-require 'ostruct'
+#require 'ostruct'
 require engine
 require 'tilt'
 
@@ -36,18 +31,16 @@ load_template = proc { |template_path|
 # define the service 
 get render_uri do
   model = req.get '_model'
-  view_uri = req.getAttribute '_view'  # not serialized
-  _module = req.getAttribute '_module' # not serialized
-  res.contentType = 'text/html'
+  view_uri = req.get_attribute '_view'  # not serialized
+  _module = req.get_attribute '_module' # not serialized
 
-  template = load_template.call document_root+'/'+_module.getName+'/'+view_uri
+  template = load_template.call document_root+'/'+_module.name+'/'+view_uri
 
+  # TODO RE-TEST THIS - we will hit the else block now
   if model.is_a? Hash
-    # it will always be an ostruct
-    res.write template.render nil, model 
+    res.write template.render nil, model
   else
     res.write(template.render(model))
   end
-  #res.flush # TODO
-end
 
+end

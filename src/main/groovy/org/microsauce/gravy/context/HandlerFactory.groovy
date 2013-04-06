@@ -11,7 +11,7 @@ abstract class HandlerFactory {
 
     static Map<Class<? extends ServiceFactory>, HandlerFactory> HANDLER_FACTORIES;
 
-    static {
+    static { // TODO use GravyType
         HANDLER_FACTORIES = [:]
         HANDLER_FACTORIES[GroovyModule.class.name] = new GroovyHandlerFactory()
         HANDLER_FACTORIES[JSModule.class.name] = new JSHandlerFactory()

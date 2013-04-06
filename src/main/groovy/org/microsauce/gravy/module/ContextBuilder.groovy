@@ -1,16 +1,16 @@
 package org.microsauce.gravy.module
 
 import groovy.transform.CompileStatic
-import groovy.util.logging.Log4j
+import org.testng.log4testng.Logger
 
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 import org.microsauce.gravy.context.Context
 
-@Log4j
 class ContextBuilder {
 
+    Logger log = Logger.getLogger(ContextBuilder.class)
     private static final Pattern SCRIPT_NAME = ~/application\.([a-zA-Z0-9]+)/
 
     Module application
@@ -30,32 +30,11 @@ class ContextBuilder {
         application = app
         Map<String,Module> modules = instantiateModules()
 
-        Map<String, Object> moduleBindings = [:]
-        if ( app.config.moduleOrder )  {
-            Set<String> loadedModules = new HashSet<String>()
-            app.config.moduleOrder.each { String moduleName ->
-                Module thisModule = modules[moduleName]
-                thisModule.load()
-                moduleBindings[thisModule.name] = thisModule.exports
-                loadedModules << thisModule.name
-            }
-            if ( modules.size() > loadedModules.size() ) {
-                // load the remaining modules
-                Set<String> xor = new HashSet<String>(modules.keySet())
-                xor.removeAll(loadedModules)
-                xor.each { String moduleName ->
-                    Module thisModule = modules[moduleName]
-                    thisModule.load()
-                    moduleBindings[thisModule.name] = thisModule.exports
-                }
-            }
-        } else {
-            for (thisModule in modules.values()) {
-                thisModule.load()
-                moduleBindings[thisModule.name] = thisModule.exports
-            }
+        Module.moduleLoadOrder(modules.keySet(), app.config.moduleOrder).each { String moduleName ->
+                log.info "\tloading module ${moduleName}"
+            modules[moduleName].load()
         }
-        app.imports = moduleBindings
+
         app.load()
         app.context
     }

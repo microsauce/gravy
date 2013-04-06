@@ -27,14 +27,15 @@ class GravyRequestProxy<T extends HttpServletRequest> extends BaseEnterpriseProx
         this.session = session
         this.chain = chain
         this.input = ((T) target).getInputStream()
-        this.reader = new BufferedReader(new InputStreamReader(this.input))
+        this.reader = new BufferedReader(new InputStreamReader(this.input, 'UTF-8')) // TODO make configurable ???
     }
 
     @CompileStatic
     Object get(String key) {
-        CommonObject obj = (CommonObject) ((T) target).getAttribute(key)
+        Object obj = ((T) target).getAttribute(key)
         Module module = ((HttpServletRequest)target).getAttribute('_module') as Module
-        obj ? obj.value(module) : null
+        if ( obj ) obj = obj instanceof CommonObject ? ((CommonObject)obj).value(module) : obj
+        obj
     }
 
     @CompileStatic

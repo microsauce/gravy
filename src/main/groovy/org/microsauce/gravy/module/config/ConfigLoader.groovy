@@ -9,12 +9,16 @@ class ConfigLoader {
 
     private static ConfigLoader instance
 
-    static ConfigLoader initInstance(String env, File appFolder) {
+    @CompileStatic static void reset() {
+        instance = null
+    }
+
+    @CompileStatic static ConfigLoader initInstance(String env, File appFolder) {
         if ( !instance ) instance = new ConfigLoader(env, appFolder)
         instance
     }
 
-    static ConfigLoader getInstance() {
+    @CompileStatic static ConfigLoader getInstance() {
         if ( !instance ) new RuntimeException('ERROR: ConfigLoader not initialized.')
         instance
     }
@@ -22,7 +26,7 @@ class ConfigLoader {
     ConfigObject appConfig
     String env
 
-    private ConfigLoader(String env, File appFolder) {
+    @CompileStatic private ConfigLoader(String env, File appFolder) {
         this.env = env
         loadAppConfig(appFolder)
     }

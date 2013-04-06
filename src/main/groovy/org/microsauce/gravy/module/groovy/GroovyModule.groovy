@@ -14,7 +14,7 @@ import org.microsauce.gravy.module.Module
 class GroovyModule extends Module {
 
     @CompileStatic
-    protected Object doLoad(Map imports) {
+    protected Object doLoad() {
         ConfigObject root = new ConfigObject()
         Map exp = [:]
         Map binding = [:]
