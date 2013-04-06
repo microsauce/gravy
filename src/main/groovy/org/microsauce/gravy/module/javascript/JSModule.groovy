@@ -22,7 +22,7 @@ class JSModule extends Module {
 
     @Override
     @CompileStatic
-    protected Object doLoad(Map<String, Handler> imports) {
+    protected Object doLoad() {
 
         if ( name != 'app' )
             jsRuntime.appendRoots([this.folder, new File(folder, '/lib')] as List<File>)

@@ -26,7 +26,7 @@ class ServiceFactory {
         EnterpriseService service = new EnterpriseService()
         Map<String, Object> parseRoute = RegExUtils.parseRoute(uriPattern)
 
-        HandlerFactory handlerFactory = HandlerFactory.getHandlerFactory(module.class.name)
+        HandlerFactory handlerFactory = HandlerFactory.getHandlerFactory(module.class.name)  // TODO use GravyType
         service.uriPattern = (Pattern) parseRoute.uriPattern
         service.uriString = uriPattern
         service.params = parseRoute.params as List<String>

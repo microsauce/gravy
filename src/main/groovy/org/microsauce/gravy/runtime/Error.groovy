@@ -5,7 +5,7 @@ import groovy.transform.CompileStatic
 class Error {
 
     String errorCode
-    String errorMessage
+    String message
     String stackTrace
     Throwable throwable
 
@@ -17,6 +17,7 @@ class Error {
     private void init(Throwable t) {
         this.errorCode = errorCode()
         this.throwable = t
+        this.message = throwable.message
         StringWriter stringWriter = new StringWriter()
         PrintWriter printWriter = new PrintWriter(stringWriter)
         t.printStackTrace printWriter

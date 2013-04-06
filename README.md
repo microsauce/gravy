@@ -1,9 +1,16 @@
 
-Gravy
+Gravy 0.1
 ===
 
-Gravy is a framework for scripting web applications (a la Sinatra/express.js) in Groovy,
-JavaScript, CoffeeScript, and/or Ruby on top of the Java Servlet API (the meat-and-potatoes).
+Gravy is a simple, intuitive framework for rapid development of web applications on the Java
+Enterprise (the meat-and-potatoes).  Script applications in Groovy, JavaScript, CoffeeScript,
+and/or Ruby and benefit from the productivity and features that each language provides.
+
+Gravy is influenced by Sinatra, express.js and the 'web-fragment' concept defined in the
+Servlet 3.0 spec.
+
+Here is a taste:
+===
 
 Hello Groovy:
 ```groovy
@@ -28,9 +35,20 @@ get '/hello/:name' do
     res.print "Hello #{name}!"
 end
 ```
+
+## Features
+- Sinatra / Express.js style routing
+- Scheduled tasks
+- Polyglot (Groovy, Ruby, JavaScript/CoffeeScript)
+- 'Web-fragement' modules
+- Single-file environment based configuration
+- Hot reload
+-
+
 ## Status
 
-Gravy is currently Alpha software.  Programming and tooling API's are still evolving, but near completion. 
+Gravy is currently Alpha software.  The focus of the current  (0.1) is to define and implement the core
+feature set (routes, modules, auto-refresh), 0.2 will include significant refactoring and performance enhancements Programming and tooling API's are still evolving, but near completion.
 
 ## Getting Started
 

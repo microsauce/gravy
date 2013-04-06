@@ -30,9 +30,9 @@ class GravyResourceFilter implements Filter {
         HttpServletResponse res = (HttpServletResponse) response
         String uri = req.requestURI
 
-
+        byte[] fileBytes = resolver.retrieve(uri)
         res.contentType = mimeTable.mimeType(extension(uri)) ?: 'application/octet-stream'  // TODO - what should the default be ???
-        res.outputStream.write resolver.retrieve(uri)
+        res.outputStream.write fileBytes
         res.outputStream.flush()
     }
 

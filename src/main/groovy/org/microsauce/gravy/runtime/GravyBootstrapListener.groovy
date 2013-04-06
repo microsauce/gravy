@@ -63,15 +63,14 @@ class GravyBootstrapListener implements ServletContextListener {
         //
         File moduleRootFolder = new File(moduleRoot)
         List<String> resourceRoots = []
-        for (File modFolder in ContextBuilder.listAllModules(moduleRootFolder)) {
-            log.info "adding folder ${modFolder.name} to the resource path"
-            String moduleName = modFolder.name
+        Collection<String> availableModules = ContextBuilder.listAllModules(moduleRootFolder).collect { File modFolder -> modFolder.name }
+        Module.moduleLoadOrder(availableModules,config.moduleOrder).each { String moduleName ->
+            log.info "adding folder ${moduleName} to the resource path"
             String moduleResoursesFolder = "${appRoot}/${moduleName}".toString()
             if (new File(moduleResoursesFolder).exists())
                 resourceRoots << moduleResoursesFolder
-//            String moduleViewFolder = "${appRoot}/WEB-INF/view/${moduleName}".toString()
         }
-
+        if ( new File( "${appRoot}/app" ).exists() ) resourceRoots.add(0, "${appRoot}/app".toString())
         //
         // instantiate and build the Application Context
         //
@@ -111,7 +110,6 @@ class GravyBootstrapListener implements ServletContextListener {
 
     @CompileStatic
     private void startSourceObserver(Module app) {
-        Map binding = app.imports
         String projectFolder = System.getProperty('user.dir')
         def sourceObserver = new JNotifySourceModObserver(projectFolder)
         sourceObserver.addScriptHandler(new RedeploySourceModHandler(app))

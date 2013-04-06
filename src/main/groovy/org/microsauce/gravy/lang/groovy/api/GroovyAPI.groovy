@@ -111,7 +111,6 @@ class GroovyAPI {
     }
 
     static void complete() {
-        // TODO handle exports
 
         ROUTES.each { GroovyAPI.Route route ->
             if (route.get)

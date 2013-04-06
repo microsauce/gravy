@@ -50,11 +50,11 @@ class GravyServletWrapper {
     @CompileStatic GravyHttpServletRequest getReq(GravyType gravyType) {
         log.info "check servlet-wrapper cache for module type ${gravyType.type}"
         Module module = nativeReq.getAttribute('_module') as Module
-        String cacheKey = gravyType.type == GravyType.RUBY.type ? gravyType.type+module.name : gravyType.type
+        String cacheKey = gravyType.type
         ServletWrapper servlet = commonServlet[cacheKey]
         if ( !servlet ) {
             log.info "\tservlet-wrapper not found in cache"
-            log.info "\tinitializing on caching servlet-wrapper"
+            log.info "\tinitializing and caching servlet-wrapper"
             servlet = initServlet(gravyType)
             commonServlet[cacheKey] = servlet
             log.info "\tcomplete"
