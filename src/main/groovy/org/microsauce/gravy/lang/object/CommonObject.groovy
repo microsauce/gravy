@@ -14,31 +14,28 @@ import org.microsauce.gravy.module.Module
 class CommonObject {
 
     GravyType nativeType
-    Module module
     Map<String, Object> nativeRepresentations
     String serializedRepresentation
 
     Stringer stringer
 
-    CommonObject(Object nativeValue, Module module) {
-        this.module = module
-        this.nativeType = module.type
+    CommonObject(Object nativeValue, GravyType nativeType) {
+        this.nativeType = nativeType
         nativeRepresentations = new HashMap<String, Object>();
-        nativeRepresentations.put(getKey(nativeType.type, module.name), nativeValue);
+        nativeRepresentations.put(nativeType.name, nativeValue);
         this.stringer = Stringer.getInstance();
     }
 
     @CompileStatic
-    Object value(Module destModule) {
-
-        Object nativeObj = nativeRepresentations.get(getKey(destModule.type.type, destModule.name));
+    Object value(GravyType destType) {
+        Object nativeObj = nativeRepresentations.get(destType.name);
         if (nativeObj) {
             return nativeObj;
         } else if (serializedRepresentation) {
-            return stringer.parse(serializedRepresentation, destModule.type);
+            return stringer.parse(serializedRepresentation, destType);
         } else {
-            nativeObj = stringer.parse(this.toString(), destModule.type);
-            nativeRepresentations.put(getKey(destModule.type.type, destModule.name), nativeObj);
+            nativeObj = stringer.parse(this.toString(), destType);
+            nativeRepresentations.put(destType.name, nativeObj);
             return nativeObj;
         }
     }
@@ -47,7 +44,7 @@ class CommonObject {
     String toString() {
         if (!serializedRepresentation) {
             serializedRepresentation = stringer.toString(
-                    nativeRepresentations.get(getKey(nativeType.type, module.name)), nativeType)
+                    nativeRepresentations.get(nativeType.name), nativeType)
         }
 
         serializedRepresentation
@@ -55,18 +52,12 @@ class CommonObject {
 
     @CompileStatic
     Object toNative() {
-        Object nativeObj = nativeRepresentations.get(getKey(nativeType.type, module.name))
-        if (!nativeRepresentations.containsKey(getKey(nativeType.type, module.name))) {
+        Object nativeObj = nativeRepresentations.get(nativeType.name)
+        if (!nativeRepresentations.containsKey(nativeType.name)) {
             nativeObj = stringer.parse(serializedRepresentation, nativeType)
-            nativeRepresentations.put(getKey(nativeType.type, module.name), nativeObj)
+            nativeRepresentations.put(nativeType.name, nativeObj)
         }
         nativeObj
     }
 
-    @CompileStatic private String getKey(String type, String modName) {
-//        if ( type == GravyType.RUBY.type ) // jruby objects cannot be shared between jruby runtimes
-//            return type +  module.name
-//        else return type
-        type
-    }
 }

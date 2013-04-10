@@ -51,8 +51,4 @@ public class RubyModule extends Module {
 		""".toString()
     }
 
-    @CompileStatic Object wrapInputStream(InputStream inputStream) {
-        new RubyIO(container.getProvider().getRuntime(), inputStream);
-    }
-
 }

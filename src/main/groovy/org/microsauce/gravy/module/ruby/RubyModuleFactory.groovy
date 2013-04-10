@@ -1,6 +1,7 @@
 package org.microsauce.gravy.module.ruby
 
 import groovy.transform.CompileStatic
+import org.microsauce.gravy.context.ServletFacade
 import org.microsauce.gravy.lang.object.GravyType
 import org.microsauce.gravy.lang.ruby.RubyRuntime
 import org.microsauce.gravy.module.Module
@@ -18,6 +19,8 @@ class RubyModuleFactory extends ModuleFactory {
         List<String> libs = [appFolder.absolutePath]
         if (appLibFolder.exists()) libs.add(appLibFolder.absolutePath)
         runtime = new RubyRuntime(libs)
+
+        ServletFacade.rubyContext = runtime.container
     }
 
     @Override

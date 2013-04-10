@@ -17,6 +17,7 @@ get '/hello/:name', {
 Hello JavaScript:
 ```js
 get('hello/:name', function(req, res) {
+
     res.print("Hello " + this.name + "!")
 })
 ```
@@ -40,15 +41,14 @@ end
 - Single-file environment based configuration
 - Hot reload
 
-## Status
+## Roadmap
 
 Gravy is currently Alpha software.  The focus of the current milestone (0.1) is to
-define and implement the core feature set (routing, scheduled tasks, servlet request/response/session
-decorators, modules, resource resolver, single file configuration, dev tools, etc).  0.2 will
-include significant refactoring and performance enhancements and enhanced routing features.
-0.3 will add Python and finish out the tooling api (package management, etc).
-
-Programming and tooling API's are still evolving, but near completion.
+define and implement the core feature set (routing, scheduled tasks, middleware,
+servlet request/response/session decorators, modules, resource resolver, single file
+configuration, dev tools, etc).  0.2 will include significant refactoring and performance
+enhancements and enhanced routing and req/res/sess decorators.  0.3 will add Python and
+finish out the tooling api (package/dependency management, etc), with a 1.0 beta to follow.
 
 ## Getting Started
 

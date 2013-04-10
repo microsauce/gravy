@@ -188,10 +188,10 @@ public class GravyJsonLexer implements Iterator<JsonToken> {
     }
 
     /**
-     * When a constant token type is expected, check that the expected constant is read,
+     * When a constant token name is expected, check that the expected constant is read,
      * and update the content of the token accordingly.
      *
-     * @param type  the token type
+     * @param type  the token name
      * @param token the token
      * @return the token updated with end column and text updated
      */

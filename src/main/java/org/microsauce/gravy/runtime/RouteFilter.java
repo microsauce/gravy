@@ -1,7 +1,5 @@
 package org.microsauce.gravy.runtime;
 
-import groovy.transform.CompileStatic;
-
 import java.io.IOException;
 import java.util.List;
 
@@ -32,7 +30,8 @@ class RouteFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse res, FilterChain chain)
             throws ServletException, IOException {
         HttpServletRequest req = (HttpServletRequest) request;
-        FilterChain routeChain = buildChain(chain, req);
+        FilterChain routeChain = buildChain(chain, req, res);
+
         if (routeChain == null) {
             log.debug("no routes defined for uri " + req.getRequestURI());
             chain.doFilter(req, res);
@@ -53,14 +52,14 @@ class RouteFilter implements Filter {
 
     public void init(javax.servlet.FilterConfig config) {}
 
-    private FilterChain buildChain(FilterChain chain, ServletRequest req) {
+    private FilterChain buildChain(FilterChain chain, ServletRequest req, ServletResponse res) {
 
         HttpServletRequest _req = (HttpServletRequest) req;
         List<EnterpriseService> matchingRoutes = context.findService(
                 getUri((HttpServletRequest) req), _req.getDispatcherType());
         FilterChain routeChain = null;
         if (matchingRoutes.size() > 0)
-            routeChain = new RouteChain(chain, matchingRoutes);
+            routeChain = new RouteChain(req, res, chain, matchingRoutes);
 
         return routeChain;
     }
@@ -73,5 +72,4 @@ class RouteFilter implements Filter {
 
         return uri;
     }
-
 }

@@ -1,7 +1,7 @@
 package org.microsauce.gravy.module.javascript
 
 import groovy.transform.CompileStatic
-import org.microsauce.gravy.context.Context
+import org.microsauce.gravy.context.ServletFacade
 import org.microsauce.gravy.lang.javascript.GravyJSRuntime
 import org.microsauce.gravy.lang.javascript.JSRuntime
 import org.microsauce.gravy.module.Module
@@ -20,6 +20,8 @@ class JSModuleFactory extends ModuleFactory {
         List<File> libs = [appFolder]
         if (appLibFolder.exists()) libs.add(appLibFolder)
         runtime = new GravyJSRuntime(libs)
+        // register the JS runtime with the ServletWrapper
+        ServletFacade.jsContext = runtime.global
     }
 
     @Override

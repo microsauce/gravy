@@ -13,4 +13,5 @@ class EnterpriseService extends Service {
 
     Pattern uriPattern
     String uriString
+    boolean endPoint
 }

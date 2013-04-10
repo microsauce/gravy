@@ -63,7 +63,7 @@ class ContextBuilder {
         String fileExtension = matcher.group(1)// [0][1]
         ModuleFactory moduleFactory = ModuleFactory.getInstance fileExtension
         if (moduleFactory == null)
-            throw new Exception("unable to find module loader for file type ${fileExtension}.")
+            throw new Exception("unable to find module loader for file name ${fileExtension}.")
 
         Module thisModule = moduleFactory.createModule(context, modFolder, applicationScript, isApp)
         thisModule.app = application

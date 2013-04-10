@@ -20,19 +20,19 @@ class Stringer {
 
     private Stringer() {
         serializers = new HashMap<String, Serializer>();
-        serializers.put(GravyType.GROOVY.type, new GroovySerializer());
-        serializers.put(GravyType.JAVASCRIPT.type, JSSerializer.getInstance());
-        serializers.put(GravyType.RUBY.type, RubySerializer.getInstance());
+        serializers.put(GravyType.GROOVY.name, new GroovySerializer());
+        serializers.put(GravyType.JAVASCRIPT.name, JSSerializer.getInstance());
+        serializers.put(GravyType.RUBY.name, RubySerializer.getInstance());
     }
 
     @CompileStatic
     Object parse(String string, GravyType context) {
-        return serializers.get(context.type).parse(string);
+        return serializers.get(context.name).parse(string);
     }
 
     @CompileStatic
     String toString(Object object, GravyType context) {
-        return serializers.get(context.type).toString(object);
+        return serializers.get(context.name).toString(object);
     }
 
 }

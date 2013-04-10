@@ -51,7 +51,8 @@ global.reviver = function (key, value) {
 }
 
 global.parseJson = function(jsonText) {
-	return JSON.load(jsonText, reviver)
+console.log("parseJson: " + jsonText)
+	return JSON.parse(jsonText, reviver)
 }
 
 global.getGlobal = function() {

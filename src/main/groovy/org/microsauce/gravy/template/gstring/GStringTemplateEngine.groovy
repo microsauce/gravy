@@ -139,7 +139,7 @@ class GStringTemplateEngine {
                     result = fmt.format(object)
                     break
                 default:
-                    log.warn("WARNING: format(): unsupported type ${object.getClass()}")
+                    log.warn("WARNING: format(): unsupported name ${object.getClass()}")
             }
         }
         catch (all) {

@@ -7,8 +7,6 @@ import java.util.regex.Pattern
 import javax.servlet.DispatcherType
 
 import org.microsauce.gravy.module.Module
-import org.microsauce.gravy.module.groovy.GroovyModule
-import org.microsauce.gravy.module.javascript.JSModule
 import org.microsauce.gravy.util.pattern.RegExUtils
 
 
@@ -29,7 +27,7 @@ class ServiceFactory {
         HandlerFactory handlerFactory = HandlerFactory.getHandlerFactory(module.class.name)  // TODO use GravyType
         service.uriPattern = (Pattern) parseRoute.uriPattern
         service.uriString = uriPattern
-        service.params = parseRoute.params as List<String>
+        service.uriParamNames = parseRoute.params as List<String>
         service.dispatch = dispatch
 
         methodHandlers.each { String method, Object rawHandler ->

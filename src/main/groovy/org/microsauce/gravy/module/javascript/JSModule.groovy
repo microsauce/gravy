@@ -37,8 +37,4 @@ class JSModule extends Module {
         jsRuntime.run(scriptFile, jsBinding)
     }
 
-    Object wrapInputStream(InputStream inputStream) {
-        return new Stream(scriptContext, inputStream, null)
-    }
-
 }

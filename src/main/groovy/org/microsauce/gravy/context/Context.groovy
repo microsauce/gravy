@@ -23,11 +23,12 @@ class Context {
     Scheduler cronScheduler
 
     List<EnterpriseService> enterpriseServices = []
+    Map<String, EnterpriseService> paramServices = [:]
     List<CronService> cronServices = []
-    Map<String, Handler> exports = [:]
+//    Map<String, Handler> exports = [:]
 
-    List<ServletWrapper> servlets = []
-    List<Filter> filters = []
+//    List<ServletWrapper> servlets = []
+//    List<Filter> filters = []
 
     @CompileStatic
     void addEnterpriseService(EnterpriseService service) {
@@ -39,19 +40,19 @@ class Context {
         cronServices << service
     }
 
-    void addServlet(String mapping, HttpServlet servlet) {
-        servlets << new ServletWrapper([servlet: servlet, mapping: mapping])
-    }
-
-    void addFilter(String uriPattern, Filter filter) {
-        def dipatches = EnumSet.of(DispactherType.REQUEST)
-        filters << new FilterWrapper([filter: filter, mapping: uriPattern, dispatch: dipatches])
-    }
-
-    void addFilter(String route, Filter filter, List dispatch) {
-        def dipatches = EnumSet.copyOf(dispatch)
-        filters << new FilterWrapper([filter: filter, mapping: route, dispatch: dipatches])
-    }
+//    void addServlet(String mapping, HttpServlet servlet) {
+//        servlets << new ServletWrapper([servlet: servlet, mapping: mapping])
+//    }
+//
+//    void addFilter(String uriPattern, Filter filter) {
+//        def dipatches = EnumSet.of(DispactherType.REQUEST)
+//        filters << new FilterWrapper([filter: filter, mapping: uriPattern, dispatch: dipatches])
+//    }
+//
+//    void addFilter(String route, Filter filter, List dispatch) {
+//        def dipatches = EnumSet.copyOf(dispatch)
+//        filters << new FilterWrapper([filter: filter, mapping: route, dispatch: dipatches])
+//    }
 
     /**
      * This is a dev mode convenience.  Clear all app module services
@@ -77,19 +78,14 @@ class Context {
     @CompileStatic
     List<EnterpriseService> findService(String uri, DispatcherType dispatcherType) {
 
-//        int chainError = 0
         List<EnterpriseService> matchingServices = [] as List
         for (EnterpriseService service in enterpriseServices) {
-            if (service.dispatch.contains(dispatcherType)
+            if (service.dispatch.contains(dispatcherType) // TODO drop dispatcherType
                     && uri ==~ service.uriPattern) {
-//                if ( !service.handlers[Service.DEFAULT] ) chainError++
                 matchingServices << service
+                if ( service.endPoint ) break
             }
         }
-//        if ( chainError > 1 ) {
-//            throw new RuntimeException(
-//                    "Invalid route chain for uri $uri : ${matchingServices.collect { EnterpriseService es -> es.uriString+' => '+ es.handlers.keySet() }}");
-//        }
         matchingServices
     }
 

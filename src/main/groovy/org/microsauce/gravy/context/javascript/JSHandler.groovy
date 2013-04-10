@@ -1,27 +1,10 @@
 package org.microsauce.gravy.context.javascript
 
 import groovy.transform.CompileStatic
-import org.microsauce.gravy.runtime.patch.ServletWrapper
-import org.ringojs.wrappers.Stream
-
-import java.lang.reflect.Proxy
-
-import javax.servlet.FilterChain
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
-import javax.servlet.http.HttpSession
-
-import org.microsauce.gravy.context.Handler
-import org.microsauce.gravy.context.GravyServletWrapper
-import org.microsauce.gravy.lang.object.CommonObject
 import org.microsauce.gravy.lang.object.GravyType
-import org.microsauce.gravy.module.Module
-import org.microsauce.gravy.runtime.patch.GravyHttpServletRequest
-import org.microsauce.gravy.runtime.patch.GravyHttpServletResponse
-import org.microsauce.gravy.runtime.patch.GravyHttpSession
-import org.microsauce.gravy.runtime.patch.GravyRequestProxy
-import org.microsauce.gravy.runtime.patch.GravyResponseProxy
-import org.microsauce.gravy.runtime.patch.GravySessionProxy
+import org.ringojs.wrappers.Stream
+import org.microsauce.gravy.context.Handler
+import org.microsauce.gravy.context.ServletFacade
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeFunction
 import org.mozilla.javascript.NativeObject
@@ -65,18 +48,14 @@ class JSHandler extends Handler {
 
     @Override
     @CompileStatic
-    public Object doExecute(GravyServletWrapper wrapper) {
+    public Object doExecute(ServletFacade facade) {
 
         ctx = org.mozilla.javascript.Context.enter()
         try {
+            // TODO rewrite pass the wrapper in alone
             executeHandler.call ctx, scope, scope, [
                     callBack,
-                    wrapper.getReq(module.type),
-                    wrapper.getRes(module.type),
-                    wrapper.paramMap,
-                    wrapper.paramList,
-                    wrapper.json,      // TODO verify this was more generic before 'objectBinding'
-                    wrapper.params] as Object[]
+                    facade] as Object[]
         }
         catch (Throwable t) {
             t.printStackTrace()

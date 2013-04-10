@@ -8,7 +8,7 @@ class GroovyExportHandler extends GroovyHandler {
 
     boolean serialized // TODO this property will be set by the module loader
     // TODO create a new app config property and a new module property:
-    // type: JS, Groovy
+    // name: JS, Groovy
 
     @CompileStatic
     public Object doExecute(Object... params) {

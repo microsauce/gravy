@@ -93,12 +93,12 @@ public class Mapper {
                     def collectionName = name + '[]'
                     if (Number.isAssignableFrom(propListClass) || propListClass == String || propListClass == Date)
                         paramTypes[collectionName] = propListClass
-                    else { // user defined type
+                    else { // user defined name
                         doBuildParameterTypeMapping(propListClass, true, typeStack).each { f1Name, f1Value ->
                             paramTypes[collectionName + '.' + f1Name] = f1Value
                         }
                     }
-                } else if (recurse) { // user defined type
+                } else if (recurse) { // user defined name
                     doBuildParameterTypeMapping(type, true, typeStack).each { f1Name, f1Value ->
                         paramTypes[name + '.' + f1Name] = f1Value
                     }

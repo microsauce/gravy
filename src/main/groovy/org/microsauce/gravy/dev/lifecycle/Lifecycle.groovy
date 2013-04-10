@@ -199,7 +199,7 @@ class Lifecycle {
     }
 
     private void compileCoffee() {
-        // if JS module type
+        // if JS module name
         JSRuntime js = new CoreJSRuntime(null)
         def engine = js.engine
         def compiler = new CoffeeC(engine)

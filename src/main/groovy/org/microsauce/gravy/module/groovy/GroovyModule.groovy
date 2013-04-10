@@ -40,10 +40,6 @@ class GroovyModule extends Module {
         ScriptUtils.run script
     }
 
-    private CommonObject commonObj(Object obj) {
-        obj ? new CommonObject(obj, GravyType.GROOVY) : null
-    }
-
     void addClosure(Map binding) {
         binding.run = { name, scriptBinding = null ->
             def subScript = new Script(
@@ -51,10 +47,6 @@ class GroovyModule extends Module {
             new ScriptDecorator(config, context).decorate(subScript)
             ScriptUtils.run(subScript)
         }
-    }
-
-    @CompileStatic Object wrapInputStream(InputStream inputStream) {
-        inputStream
     }
 
 }

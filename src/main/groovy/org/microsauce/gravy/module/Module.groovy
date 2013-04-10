@@ -83,8 +83,6 @@ abstract class Module {
         return scriptContext;
     }
 
-    abstract Object wrapInputStream(InputStream inputStream)   // TODO probably a better place for this
-
     @CompileStatic
     void load() {
         try {
@@ -124,6 +122,11 @@ abstract class Module {
      */
     abstract protected Object doLoad()
 
+    // TODO clean this up:
+    // change 'default' to 'middleware'
+    // check for method != 'middleware'
+    static Set<String> END_POINTS = ['GET', 'POST', 'PUT', 'DELETE', 'get', 'post', 'put', 'delete']
+
     @CompileStatic
     public void addEnterpriseService(String uriPattern, String method, Object rawHandler, List<DispatcherType> dispatch) {
         log.info "addEnterpriseService: uri: $uriPattern - method: $method - dispatch: $dispatch"
@@ -139,7 +142,7 @@ abstract class Module {
             service = serviceFactory.makeEnterpriseService(scriptContext, uriPattern, methodHandler, dispatch)
             service.module = this
         }
-
+        service.endPoint = END_POINTS.contains(method)
         context.addEnterpriseService(service)
     }
 
@@ -150,21 +153,21 @@ abstract class Module {
         context.addCronService(service)
     }
 
-    @CompileStatic
-    public void addServlet(String mapping, HttpServlet servlet) {
-        log.info "addServlet: mapping: $mapping"
-        context.addServlet(mapping, servlet)
-    }
-
-    @CompileStatic
-    public void addFilter(String uriPattern, Filter servlet) {
-        log.info "addFilter: uriPattern: $uriPattern"
-        context.addFilter(uriPattern, servlet)
-    }
-
-    @CompileStatic
-    public void addFilter(String uriPattern, List<DispatcherType> dispatch, Filter servlet) {
-        log.info "addFilter: uriPattern: $uriPattern - dispatch: $dispatch"
-        context.addFilter(uriPattern, servlet)
-    }
+//    @CompileStatic
+//    public void addServlet(String mapping, HttpServlet servlet) {
+//        log.info "addServlet: mapping: $mapping"
+//        context.addServlet(mapping, servlet)
+//    }
+//
+//    @CompileStatic
+//    public void addFilter(String uriPattern, Filter servlet) {
+//        log.info "addFilter: uriPattern: $uriPattern"
+//        context.addFilter(uriPattern, servlet)
+//    }
+//
+//    @CompileStatic
+//    public void addFilter(String uriPattern, List<DispatcherType> dispatch, Filter servlet) {
+//        log.info "addFilter: uriPattern: $uriPattern - dispatch: $dispatch"
+//        context.addFilter(uriPattern, servlet)
+//    }
 }

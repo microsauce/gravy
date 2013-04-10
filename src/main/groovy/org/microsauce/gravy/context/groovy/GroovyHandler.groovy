@@ -1,23 +1,16 @@
 package org.microsauce.gravy.context.groovy
 
 import groovy.transform.CompileStatic
+import org.microsauce.gravy.lang.groovy.GroovyRequest
+import org.microsauce.gravy.lang.groovy.GroovyResponse
 
-import java.lang.reflect.Proxy
-
-import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 import org.microsauce.gravy.context.Handler
-import org.microsauce.gravy.context.GravyServletWrapper
-import org.microsauce.gravy.lang.object.CommonObject
+import org.microsauce.gravy.context.ServletFacade
 import org.microsauce.gravy.lang.object.GravyType
 import org.microsauce.gravy.runtime.patch.GravyHttpServletRequest
 import org.microsauce.gravy.runtime.patch.GravyHttpServletResponse
-import org.microsauce.gravy.runtime.patch.GravyHttpSession
-import org.microsauce.gravy.runtime.patch.GravyRequestProxy
-import org.microsauce.gravy.runtime.patch.GravyResponseProxy
-import org.microsauce.gravy.runtime.patch.GravySessionProxy
 
 class GroovyHandler extends Handler {
 
@@ -33,48 +26,44 @@ class GroovyHandler extends Handler {
     }
 
     @Override
-    @CompileStatic public Object doExecute(GravyServletWrapper wrapper) {
-        wrapper.nativeReq.getAttribute('_')
-    // TODO don't forget stage 2 caching
-    // TODO cache the binding 'binding' in the req
-        HttpServletRequest nativeReq = wrapper.nativeReq
-        Map binding = (Map)nativeReq.getAttribute('_groovy_binding')
-        if ( !binding ) {
-            // add the jee runtime to the closure binding
-            binding = [:]
-            nativeReq.setAttribute('_groovy_binding', binding)
+    @CompileStatic public Object doExecute(ServletFacade facade) {
+        Map groovyFacade = (Map)facade.nativeReq.getAttribute('_groovy_facade')
+        if (!groovyFacade) {
+            HttpServletRequest nativeReq = facade.nativeReq
 
-            GravyHttpServletRequest req = wrapper.getReq(GravyType.GROOVY)
-            GravyHttpServletResponse res = wrapper.getRes(GravyType.GROOVY)
-            OutputStream out = (OutputStream)res.getOut()
-            binding.req = req
-            binding.sess = req.getSession()
-            binding.res = res
-            binding.out = out
-            binding.writer = new PrintWriter(new OutputStreamWriter(out, 'utf-8'))
-            binding.chain = wrapper.nativeChain
-            binding.json = wrapper.json
-// TODO review JS and Ruby and GravyServletWrapper parms refers to request parameters (not uri parameters)
-            if (nativeReq.method == 'GET' || nativeReq.method == 'DELETE') binding.query = wrapper.params
-            else if (nativeReq.method == 'POST' || nativeReq.method == 'PUT') binding.form = wrapper.params // TODO verify: not exactly sure what params refers to (most likely servlet request params)
+            GroovyRequest gReq = new GroovyRequest(facade)
+            GroovyResponse gRes = new GroovyResponse(facade)
+            Map binding = new HashMap()
+            binding.req = gReq
+            binding.sess = gReq.session
+            binding.res = gRes
+            binding.out = gRes.out
+            binding.writer = new PrintWriter(new OutputStreamWriter(gRes.out, 'utf-8'))
+            binding.chain = facade.nativeChain
+            binding.json = facade.getJson()
+
+            if (nativeReq.method == 'GET' || nativeReq.method == 'DELETE') binding.query = facade.requestParams
+            else if (nativeReq.method == 'POST' || nativeReq.method == 'PUT') binding.form = facade.requestParams // TODO verify: not exactly sure what uriParamNames refers to (most likely servlet request params)
 
             // add uri parameters
-            wrapper.paramMap.each { String key, String value ->
+            facade.uriParamMap.each { String key, String value ->
                 binding[key] = value
             }
-            String[] splat = wrapper.splat ?: []
+            String[] splat = facade.splat ?: []
 
             // add the splat
             binding.splat = splat
+
+            facade.nativeReq.setAttribute('_groovy_facade', binding)
+            groovyFacade = binding
         }
 
-        Closure closure = (Closure) closure.clone()
-
+        Closure closure = (Closure) closure.clone()   // TODO verify the clone
         List<String> _paramList =
-            closure.maximumNumberOfParameters == wrapper.splat.size() ?
-                wrapper.paramList : [] as List<String>
+            closure.maximumNumberOfParameters == facade.splat.size() ?
+                facade.splat : [] as List<String>
 
-        closure.delegate = binding as Binding
+        closure.delegate = groovyFacade as Binding
         closure.resolveStrategy = Closure.DELEGATE_FIRST
         closure.call(_paramList.size() == 1 ? _paramList[0] : _paramList)
     }

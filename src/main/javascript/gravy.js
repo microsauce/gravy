@@ -21,6 +21,7 @@ importPackage(java.util)
 importPackage(java.io)
 importPackage(org.microsauce.gravy.context.javascript)
 importPackage(org.microsauce.gravy.lang.object)
+importPackage(org.microsauce.gravy.lang.javascript)
 
 /********************************************************
  * undocumented global variables
@@ -68,66 +69,120 @@ global.executeHandler = function(callBack, req, res, paramMap, paramList,
 	jsHandler.invokeHandler(req, res, paramMap, paramList, objectBinding, parms)
 }
 
+global.getJSSession = function(servletFacade) {
+    var nativeSess = servletFacade.nativeReq.session;
+    var sess = nativeSess.getAttribute('_js_session');
+    if (!sess) {
+        sess = new ScriptableMap(new JSSessObject(nativeSess));
+        nativeSess.setAttribute('_js_session', sess);
+        sess.__noSuchMethod__ = function(name, args) {
+            nativeSess[name].apply(nativeSess, args);
+        }
+    }
+    return sess;
+}
+global.newJSRequest = function(servletFacade) {
+    var req = new ScriptableMap(new JSReqObject(servletFacade.nativeReq))
+    req.initialize = function(servletFacade) {
+        this.facade = servletFacade  // TODO i can probably due w/o this
+        this.__noSuchMethod__ = function (name, args) {
+            return this.facade.nativeReq[name].apply(this.facade.nativeReq, args)
+        }
+        this.next = function() {
+            this.facade.next();
+        }
+        this.forward = function(uri) {
+            this.facade.forward(uri);
+        }
+        this.input = servletFacade.getInput();
+        this.session = getJSSession(servletFacade);
+        this.json = servletFacade.getJson();
+        return this
+    }
+    return req.initialize(servletFacade);
+}
+global.newJSResponse = function(servletFacade) {
+    var res = new ScriptableMap(new JSResObject(servletFacade.nativeRes))
+    res.initialize = function(servletFacade) {
+        this.facade = servletFacade   // TODO i can probably due w/o this
+        this.__noSuchMethod__ = function(name, args) {
+            this.facade.nativeRes[name].apply(this.facade.nativeRes, args)
+        }
+        this.print = function(str) {
+            this.facade.print(str);
+        }
+        this.write = function(bytes) {
+            this.facade.write(bytes);
+        }
+        this.redirect = function(url) {
+            this.facade.redirect(url)
+        }
+        this.renderJson = function(model) {
+            this.facade.renderJson(model)
+        }
+        this.render = function(viewUri, model) {
+            this.facade.render(viewUri,model)
+        }
+        this.out = servletFacade.getOut()
+        return this;
+    }
+    return res.initialize(servletFacade);
+}
+
 global.NativeJSHandler = function(handler) {
 
 	this.handler = handler
 
-	this.invokeHandler = function(req, res, paramMap, paramList, objectBinding, parms) {
-        // TODO cache the binding 'this' in the req
+	this.invokeHandler = function(servletFacade) {
+        var jsFacade = servletFacade.nativeReq.getAttribute('_js_facade')
+        if ( !jsFacade ) {
 
-        var binding = req.getAttribute('_js_binding')
-        if ( !binding ) {
+            var req = newJSRequest(servletFacade)
+            var res = newJSResponse(servletFacade)
 
             // add uri parameters to 'this'
-            if (paramMap != null) {
-                var iterator = paramMap.keySet().iterator()
+            var params = {}
+            if (servletFacade.uriParamMap != null) {
+                var iterator = servletFacade.uriParamMap.keySet().iterator()
                 while (iterator.hasNext()) {
                     var key = iterator.next()
-                    this[key] = paramMap.get(key)
+                    var value = servletFacade.uriParamMap.get(key)
+                    params[key] = value
+                    this[key] = value
                 }
             }
+            req.params = params
 
             // create the splat array
-            if (paramList != null) {
-                var iterator = paramList.iterator()
-                this.splat = []
-                while (iterator.hasNext()) {
-                    var next = iterator.next()
-                    this.splat.push(next)
-                }
+            var splat
+            if (servletFacade.splat != null) {
+                splat = new ScriptableList(servletFacade.splat)
             }
+            req.splat = splat
 
             // set the form/query properties
             var method = req.getMethod()
-            var parameters = new ScriptableMap(parms)
+            var parameters = new ScriptableMap(servletFacade.requestParams)
             if (method == 'GET' || method == 'DELETE') {
+                req.query = parameters
                 this.query = parameters
             } else if (method == 'POST' || method == 'PUT') {
+                req.form = parameters
                 this.form = parameters
             }
 
-            if (objectBinding != null) {
-                var iterator = objectBinding.keySet().iterator()
-                while (iterator.hasNext()) {
-                    var key = iterator.next()
-                    this[key] = objectBinding.get(key)
-                }
-            }
-            req.setAttribute('_js_binding', this)
+            jsFacade = {req: req, res: res, binding: this}
+            servletFacade.nativeReq.setAttribute('_js_facade', jsFacade)
         }
 
         // build the parameter array
-        var params = new Array() // TODO cache this too ???
+        var params = new Array()
         if (req != null && res != null) {
-            params.push(req)
-            params.push(res)
+            params.push(jsFacade.req)
+            params.push(jsFacade.res)
         }
-        var parmListSize = paramList.size()
-        for ( var i = 0; i<parmListSize; i++ ) {
-            params.push(paramList.get(i))
-        }
-
-		this.handler.apply(binding ? binding : this, params)
+        params.concat(jsFacade.req.splat)
+		this.handler.apply(jsFacade.binding, params)
 
 		res.out.flush()
 	}

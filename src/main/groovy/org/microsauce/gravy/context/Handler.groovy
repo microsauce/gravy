@@ -2,35 +2,24 @@ package org.microsauce.gravy.context
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j
-import org.apache.commons.fileupload.FileItem
-import org.apache.commons.fileupload.FileUploadException
-import org.apache.commons.fileupload.disk.DiskFileItemFactory
-import org.apache.commons.fileupload.servlet.ServletFileUpload
 import org.microsauce.gravy.lang.object.CommonObject
-import org.microsauce.gravy.lang.object.GravyType
 import org.microsauce.gravy.module.Module
-import org.microsauce.gravy.runtime.patch.GravyHttpServletRequest
-import org.microsauce.gravy.runtime.patch.GravyHttpServletResponse
-import org.microsauce.gravy.runtime.patch.GravyHttpSession
 
-import javax.servlet.FilterChain
 import javax.servlet.RequestDispatcher
-import javax.servlet.ServletException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-import java.util.regex.Pattern
 
 /**
  * A request handler defined in an application script.
  *
- * @author jboone
+ * @author microsauce
  */
 @Log4j
 abstract class Handler {
 
     protected Module module
 
-    abstract Object doExecute(GravyServletWrapper wrapper)
+    abstract Object doExecute(ServletFacade wrapper)
 
     abstract Object doExecute(Object params)
 
@@ -69,34 +58,28 @@ abstract class Handler {
         if (np1) parms.add(0, np1)
         Object result = doExecute(parms)
 
-        new CommonObject(result, module).toNative()
+        new CommonObject(result, module.type).toNative()
     }
 
     @CompileStatic private Object nativeObj(CommonObject obj) {
-        obj ? obj.value(module) : null
+        obj ? obj.value(module.type) : null
     }
 
-    @CompileStatic Object execute(HttpServletRequest req, HttpServletResponse res, FilterChain chain, Pattern uriPattern, List<String> params) {
-        try {
-            GravyServletWrapper servletWrapper = servletWrapperCache(req, res, chain, uriPattern, params)
+    @CompileStatic Object execute(ServletFacade servletWrapper) {
+        try {                                    // TODO move this to RouteFilter - pass ServletFacade into execute as the only parm
+            servletWrapper.currentContext = module.type
             doExecute(servletWrapper)
         }
         catch (Throwable t) {
             org.microsauce.gravy.runtime.Error error = new org.microsauce.gravy.runtime.Error(t)
             log.error "${error.errorCode} - ${error.message}", t
-            req.setAttribute("error", error)
-            RequestDispatcher dispatcher = req.getRequestDispatcher(module.errorUri)
-            dispatcher.forward(req, res)
+// TODO
+//            HttpServletRequest req = servletWrapper.getNativeReq()
+//            HttpServletResponse res = servletWrapper.getNativeRes()
+//            req.setAttribute("error", error)
+//            RequestDispatcher dispatcher = req.getRequestDispatcher(module.errorUri)
+//            dispatcher.forward(req, res)
         }
-    }
-
-    @CompileStatic private GravyServletWrapper servletWrapperCache(HttpServletRequest req, HttpServletResponse res, FilterChain chain, Pattern uriPattern, List<String> params) {
-        GravyServletWrapper wrapper = (GravyServletWrapper)req.getAttribute('_wrapper')
-        if ( !wrapper ) {
-            wrapper = new GravyServletWrapper(req, res, chain, uriPattern, params)
-            req.setAttribute('_wrapper', wrapper)
-        }
-        wrapper
     }
 
     @CompileStatic Object execute(Object... parms) {

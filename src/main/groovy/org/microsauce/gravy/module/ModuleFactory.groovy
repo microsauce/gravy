@@ -112,7 +112,7 @@ abstract class ModuleFactory {
     abstract String moduleScriptName()
 
     /**
-     * The module type
+     * The module name
      */
     abstract GravyType type()
 }
