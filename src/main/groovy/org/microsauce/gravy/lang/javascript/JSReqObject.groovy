@@ -35,7 +35,6 @@ public class JSReqObject extends HashMap {
     }
 
     Object put(Object key, Object value) {
-println "key: $key - value: $value"
         if (FACADE_PROPERTIES.contains(key)) {
             super.put(key, value)
         }

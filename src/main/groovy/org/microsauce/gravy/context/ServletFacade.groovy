@@ -113,7 +113,6 @@ class ServletFacade {
         String payload = readJsonPayload(req)
         CommonObject json = null
         if ( payload ) {
-//            Module module = req.getAttribute('_module') as Module
             json = new CommonObject(null, currentContext)
             json.serializedRepresentation = payload
         }

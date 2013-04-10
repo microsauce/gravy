@@ -32,17 +32,17 @@ scope = self
 # patch Object
 class Object
 
-  def to_serializable 
-    if self.is_a? Numeric or self.is_a? String
+  def to_serializable
+    if self.respond_to? :capitalize or self.is_a? (Numeric)   # TODO there appears to be a JRuby bug/issue here, resort to duck-type check for String
       return self
-    elsif self.is_a? Date
+    elsif self.is_a? (Date)
       return self.new_offset(0)
-    elsif self.is_a? Array
+    elsif self.is_a? (Array)
       return self.collect {|element| element.to_serializable}
     end
 
     hash = Hash.new
-    if self.is_a? Hash
+    if self.is_a? (Hash)
       return self.each {|k,v| hash[k] = v.to_serializable()}
     else
       self.instance_variables.each do |var|
@@ -315,7 +315,6 @@ module GravyModule
 
     def invoke_handler(servlet_facade) #req, res, param_map, param_list, object_binding, parms)
 
-#      _module = req.get_attribute('_module')
       ruby_facade = servlet_facade.native_req.get_attribute('_ruby_facade')
 
       if ruby_facade.nil?
@@ -366,11 +365,8 @@ module GravyModule
       end
 
       # call the handler
-#      (ruby_facade.nil? ? self : ruby_facade).instance_exec *params, &block
       ruby_facade.instance_exec *params, &block
-puts "servlet_facade.out: #{servlet_facade.out}"
       servlet_facade.out.flush
-puts "flush complete"
 
     end
 

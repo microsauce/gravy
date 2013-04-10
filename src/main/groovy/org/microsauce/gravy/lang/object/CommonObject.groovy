@@ -46,7 +46,6 @@ class CommonObject {
             serializedRepresentation = stringer.toString(
                     nativeRepresentations.get(nativeType.name), nativeType)
         }
-
         serializedRepresentation
     }
 
