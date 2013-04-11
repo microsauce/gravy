@@ -32,6 +32,11 @@ class Context {
     }
 
     @CompileStatic
+    void addParameterPrecondition(String parameterName, EnterpriseService service) {
+        paramServices[parameterName] = service
+    }
+
+    @CompileStatic
     void addCronService(CronService service) {
         cronServices << service
     }

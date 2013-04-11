@@ -59,7 +59,7 @@ class RouteFilter implements Filter {
                 getUri((HttpServletRequest) req), _req.getDispatcherType());
         FilterChain routeChain = null;
         if (matchingRoutes.size() > 0)
-            routeChain = new RouteChain(req, res, chain, matchingRoutes);
+            routeChain = new RouteChain(req, res, chain, matchingRoutes, context.getParamServices());
 
         return routeChain;
     }

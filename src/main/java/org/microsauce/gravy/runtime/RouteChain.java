@@ -2,6 +2,7 @@ package org.microsauce.gravy.runtime;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.servlet.FilterChain;
@@ -25,16 +26,29 @@ class RouteChain implements FilterChain {
     Integer currentPosition = 0;
     FilterChain serverChain;
     ServletFacade servletFacade;
+//    Map<String, EnterpriseService> paramPreconditions;
 
-    RouteChain(ServletRequest req, ServletResponse res, FilterChain serverChain, List<EnterpriseService> routes) {
+    RouteChain(ServletRequest req, ServletResponse res, FilterChain serverChain, List<EnterpriseService> routes, Map<String, EnterpriseService> paramPreconditions) {
         this.serverChain = serverChain;
         this.routes = routes;
+//        this.paramPreconditions = paramPreconditions;
 
         EnterpriseService endPoint = endPoint();
         if ( endPoint != null )
-            servletFacade = servletFacade((HttpServletRequest) req, (HttpServletResponse) res, this, endPoint.getUriPattern(), endPoint.getUriParamNames());
+            servletFacade = new ServletFacade((HttpServletRequest) req, (HttpServletResponse) res, this, endPoint.getUriPattern(), endPoint.getUriParamNames());
         else
-            servletFacade = servletFacade((HttpServletRequest) req, (HttpServletResponse) res, this, null, null);
+            servletFacade = new ServletFacade((HttpServletRequest) req, (HttpServletResponse) res, this, null, null);
+
+        for( String uriParam : servletFacade.getUriParamMap().keySet() ) {
+System.out.println("uriParam: " + uriParam);
+            EnterpriseService paramService = paramPreconditions.get(uriParam);
+System.out.println("paramPreconditions: " + paramPreconditions);
+System.out.println("paramService: " + paramService);
+            if ( paramService != null ) {
+System.out.println("adding route");
+                routes.add(0, paramService);
+            }
+        }
     }
 
     public void doFilter(ServletRequest req, ServletResponse res) throws IOException, ServletException {
@@ -42,12 +56,17 @@ class RouteChain implements FilterChain {
             // finish up with the 'native' filter
             serverChain.doFilter(req, res);
         else {
+System.out.println("currentPosition: " + currentPosition);
             EnterpriseService route = routes.get(currentPosition++);
             String method = ((HttpServletRequest) req).getMethod().toLowerCase();
+System.out.println("method: " + method);
             Handler methodHandler = route.getHandlers().get(method);
+System.out.println("methodHandler: " + methodHandler);
 
             Handler handler = methodHandler != null ? methodHandler : route.getHandlers().get(EnterpriseService.DEFAULT);
+System.out.println("handler1: " + handler);
             handler = handler != null ? handler : route.getHandlers().get(method);
+System.out.println("handler2: " + handler);
 
             if ( handler == null ) doFilter(req, res); // there may not be a 'default' handler for this route
             else {
@@ -69,15 +88,6 @@ class RouteChain implements FilterChain {
                 }
             }
         }
-    }
-
-    private ServletFacade servletFacade(HttpServletRequest req, HttpServletResponse res, FilterChain chain, Pattern uriPattern, List<String> params) {
-//        ServletFacade wrapper = (ServletFacade)req.getAttribute("_wrapper");
-//        if ( wrapper == null ) {
-        ServletFacade wrapper = new ServletFacade(req, res, chain, uriPattern, params);
-//            req.setAttribute("_wrapper", wrapper);
-//        }
-        return wrapper;
     }
 
     private EnterpriseService endPoint() {

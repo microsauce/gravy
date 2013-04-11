@@ -152,4 +152,13 @@ abstract class Module {
         CronService service = serviceFactory.makeCronService(scriptContext, cronPattern, rawHandler)
         context.addCronService(service)
     }
+
+    @CompileStatic void addParameterPrecondition(String param, Object rawHandler) {
+        Map<String, Object> methodHandler = [:]
+        methodHandler[EnterpriseService.DEFAULT] = rawHandler
+        EnterpriseService service = serviceFactory.makeEnterpriseService(scriptContext, '', methodHandler, null)
+        service.module = this
+        service.endPoint = false
+        context.addParameterPrecondition(param, service)
+    }
 }

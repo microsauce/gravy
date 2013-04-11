@@ -54,6 +54,10 @@ class GroovyAPI {
         module.addEnterpriseService(uriPattern, DEFAULT, handler, [REQUEST, FORWARD])
     }
 
+    static void param(String param, Closure handler) {
+        module.addParameterPrecondition(param, handler)
+    }
+
     static GroovyAPI.Route route(String uriPattern) {
         GroovyAPI.Route route = new GroovyAPI.Route()
         route.uriPattern = uriPattern
