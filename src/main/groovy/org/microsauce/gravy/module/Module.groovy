@@ -152,22 +152,4 @@ abstract class Module {
         CronService service = serviceFactory.makeCronService(scriptContext, cronPattern, rawHandler)
         context.addCronService(service)
     }
-
-//    @CompileStatic
-//    public void addServlet(String mapping, HttpServlet servlet) {
-//        log.info "addServlet: mapping: $mapping"
-//        context.addServlet(mapping, servlet)
-//    }
-//
-//    @CompileStatic
-//    public void addFilter(String uriPattern, Filter servlet) {
-//        log.info "addFilter: uriPattern: $uriPattern"
-//        context.addFilter(uriPattern, servlet)
-//    }
-//
-//    @CompileStatic
-//    public void addFilter(String uriPattern, List<DispatcherType> dispatch, Filter servlet) {
-//        log.info "addFilter: uriPattern: $uriPattern - dispatch: $dispatch"
-//        context.addFilter(uriPattern, servlet)
-//    }
 }

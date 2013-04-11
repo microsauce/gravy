@@ -11,9 +11,7 @@ abstract class Service {
     static String GET = 'get'
     static String POST = 'post'
     static String PUT = 'put'
-//    static String HEAD = 'head'
     static String DELETE = 'delete'
-//    static String OPTIONS = 'options'
     static String DEFAULT = 'default'
 
     Module module

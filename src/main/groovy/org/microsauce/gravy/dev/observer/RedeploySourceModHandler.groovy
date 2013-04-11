@@ -25,6 +25,7 @@ class RedeploySourceModHandler implements SourceModHandler {
             // reload the module
             app.context.clearApplicationServices()
             app.load()
+            app.context.resetCronScheduler()
         }
         catch (all) {
             all.printStackTrace()

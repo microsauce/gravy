@@ -25,10 +25,6 @@ class Context {
     List<EnterpriseService> enterpriseServices = []
     Map<String, EnterpriseService> paramServices = [:]
     List<CronService> cronServices = []
-//    Map<String, Handler> exports = [:]
-
-//    List<ServletWrapper> servlets = []
-//    List<Filter> filters = []
 
     @CompileStatic
     void addEnterpriseService(EnterpriseService service) {
@@ -39,20 +35,6 @@ class Context {
     void addCronService(CronService service) {
         cronServices << service
     }
-
-//    void addServlet(String mapping, HttpServlet servlet) {
-//        servlets << new ServletWrapper([servlet: servlet, mapping: mapping])
-//    }
-//
-//    void addFilter(String uriPattern, Filter filter) {
-//        def dipatches = EnumSet.of(DispactherType.REQUEST)
-//        filters << new FilterWrapper([filter: filter, mapping: uriPattern, dispatch: dipatches])
-//    }
-//
-//    void addFilter(String route, Filter filter, List dispatch) {
-//        def dipatches = EnumSet.copyOf(dispatch)
-//        filters << new FilterWrapper([filter: filter, mapping: route, dispatch: dipatches])
-//    }
 
     /**
      * This is a dev mode convenience.  Clear all app module services
@@ -97,6 +79,31 @@ class Context {
         }
 
         retService
+    }
+
+    @CompileStatic void startCronScheduler() {
+        if (cronServices.size() > 0) {
+            cronScheduler = new Scheduler()
+            cronServices.each { CronService service ->
+                cronScheduler.schedule(service.cronString, {
+                    service.handlers['default'].execute([] as Object[])
+                } as Runnable )
+            }
+            cronScheduler.start()
+        }
+
+    }
+
+    @CompileStatic void stopCronScheduler() {
+        if (cronScheduler) {
+            cronScheduler.stop()
+            cronScheduler = null
+        }
+    }
+
+    @CompileStatic void resetCronScheduler() {
+        stopCronScheduler()
+        startCronScheduler()
     }
 
 }

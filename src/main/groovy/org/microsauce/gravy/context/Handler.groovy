@@ -5,12 +5,13 @@ import groovy.util.logging.Log4j
 import org.microsauce.gravy.lang.object.CommonObject
 import org.microsauce.gravy.module.Module
 
+import javax.servlet.DispatcherType
 import javax.servlet.RequestDispatcher
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 /**
- * A request handler defined in an application script.
+ * A request handler as defined in an application script.
  *
  * @author microsauce
  */
@@ -65,20 +66,31 @@ abstract class Handler {
         obj ? obj.value(module.type) : null
     }
 
-    @CompileStatic Object execute(ServletFacade servletWrapper) {
-        try {                                    // TODO move this to RouteFilter - pass ServletFacade into execute as the only parm
-            servletWrapper.currentContext = module.type
-            doExecute(servletWrapper)
+    @CompileStatic Object execute(ServletFacade servletFacade) {
+        try {
+            servletFacade.currentContext = module.type
+            doExecute(servletFacade)
         }
         catch (Throwable t) {
             org.microsauce.gravy.runtime.Error error = new org.microsauce.gravy.runtime.Error(t)
             log.error "${error.errorCode} - ${error.message}", t
-// TODO
-//            HttpServletRequest req = servletWrapper.getNativeReq()
-//            HttpServletResponse res = servletWrapper.getNativeRes()
-//            req.setAttribute("error", error)
-//            RequestDispatcher dispatcher = req.getRequestDispatcher(module.errorUri)
-//            dispatcher.forward(req, res)
+            HttpServletRequest req = servletFacade.getNativeReq()
+            HttpServletResponse res = servletFacade.getNativeRes()
+            if ( module.context.findService('/error', DispatcherType.FORWARD) ) {
+                req.setAttribute("error", error)
+                RequestDispatcher dispatcher = req.getRequestDispatcher(module.errorUri)
+                dispatcher.forward(req, res)
+            } else {
+                res.contentType = 'text/plain'
+                res.status = 500
+                res.outputStream.print(
+"""
+${error.errorCode} - ${error.message } \n
+${error.stackTrace}
+""")
+                res.outputStream.flush()
+            }
+
         }
     }
 

@@ -124,23 +124,6 @@ class GravyBootstrapListener implements ServletContextListener {
 
     private void initEnterpriseRuntime(Context context, List<String> resourceRoots, String deployPath, ServletContextEvent sce, String errorUri) {
         ServletContext servletContext = sce.servletContext
-//        int serialNumber = 0
-//        context.servlets.each { servlet ->
-//            def name = servlet.servlet.getClass().name
-//            if (name.lastIndexOf('.') > 0) {
-//                name = name.substring(name.lastIndexOf('.') + 1)
-//            }
-//            addServlet(name + serialNumber++, servlet, servletContext)
-//        }
-//
-//        serialNumber = 0
-//        context.filters.each { filter ->
-//            def name = filter.filter.getClass().name
-//            if (name.lastIndexOf('.') > 0) {
-//                name = name.substring(name.lastIndexOf('.') + 1)
-//            }
-//            addFilter(name + serialNumber++, filter, servletContext)
-//        }
 
         addFilter('RouteFilter', new FilterWrapper([
                 filter: new RouteFilter(context, errorUri),
