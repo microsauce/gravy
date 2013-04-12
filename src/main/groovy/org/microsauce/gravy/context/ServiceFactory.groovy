@@ -32,6 +32,7 @@ class ServiceFactory {
 
         methodHandlers.each { String method, Object rawHandler ->
             Handler handler = handlerFactory.makeHandler(rawHandler, scriptContext)
+            handler.service = service
             handler.module = module
             service.handlers.put(method, handler)
         }

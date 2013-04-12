@@ -52,7 +52,6 @@ class JSHandler extends Handler {
 
         ctx = org.mozilla.javascript.Context.enter()
         try {
-            // TODO rewrite pass the wrapper in alone
             executeHandler.call ctx, scope, scope, [
                     callBack,
                     facade] as Object[]

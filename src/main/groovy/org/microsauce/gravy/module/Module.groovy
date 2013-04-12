@@ -128,13 +128,14 @@ abstract class Module {
     static Set<String> END_POINTS = ['GET', 'POST', 'PUT', 'DELETE', 'get', 'post', 'put', 'delete']
 
     @CompileStatic
-    public void addEnterpriseService(String uriPattern, String method, Object rawHandler, List<DispatcherType> dispatch) {
+    public EnterpriseService addEnterpriseService(String uriPattern, String method, Object rawHandler, List<DispatcherType> dispatch) {
         log.info "addEnterpriseService: uri: $uriPattern - method: $method - dispatch: $dispatch"
 
         EnterpriseService service = context.findServiceByUriString(uriPattern)
         if (service) {
             Handler thisHandler = HandlerFactory.getHandlerFactory(this.class.name).makeHandler(rawHandler, scriptContext)
             thisHandler.module = this
+            thisHandler.service = service
             service.handlers[method] = thisHandler
         } else {
             Map<String, Object> methodHandler = [:]
@@ -144,6 +145,22 @@ abstract class Module {
         }
         service.endPoint = END_POINTS.contains(method)
         context.addEnterpriseService(service)
+        service
+    }
+
+    @CompileStatic
+    public void addEnterpriseService(String uriPattern, String method, List middleware, Object endPoint, List<DispatcherType> dispatch) {
+        EnterpriseService endPointService = addEnterpriseService(uriPattern, method, endPoint, dispatch)
+        // add middleware handlers
+        // TODO
+        if ( middleware ) {
+            middleware.each { Object rawHandler ->
+                Handler thisHandler = HandlerFactory.getHandlerFactory(this.class.name).makeHandler(rawHandler, scriptContext)
+                thisHandler.module = this
+                thisHandler.service = endPointService
+                endPointService.middleware << thisHandler
+            }
+        }
     }
 
     @CompileStatic

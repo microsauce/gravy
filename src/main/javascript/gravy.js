@@ -63,6 +63,27 @@ global.addEnterpriseService = function(gravyModule, uriPattern, method, callBack
 	return gravyModule.addEnterpriseService(uriPattern, method, callBack, dispatchList)
 }
 
+//global.addEnterpriseService = function(gravyModule, method, args) {
+//    if ( args.length < 2 ) throw new Error('ERROR: Invalid arguments: ' + method)
+//    var uriPattern = args[0]
+//    if (typeof(uriPattern) !== 'string' && !(uriPattern instanceof String))
+//        throw new Error('ERROR: ' + method + ': first parameter must be string')
+//    var handlers = args.slice(1,args.length)
+//    for ( var i = 0; i < args; i++ ) {
+//        if (typeof(handlers[i]) !== 'function' && !(uriPattern instanceof Function))
+//            throw new Error('ERROR: ' + method + ': arguments 2-N must be Function')
+//    }
+//	var dispatchList = new ArrayList()
+//    dispatchList.add(REQUEST)
+//    dispatchList.add(FORWARD)
+//
+//    return addEnterpriseService(uriPattern, method, handlers.slice(0,(handlers.length-1),handlers[handlers.length-1], dispatchList)
+//}
+
+global.addParameterPrecondition = function(gravyModule, paramName, callback) {
+    return gravyModule.addParameterPrecondition(paramName, callback)
+}
+
 global.executeHandler = function(callBack, req, res, paramMap, paramList,
 		objectBinding, parms) {
 	var jsHandler = new NativeJSHandler(callBack)
@@ -174,17 +195,14 @@ global.NativeJSHandler = function(handler) {
             jsFacade = {req: req, res: res, binding: this}
             servletFacade.nativeReq.setAttribute('_js_facade', jsFacade)
         }
-
         // build the parameter array
         var params = new Array()
-        if (req != null && res != null) {
-            params.push(jsFacade.req)
-            params.push(jsFacade.res)
-        }
+        params.push(jsFacade.req)
+        params.push(jsFacade.res)
         params.concat(jsFacade.req.splat)
 		this.handler.apply(jsFacade.binding, params)
 
-		res.out.flush()
+		jsFacade.res.out.flush()
 	}
 }
 
@@ -323,6 +341,21 @@ global.GravyModule = function(j_module, j_config, j_logger) {
      */
     this.route = function(uriPattern, callBack, dispatch) {
         addEnterpriseService(this.gravyModule, uriPattern, 'default', callBack, dispatch)
+    }
+
+    /*
+     * define a parameter precondition
+     *
+     * Example:
+     * param '/hello/:name', (req, res) ->
+     * 		res.render '/greeting.html', {name: this.name}
+     *
+     * param 'name', (req, res) ->
+     * 		res.render '/greeting.html', {name: this.name}
+     * , [REQUEST]
+     */
+    this.param = function(paramName, callBack) {
+        addParameterPrecondition(this.gravyModule, paramName, callBack)  // TODO
     }
 
     /*

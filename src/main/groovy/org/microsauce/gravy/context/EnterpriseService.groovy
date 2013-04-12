@@ -11,7 +11,7 @@ class EnterpriseService extends Service {
     public static String DELETE = 'delete'
     public static String DEFAULT = 'default'
 
-    List<Handler> middleware
+    List<Handler> middleware = []
 
     Pattern uriPattern
     String uriString

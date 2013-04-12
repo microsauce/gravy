@@ -23,7 +23,7 @@ class Context {
     Scheduler cronScheduler
 
     List<EnterpriseService> enterpriseServices = []
-    Map<String, EnterpriseService> paramServices = [:]
+    Map<String, EnterpriseService> paramServices = new HashMap()
     List<CronService> cronServices = []
 
     @CompileStatic
@@ -49,6 +49,7 @@ class Context {
     void clearApplicationServices() {
         clearAppServices enterpriseServices
         clearAppServices cronServices
+        clearAppParamMiddleware()
     }
 
     @CompileStatic
@@ -60,6 +61,15 @@ class Context {
         }
 
         services.removeAll(clearList)
+    }
+
+    @CompileStatic clearAppParamMiddleware() {   // TODO this causes ConcurrentModificationException
+        Iterator iterator = paramServices.entrySet().iterator()
+        while (iterator.hasNext()) {
+            Map.Entry thisEntry = iterator.next()
+            if ( thisEntry.value.module.isApp )
+                iterator.remove()
+        }
     }
 
     @CompileStatic
@@ -74,6 +84,25 @@ class Context {
             }
         }
         matchingServices
+    }
+
+    @CompileStatic List<Handler> makeRoute(String uri, String method) {
+        List<Handler> handlers = [] as List
+        for (EnterpriseService service in enterpriseServices) {
+            if ( uri ==~ service.uriPattern ) {
+                Handler serviceEndPoint = service.handlers[method.toLowerCase()] ?: service.handlers[EnterpriseService.DEFAULT]
+                if ( serviceEndPoint ) {
+                    if (service.middleware) {
+                        service.middleware.each { Handler middlewareHandler ->
+                            handlers << middlewareHandler
+                        }
+                    }
+                    handlers << serviceEndPoint
+                    if ( service.endPoint ) break
+                }
+            }
+        }
+        handlers
     }
 
     @CompileStatic

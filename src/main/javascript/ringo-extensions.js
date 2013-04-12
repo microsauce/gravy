@@ -4,7 +4,7 @@
 */
 
 var wrapMod = function(scriptText) {
-    return '(function(gravy) { this.gravyModule = gravy.gravyModule; var get = gravy.get; var post = gravy.post; var put = gravy.put; var del = gravy.del;  var use = gravy.use;  var route = gravy.route; var conf = gravy.conf; var log = gravy.log; ' + scriptText + '\n})(new GravyModule(j_module,j_config,j_logger))';
+    return '(function(gravy) { this.gravyModule = gravy.gravyModule; var get = gravy.get; var post = gravy.post; var put = gravy.put; var del = gravy.del;  var use = gravy.use;  var route = gravy.route; var param = gravy.param; var conf = gravy.conf; var log = gravy.log; ' + scriptText + '\n})(new GravyModule(j_module,j_config,j_logger))';
 }
 
 var isAppScript = function(path) {

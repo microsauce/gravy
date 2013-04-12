@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.log4j.Logger;
 import org.microsauce.gravy.context.Context;
 import org.microsauce.gravy.context.EnterpriseService;
+import org.microsauce.gravy.context.Handler;
 
 class RouteFilter implements Filter {
 
@@ -55,11 +56,11 @@ class RouteFilter implements Filter {
     private FilterChain buildChain(FilterChain chain, ServletRequest req, ServletResponse res) {
 
         HttpServletRequest _req = (HttpServletRequest) req;
-        List<EnterpriseService> matchingRoutes = context.findService(
-                getUri((HttpServletRequest) req), _req.getDispatcherType());
+        List<Handler> routeHandlers = context.makeRoute(
+                getUri((HttpServletRequest) req), _req.getMethod());
         FilterChain routeChain = null;
-        if (matchingRoutes.size() > 0)
-            routeChain = new RouteChain(req, res, chain, matchingRoutes, context.getParamServices());
+        if (routeHandlers.size() > 0)
+            routeChain = new RouteChain(req, res, chain, routeHandlers, context.getParamServices());
 
         return routeChain;
     }

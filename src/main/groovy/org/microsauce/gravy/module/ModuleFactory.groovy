@@ -75,8 +75,6 @@ abstract class ModuleFactory {
 
     @CompileStatic
     private ClassLoader createModuleClassLoader(File moduleFolder) {
-//        if ( moduleClassName() == 'org.microsauce.gravy.module.ruby.RubyModule' )
-//            return this.class.classLoader
 
         log.info "initialize ${moduleFolder.name} classloader . . ."
         List<URL> classpath = []

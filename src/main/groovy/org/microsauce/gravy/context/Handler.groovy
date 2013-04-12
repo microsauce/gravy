@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse
 abstract class Handler {
 
     protected Module module
+    EnterpriseService service
 
     abstract Object doExecute(ServletFacade wrapper)
 
@@ -76,7 +77,7 @@ abstract class Handler {
             log.error "${error.errorCode} - ${error.message}", t
             HttpServletRequest req = servletFacade.getNativeReq()
             HttpServletResponse res = servletFacade.getNativeRes()
-            if ( module.context.findService('/error', DispatcherType.FORWARD) ) {
+            if ( module.context.findService('/error', DispatcherType.FORWARD) && !req.requestURI == '/error') {
                 req.setAttribute("error", error)
                 RequestDispatcher dispatcher = req.getRequestDispatcher(module.errorUri)
                 dispatcher.forward(req, res)

@@ -143,32 +143,38 @@ module GravyModule
   # define the scripting api
   #
 
-  def get(uri_pattern, dispatch = [], &block)
-    add_service uri_pattern, 'get', dispatch, &block
+  def get(uri_pattern, *call_backs, &block)
+puts "get: call_backs: #{call_backs}"
+    add_service uri_pattern, 'get', call_backs, block
   end
   
-  def post(uri_pattern, dispatch = [], &block)
-    add_service uri_pattern, 'post', dispatch, &block
+  def post(uri_pattern, *call_backs, &block)
+    add_service uri_pattern, 'post', call_backs, block
   end
   
-  def put(uri_pattern, dispatch = [], &block)
-    add_service uri_pattern, 'put', dispatch, &block
+  def put(uri_pattern, *call_backs, &block)
+    add_service uri_pattern, 'put', call_backs, block
   end
   
-  def delete(uri_pattern, dispatch = [], &block)
-    add_service uri_pattern, 'delete', dispatch, &block
+  def delete(uri_pattern, *call_backs, &block)
+    add_service uri_pattern, 'delete', call_backs, block
   end
 
-  def route(uri_pattern, dispatch = [], &block)
-    add_service uri_pattern, 'default', dispatch, &block
+  def route(uri_pattern, *call_backs, &block)
+    add_service uri_pattern, 'default', call_backs, block
   end
 
-  def use(uri_pattern, dispatch = [], &block)
-    add_service uri_pattern, 'default', dispatch, &block
+  def use(uri_pattern, *call_backs, &block)
+    add_service uri_pattern, 'default', call_backs, block
+  end
+
+  def param(param_name, &block)
+    call_back = CallbackWrapper.new('', 'default', block)
+    @j_module.addParameterPrecondition(param_name, call_back)
   end
 
   def schedule(cron_string, &block)
-    add_scheduled_task cron_string, &block
+    add_scheduled_task cron_string, block
   end
 
   private
@@ -176,17 +182,17 @@ module GravyModule
   # private module classes
 
   class CallbackWrapper
-    attr_accessor :uri_pattern, :method, :block
+    attr_accessor :uri_pattern, :method, :call_back
 
-    def initialize(uri_pattern, method, &block)
+    def initialize(uri_pattern, method, call_back)
       @uri_pattern = uri_pattern
       @method = method
-      @block = block
+      @call_back = call_back
     end
 
     # call this method from Java handler
     def invoke(servlet_facade)
-      ruby_handler = NativeRubyHandler.new(&@block)
+      ruby_handler = NativeRubyHandler.new(@call_back)
       ruby_handler.invoke_handler servlet_facade
     end
 
@@ -195,7 +201,7 @@ module GravyModule
   class ScheduledTaskCallbackWrapper
     attr_accessor :call_back
 
-    def initialize(&call_back)
+    def initialize(call_back)
       @call_back = call_back
     end
 
@@ -307,10 +313,10 @@ module GravyModule
   end
   class NativeRubyHandler
 
-    attr_accessor :block
+    attr_accessor :call_back
 
-    def initialize(&block)
-      @block = block
+    def initialize(call_back)
+      @call_back = call_back
     end
 
     def invoke_handler(servlet_facade) #req, res, param_map, param_list, object_binding, parms)
@@ -365,7 +371,7 @@ module GravyModule
       end
 
       # call the handler
-      ruby_facade.instance_exec *params, &block
+      ruby_facade.instance_exec *params, &@call_back
       servlet_facade.out.flush
 
     end
@@ -396,25 +402,40 @@ module GravyModule
     end
     return result
   end
-
-  def add_service(uri_pattern, method, dispatch, &block)
-    dispatch_list = ArrayList.new
-    if dispatch.length == 0
-      dispatch_list.add(REQUEST)
-      dispatch_list.add(FORWARD)
-    else
-      for i in 0...dispatch.length
-        dispatch_list.add(dispatch[i])
+  def add_service(uri_pattern, method, call_backs, block)
+    if call_backs.length == 0 and block.nil?
+      raise "ERROR: no callbacks were defined for route: #{method} - #{uri_pattern}"
+    end
+    middleware = nil
+    end_point = nil
+    if block.nil?
+      if call_backs.length == 1
+        middleware = []
+        end_point = call_backs[0]
+      else
+        middleware = call_backs[0,call_backs.length-1]
+        end_point = call_backs[call_backs.length-1]
       end
+    else
+      middleware = call_backs
+      end_point = block
     end
 
-    call_back = CallbackWrapper.new(uri_pattern, method, &block)
-    @j_module.addEnterpriseService(uri_pattern, method, call_back, dispatch_list)
+    # TODO move dispatch code to Module
+    dispatch_list = ArrayList.new
+    dispatch_list.add(REQUEST)
+    dispatch_list.add(FORWARD)
 
+    end_point_wrapper = CallbackWrapper.new(uri_pattern, method, end_point)
+    middleware_wrappers = ArrayList.new
+    middleware.each do |this_callback|
+      middleware_wrappers.add(CallbackWrapper.new('', 'default', this_callback))
+    end
+    @j_module.addEnterpriseService(uri_pattern, method, middleware_wrappers, end_point_wrapper, dispatch_list)
   end
 
-  def add_scheduled_task(cron_string, &call_back)
-    @j_module.addCronService(cron_string, ScheduledTaskCallbackWrapper.new(&call_back))
+  def add_scheduled_task(cron_string, call_back)
+    @j_module.addCronService(cron_string, ScheduledTaskCallbackWrapper.new(call_back))
   end
 
 end
