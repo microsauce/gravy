@@ -44,41 +44,19 @@ global.DELETE = 'delete'
  * define global scope
  */
 
-global.REQUEST = DispatcherType.REQUEST
-global.FORWARD = DispatcherType.FORWARD
-global.ERROR = DispatcherType.ERROR
-global.INCLUDE = DispatcherType.INCLUDE
+global.addEnterpriseService = function(gravyModule, method, args) {
+    if ( args.length < 2 ) throw new Error('ERROR: Invalid arguments: ' + method)
+    var uriPattern = args[0]
+    if (typeof(uriPattern) !== 'string' && !(uriPattern instanceof String))
+        throw new Error('ERROR: ' + method + ': first parameter must be string')
+    var handlers = args.slice(1,args.length)
+    for ( var i = 0; i < args; i++ ) {
+        if (typeof(handlers[i]) !== 'function' && !(uriPattern instanceof Function))
+            throw new Error('ERROR: ' + method + ': arguments 2-N must be Function')
+    }
 
-global.addEnterpriseService = function(gravyModule, uriPattern, method, callBack, dispatch) {
-	var dispatchList = new ArrayList()
-	if (dispatch == null || dispatch.length == 0) {
-		dispatchList.add(REQUEST)
-		dispatchList.add(FORWARD)
-	} else {
-		for (i = 0; i < dispatch.length; i++) {
-			dispatchList.add(dispatch[i])
-		}
-	}
-
-	return gravyModule.addEnterpriseService(uriPattern, method, callBack, dispatchList)
+    return gravyModule.addEnterpriseService(uriPattern, method, handlers.slice(0,(handlers.length-1),handlers[handlers.length-1])
 }
-
-//global.addEnterpriseService = function(gravyModule, method, args) {
-//    if ( args.length < 2 ) throw new Error('ERROR: Invalid arguments: ' + method)
-//    var uriPattern = args[0]
-//    if (typeof(uriPattern) !== 'string' && !(uriPattern instanceof String))
-//        throw new Error('ERROR: ' + method + ': first parameter must be string')
-//    var handlers = args.slice(1,args.length)
-//    for ( var i = 0; i < args; i++ ) {
-//        if (typeof(handlers[i]) !== 'function' && !(uriPattern instanceof Function))
-//            throw new Error('ERROR: ' + method + ': arguments 2-N must be Function')
-//    }
-//	var dispatchList = new ArrayList()
-//    dispatchList.add(REQUEST)
-//    dispatchList.add(FORWARD)
-//
-//    return addEnterpriseService(uriPattern, method, handlers.slice(0,(handlers.length-1),handlers[handlers.length-1], dispatchList)
-//}
 
 global.addParameterPrecondition = function(gravyModule, paramName, callback) {
     return gravyModule.addParameterPrecondition(paramName, callback)
@@ -278,8 +256,11 @@ global.GravyModule = function(j_module, j_config, j_logger) {
      * 		res.render '/greeting.html', {name: @name}
      * , [REQUEST]
      */
-    this.get = function(uriPattern, callBack, dispatch) {
-        addEnterpriseService(this.gravyModule, uriPattern, GET, callBack, dispatch)
+    this.get = function(uriPattern, callBacks) {
+        var args = arguments
+        args.unshift(GET)
+        args.unshift(this.gravyModule)
+        addEnterpriseService.apply(null, args)
     }
 
     /*
@@ -294,8 +275,11 @@ global.GravyModule = function(j_module, j_config, j_logger) {
      * 		res.render '/greeting.html', {name: @name}
      * , [REQUEST]
      */
-    this.post = function(uriPattern, callBack, dispatch) {
-        addEnterpriseService(this.gravyModule, uriPattern, POST, callBack, dispatch)
+    this.post = function(uriPattern, callBack) {
+        var args = arguments
+        args.unshift(POST)
+        args.unshift(this.gravyModule)
+        addEnterpriseService.apply(null, args)
     }
 
     /*
@@ -307,10 +291,12 @@ global.GravyModule = function(j_module, j_config, j_logger) {
      *
      * del '/hello/:name', (req, res) ->
      * 		res.render '/greeting.html', {name: @name}
-     * , [REQUEST]
      */
-    this.del = function(uriPattern, callBack, dispatch) {
-        addEnterpriseService(this.gravyModule, uriPattern, DELETE, callBack, dispatch)
+    this.del = function(uriPattern, callBack) {
+        var args = arguments
+        args.unshift(DELETE)
+        args.unshift(this.gravyModule)
+        addEnterpriseService.apply(null, args)
     }
 
     /*
@@ -324,8 +310,11 @@ global.GravyModule = function(j_module, j_config, j_logger) {
      * 		res.render '/greeting.html', {name: this.name}
      * , [REQUEST]
      */
-    this.put = function(uriPattern, callBack, dispatch) {
-        addEnterpriseService(this.gravyModule, uriPattern, PUT, callBack, dispatch)
+    this.put = function(uriPattern, callBack) {
+        var args = arguments
+        args.unshift(PUT)
+        args.unshift(this.gravyModule)
+        addEnterpriseService.apply(null, args)
     }
 
     /*
@@ -339,8 +328,11 @@ global.GravyModule = function(j_module, j_config, j_logger) {
      * 		res.render '/greeting.html', {name: this.name}
      * , [REQUEST]
      */
-    this.route = function(uriPattern, callBack, dispatch) {
-        addEnterpriseService(this.gravyModule, uriPattern, 'default', callBack, dispatch)
+    this.route = function(uriPattern, callBack) {
+        var args = arguments
+        args.unshift('default')
+        args.unshift(this.gravyModule)
+        addEnterpriseService.apply(null, args)
     }
 
     /*
@@ -355,14 +347,20 @@ global.GravyModule = function(j_module, j_config, j_logger) {
      * , [REQUEST]
      */
     this.param = function(paramName, callBack) {
-        addParameterPrecondition(this.gravyModule, paramName, callBack)  // TODO
+        var args = arguments
+        args.unshift('default')
+        args.unshift(this.gravyModule)
+        addEnterpriseService.apply(null, args)
     }
 
     /*
      * alias for 'route' - a la expressjs.
      */
-    this.use = function(uriPattern, callBack, dispatch) {
-        route(uriPattern, 'default', callBack, dispatch)
+    this.use = function(uriPattern, callBack) {
+        var args = arguments
+        args.unshift('default')
+        args.unshift(this.gravyModule)
+        addEnterpriseService.apply(null, args)
     }
 
     /*

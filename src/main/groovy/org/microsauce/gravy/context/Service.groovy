@@ -17,7 +17,7 @@ abstract class Service {
     Module module
     Class binding
     List<String> uriParamNames
-    List<DispatcherType> dispatch = []
+//    List<DispatcherType> dispatch = []
 
     Map<String, Handler> handlers = [:]
     HandlerFactory handlerFactory

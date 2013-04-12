@@ -27,31 +27,27 @@ class GroovyAPI {
     static List<GroovyAPI.Route> ROUTES = []
 
     static void get(String uriPattern, Closure handler) {
-        module.addEnterpriseService(uriPattern, GET, handler, [REQUEST, FORWARD])
+        module.addEnterpriseService(uriPattern, GET, handler)
     }
 
     static void post(String uriPattern, Closure handler) {
-        module.addEnterpriseService(uriPattern, POST, handler, [REQUEST, FORWARD])
+        module.addEnterpriseService(uriPattern, POST, handler)
     }
 
     static void put(String uriPattern, Closure handler) {
-        module.addEnterpriseService(uriPattern, PUT, handler, [REQUEST, FORWARD])
+        module.addEnterpriseService(uriPattern, PUT, handler)
     }
 
     static void delete(String uriPattern, Closure handler) {
-        module.addEnterpriseService(uriPattern, DELETE, handler, [REQUEST, FORWARD])
-    }
-
-    static void options(String uriPattern, Closure handler) {
-        module.addEnterpriseService(uriPattern, OPTIONS, handler, [REQUEST, FORWARD])
+        module.addEnterpriseService(uriPattern, DELETE, handler)
     }
 
     static void route(String uriPattern, Closure handler) {
-        module.addEnterpriseService(uriPattern, DEFAULT, handler, [REQUEST, FORWARD])
+        module.addEnterpriseService(uriPattern, DEFAULT, handler)
     }
 
     static void use(String uriPattern, Closure handler) {
-        module.addEnterpriseService(uriPattern, DEFAULT, handler, [REQUEST, FORWARD])
+        module.addEnterpriseService(uriPattern, DEFAULT, handler)
     }
 
     static void param(String param, Closure handler) {
@@ -66,30 +62,6 @@ class GroovyAPI {
         route
     }
 
-    static void get(String uriPattern, List<DispatcherType> dispatch, Closure handler) {
-        module.addEnterpriseService(uriPattern, GET, handler, dispatch)
-    }
-
-    static void post(String uriPattern, List<DispatcherType> dispatch, Closure handler) {
-        module.addEnterpriseService(uriPattern, POST, handler, dispatch)
-    }
-
-    static void put(String uriPattern, List<DispatcherType> dispatch, Closure handler) {
-        module.addEnterpriseService(uriPattern, PUT, handler, dispatch)
-    }
-
-    static void delete(String uriPattern, List<DispatcherType> dispatch, Closure handler) {
-        module.addEnterpriseService(uriPattern, DELETE, handler, dispatch)
-    }
-
-    static void route(String uriPattern, List<DispatcherType> dispatch, Closure handler) {
-        module.addEnterpriseService(uriPattern, DEFAULT, handler, dispatch)
-    }
-
-    static void use(String uriPattern, List<DispatcherType> dispatch, Closure handler) {
-        module.addEnterpriseService(uriPattern, DEFAULT, handler, dispatch)
-    }
-
     static GroovyAPI.Route route(String uriPattern, List<DispatcherType> dispatch) {
         GroovyAPI.Route route = new GroovyAPI.Route()
         route.uriPattern = uriPattern
@@ -100,18 +72,6 @@ class GroovyAPI {
 
     static void schedule(String cronString, Closure handler) {
         module.addCronService(cronString, handler)
-    }
-
-    static void servlet(String mapping, HttpServlet servlet) {
-        module.addServlet(mapping, servlet)
-    }
-
-    static void filter(String uriPattern, Filter filter) {
-        module.addFilter(uriPattern, filter)
-    }
-
-    static void filter(String uriPattern, List<DispatcherType> dispatch, Filter filter) {
-        module.addFilter(uriPattern, filter, dispatch)
     }
 
     static void complete() {

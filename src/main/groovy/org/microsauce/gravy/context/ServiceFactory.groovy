@@ -19,7 +19,7 @@ class ServiceFactory {
     }
 
     @CompileStatic
-    public EnterpriseService makeEnterpriseService(Object scriptContext, String uriPattern, Map<String, Object> methodHandlers, List<DispatcherType> dispatch) {
+    public EnterpriseService makeEnterpriseService(Object scriptContext, String uriPattern, Map<String, Object> methodHandlers) {
 
         EnterpriseService service = new EnterpriseService()
         Map<String, Object> parseRoute = RegExUtils.parseRoute(uriPattern)
@@ -28,7 +28,6 @@ class ServiceFactory {
         service.uriPattern = (Pattern) parseRoute.uriPattern
         service.uriString = uriPattern
         service.uriParamNames = parseRoute.params as List<String>
-        service.dispatch = dispatch
 
         methodHandlers.each { String method, Object rawHandler ->
             Handler handler = handlerFactory.makeHandler(rawHandler, scriptContext)

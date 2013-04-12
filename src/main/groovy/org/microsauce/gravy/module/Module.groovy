@@ -128,8 +128,8 @@ abstract class Module {
     static Set<String> END_POINTS = ['GET', 'POST', 'PUT', 'DELETE', 'get', 'post', 'put', 'delete']
 
     @CompileStatic
-    public EnterpriseService addEnterpriseService(String uriPattern, String method, Object rawHandler, List<DispatcherType> dispatch) {
-        log.info "addEnterpriseService: uri: $uriPattern - method: $method - dispatch: $dispatch"
+    public EnterpriseService addEnterpriseService(String uriPattern, String method, Object rawHandler) {
+        log.info "addEnterpriseService: uri: $uriPattern - method: $method "
 
         EnterpriseService service = context.findServiceByUriString(uriPattern)
         if (service) {
@@ -140,7 +140,7 @@ abstract class Module {
         } else {
             Map<String, Object> methodHandler = [:]
             methodHandler[method] = rawHandler
-            service = serviceFactory.makeEnterpriseService(scriptContext, uriPattern, methodHandler, dispatch)
+            service = serviceFactory.makeEnterpriseService(scriptContext, uriPattern, methodHandler)
             service.module = this
         }
         service.endPoint = END_POINTS.contains(method)
@@ -149,8 +149,8 @@ abstract class Module {
     }
 
     @CompileStatic
-    public void addEnterpriseService(String uriPattern, String method, List middleware, Object endPoint, List<DispatcherType> dispatch) {
-        EnterpriseService endPointService = addEnterpriseService(uriPattern, method, endPoint, dispatch)
+    public void addEnterpriseService(String uriPattern, String method, List middleware, Object endPoint) {
+        EnterpriseService endPointService = addEnterpriseService(uriPattern, method, endPoint)
         // add middleware handlers
         // TODO
         if ( middleware ) {
@@ -173,7 +173,7 @@ abstract class Module {
     @CompileStatic void addParameterPrecondition(String param, Object rawHandler) {
         Map<String, Object> methodHandler = [:]
         methodHandler[EnterpriseService.DEFAULT] = rawHandler
-        EnterpriseService service = serviceFactory.makeEnterpriseService(scriptContext, '', methodHandler, null)
+        EnterpriseService service = serviceFactory.makeEnterpriseService(scriptContext, '', methodHandler)
         service.module = this
         service.endPoint = false
         context.addParameterPrecondition(param, service)

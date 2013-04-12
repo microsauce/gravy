@@ -15,7 +15,6 @@ require 'ostruct'
 require 'java'
 require 'set'
 
-java_import javax.servlet.DispatcherType
 java_import javax.servlet.http.HttpServletRequest
 java_import javax.servlet.http.HttpServletResponse
 java_import javax.servlet.http.HttpSession
@@ -130,14 +129,6 @@ serializer = Serializer.new
 
 
 module GravyModule
-
-  #
-  # gravy constants
-  #
-  REQUEST = DispatcherType::REQUEST
-  FORWARD = DispatcherType::FORWARD
-  ERROR   = DispatcherType::ERROR
-  INCLUDE = DispatcherType::INCLUDE
 
   #
   # define the scripting api
@@ -421,17 +412,12 @@ puts "get: call_backs: #{call_backs}"
       end_point = block
     end
 
-    # TODO move dispatch code to Module
-    dispatch_list = ArrayList.new
-    dispatch_list.add(REQUEST)
-    dispatch_list.add(FORWARD)
-
     end_point_wrapper = CallbackWrapper.new(uri_pattern, method, end_point)
     middleware_wrappers = ArrayList.new
     middleware.each do |this_callback|
       middleware_wrappers.add(CallbackWrapper.new('', 'default', this_callback))
     end
-    @j_module.addEnterpriseService(uri_pattern, method, middleware_wrappers, end_point_wrapper, dispatch_list)
+    @j_module.addEnterpriseService(uri_pattern, method, middleware_wrappers, end_point_wrapper)
   end
 
   def add_scheduled_task(cron_string, call_back)

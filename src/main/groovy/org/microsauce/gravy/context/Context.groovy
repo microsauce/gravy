@@ -73,12 +73,11 @@ class Context {
     }
 
     @CompileStatic
-    List<EnterpriseService> findService(String uri, DispatcherType dispatcherType) {
+    List<EnterpriseService> findService(String uri) {
 
         List<EnterpriseService> matchingServices = [] as List
         for (EnterpriseService service in enterpriseServices) {
-            if (service.dispatch.contains(dispatcherType) // TODO drop dispatcherType
-                    && uri ==~ service.uriPattern) {
+            if ( uri ==~ service.uriPattern ) {
                 matchingServices << service
                 if ( service.endPoint ) break
             }

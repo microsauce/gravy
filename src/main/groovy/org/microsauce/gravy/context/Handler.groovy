@@ -77,7 +77,7 @@ abstract class Handler {
             log.error "${error.errorCode} - ${error.message}", t
             HttpServletRequest req = servletFacade.getNativeReq()
             HttpServletResponse res = servletFacade.getNativeRes()
-            if ( module.context.findService('/error', DispatcherType.FORWARD) && !req.requestURI == '/error') {
+            if ( module.context.findService('/error') && !req.requestURI == '/error') {
                 req.setAttribute("error", error)
                 RequestDispatcher dispatcher = req.getRequestDispatcher(module.errorUri)
                 dispatcher.forward(req, res)
