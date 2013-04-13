@@ -187,7 +187,7 @@ class ServletFacade {
         Module module = nativeReq.getAttribute('_module') as Module
         nativeReq.setAttribute('_view', viewUri)
         nativeReq.setAttribute('_model', new CommonObject(model, module.type))
-        nativeReq.setAttribute('_render_for_module', module)
+        nativeReq.setAttribute('_document_root', module.name)
         RequestDispatcher dispatcher = nativeReq.getRequestDispatcher(module.renderUri)
         nativeRes.contentType = 'text/html'
         dispatcher.forward(nativeReq, nativeRes)

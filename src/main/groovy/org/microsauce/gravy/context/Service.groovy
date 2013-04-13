@@ -8,12 +8,6 @@ import org.microsauce.gravy.module.Module
 
 abstract class Service {
 
-    static String GET = 'get'
-    static String POST = 'post'
-    static String PUT = 'put'
-    static String DELETE = 'delete'
-    static String DEFAULT = 'default'
-
     Module module
     Class binding
     List<String> uriParamNames

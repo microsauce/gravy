@@ -10,13 +10,13 @@ import org.microsauce.gravy.runtime.ServletWrapper;
 
 abstract class ServerWrapper {
 
-    def static final DEFAULT = 0
-    def static final REQUEST = 1
-    def static final FORWARD = 2
-    def static final INCLUDE = 4
-    def static final ERROR = 8
-    def static final ASYNC = 16
-    def static final ALL = 31
+//    def static final DEFAULT = 0
+//    def static final REQUEST = 1
+//    def static final FORWARD = 2
+//    def static final INCLUDE = 4
+//    def static final ERROR = 8
+//    def static final ASYNC = 16
+//    def static final ALL = 31
 
 
     List<ServletWrapper> servlets = []

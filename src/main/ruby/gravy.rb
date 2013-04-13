@@ -223,18 +223,20 @@ puts "get: call_backs: #{call_backs}"
     end
   end
   class RubyRequest
-    @@request_methods = HttpServletRequest.public_instance_methods.to_set
+    @@request_methods = nil
+
     attr_accessor :input, :session, :json #, :form, :query
     def initialize(servlet_facade)
       @servlet_facade = servlet_facade
       @j_request = servlet_facade.native_req
+      @req_methods = get_req_methods(@j_request)
       @input = servlet_facade.input # TODO
-      @session = self.get_session # RubySession.new @j_request.session # TODO retrieve from session first
+      @session = self.get_session
       @json = servlet_facade.get_json
     end
     def method_missing(name, *args, &block)
-       if @@request_methods.member? name
-         @j_request.send(name, *args, &block)   # or java_send
+       if @req_methods.member? name
+         return @j_request.send(name, *args, &block)   # or java_send
        else
          attr_name = name
          if name.to_s.end_with?('=')  # this is a write
@@ -253,7 +255,7 @@ puts "get: call_backs: #{call_backs}"
     end
     private
     def get_session
-      j_session = @@j_request.session
+      j_session = @j_request.session
       ruby_session = j_session.get_attribute '_ruby_session'
       if ruby_session.nil?
         ruby_session = RubySession.new j_session
@@ -261,9 +263,14 @@ puts "get: call_backs: #{call_backs}"
       end
       return ruby_session
     end
+    def get_req_methods(req)
+      if @@request_methods.nil?
+        @@request_methods = req.class.public_instance_methods
+      end
+      return @@request_methods
+    end
   end
   class RubyResponse
-    @@response_methods = HttpServletResponse.public_instance_methods.to_set
     attr_accessor :out
     def initialize(servlet_facade)
       @servlet_facade = servlet_facade
@@ -271,8 +278,9 @@ puts "get: call_backs: #{call_backs}"
       @out = servlet_facade.out
     end
     def method_missing(name, *args, &block)
-       @j_response.send(name, *args, &block)   # or java_send
+       return @j_response.send(name, *args, &block)   # or java_send
     end
+
     def print(str)
       @servlet_facade.print str
     end

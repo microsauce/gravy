@@ -1,15 +1,13 @@
 package org.microsauce.gravy.lang.groovy.api
 
-import static org.microsauce.gravy.context.EnterpriseService.DEFAULT
+
 import static org.microsauce.gravy.context.EnterpriseService.DELETE
 import static org.microsauce.gravy.context.EnterpriseService.GET
-import static org.microsauce.gravy.context.EnterpriseService.OPTIONS
+import static org.microsauce.gravy.context.EnterpriseService.MIDDLEWARE
 import static org.microsauce.gravy.context.EnterpriseService.POST
 import static org.microsauce.gravy.context.EnterpriseService.PUT
 
 import javax.servlet.DispatcherType
-import javax.servlet.Filter
-import javax.servlet.http.HttpServlet
 
 import org.microsauce.gravy.module.Module
 
@@ -26,28 +24,53 @@ class GroovyAPI {
 
     static List<GroovyAPI.Route> ROUTES = []
 
-    static void get(String uriPattern, Closure handler) {
-        module.addEnterpriseService(uriPattern, GET, handler)
+    static void get(String uriPattern, Closure ... handlers) {
+        def handlerList = handlers as List
+        def middleware = []
+        if ( handlerList.size() > 1 )
+            middleware.addAll(handlerList.subList(0,handlerList.size()-1))
+        def endPoint = handlers[handlers.size()-1]
+        module.addEnterpriseService(uriPattern, GET, middleware, endPoint)
     }
 
-    static void post(String uriPattern, Closure handler) {
-        module.addEnterpriseService(uriPattern, POST, handler)
+    static void post(String uriPattern, Closure ... handlers) {
+        def handlerList = handlers as List
+        def middleware = []
+        if ( handlerList.size() > 1 )
+            middleware.addAll(handlerList.subList(0,handlerList.size()-1))
+        def endPoint = handlers[handlers.size()-1]
+        module.addEnterpriseService(uriPattern, POST, middleware, endPoint)
     }
 
-    static void put(String uriPattern, Closure handler) {
-        module.addEnterpriseService(uriPattern, PUT, handler)
+    static void put(String uriPattern, Closure ... handlers) {
+        def handlerList = handlers as List
+        def middleware = []
+        if ( handlerList.size() > 1 )
+            middleware.addAll(handlerList.subList(0,handlerList.size()-1))
+        def endPoint = handlers[handlers.size()-1]
+        module.addEnterpriseService(uriPattern, PUT, middleware, endPoint)
     }
 
-    static void delete(String uriPattern, Closure handler) {
-        module.addEnterpriseService(uriPattern, DELETE, handler)
+    static void delete(String uriPattern, Closure ... handlers) {
+        def handlerList = handlers as List
+        def middleware = []
+        if ( handlerList.size() > 1 )
+            middleware.addAll(handlerList.subList(0,handlerList.size()-1))
+        def endPoint = handlers[handlers.size()-1]
+        module.addEnterpriseService(uriPattern, DELETE, middleware, endPoint)
     }
 
-    static void route(String uriPattern, Closure handler) {
-        module.addEnterpriseService(uriPattern, DEFAULT, handler)
+    static void route(String uriPattern, Closure ... handlers) {
+        def handlerList = handlers as List
+        def middleware = []
+        if ( handlerList.size() > 1 )
+            middleware.addAll(handlerList.subList(0,handlerList.size()-1))
+        def endPoint = handlers[handlers.size()-1]
+        module.addEnterpriseService(uriPattern, MIDDLEWARE, middleware, endPoint)
     }
 
-    static void use(String uriPattern, Closure handler) {
-        module.addEnterpriseService(uriPattern, DEFAULT, handler)
+    static void use(String uriPattern, Closure ... handlers) {
+        route(uriPattern, handlers)
     }
 
     static void param(String param, Closure handler) {
@@ -78,17 +101,15 @@ class GroovyAPI {
 
         ROUTES.each { GroovyAPI.Route route ->
             if (route.get)
-                module.addEnterpriseService(route.uriPattern, GET, route.get, route.dispatch)
+                module.addEnterpriseService(route.uriPattern, GET, route.get)
             if (route.post)
-                module.addEnterpriseService(route.uriPattern, POST, route.post, route.dispatch)
+                module.addEnterpriseService(route.uriPattern, POST, route.post)
             if (route.put)
-                module.addEnterpriseService(route.uriPattern, PUT, route.put, route.dispatch)
-            if (route.options)
-                module.addEnterpriseService(route.uriPattern, OPTIONS, route.options, route.dispatch)
+                module.addEnterpriseService(route.uriPattern, PUT, route.put)
             if (route.delete)
-                module.addEnterpriseService(route.uriPattern, DELETE, route.delete, route.dispatch)
+                module.addEnterpriseService(route.uriPattern, DELETE, route.delete)
             if (route.route)
-                module.addEnterpriseService(route.uriPattern, DEFAULT, route.route, route.dispatch)
+                module.addEnterpriseService(route.uriPattern, MIDDLEWARE, route.route)
         }
 
         traverseUriTree(root.entrySet, new StringBuilder())
@@ -108,7 +129,7 @@ class GroovyAPI {
                 uri = new StringBuilder(dummy)
             } else if (thisValue instanceof Closure) {
                 uri += (String) thisEntry.key
-                module.addEnterpriseService(uri.toString(), DEFAULT, thisValue, [REQUEST, FORWARD])
+                module.addEnterpriseService(uri.toString(), MIDDLEWARE, thisValue, [REQUEST, FORWARD])
             }
         }
     }
@@ -121,7 +142,6 @@ class GroovyAPI {
         Closure post
         Closure put
         Closure delete
-        Closure options
         Closure route
     }
 

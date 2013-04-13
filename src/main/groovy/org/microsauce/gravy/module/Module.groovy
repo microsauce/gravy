@@ -172,7 +172,7 @@ abstract class Module {
 
     @CompileStatic void addParameterPrecondition(String param, Object rawHandler) {
         Map<String, Object> methodHandler = [:]
-        methodHandler[EnterpriseService.DEFAULT] = rawHandler
+        methodHandler[EnterpriseService.MIDDLEWARE] = rawHandler
         EnterpriseService service = serviceFactory.makeEnterpriseService(scriptContext, '', methodHandler)
         service.module = this
         service.endPoint = false

@@ -1,6 +1,7 @@
 package org.microsauce.gravy.runtime;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -35,12 +36,15 @@ class RouteChain implements FilterChain {
         else
             servletFacade = new ServletFacade((HttpServletRequest) req, (HttpServletResponse) res, this, null, null);
 
+        List<Handler> paramHandlers= new ArrayList<Handler>();
         for( String uriParam : servletFacade.getUriParamMap().keySet() ) {
             EnterpriseService paramService = paramPreconditions.get(uriParam);
             if ( paramService != null ) {
-                route.add(0, paramService.getHandlers().get(EnterpriseService.DEFAULT));
+                paramHandlers.add(paramService.getHandlers().get(EnterpriseService.MIDDLEWARE));
             }
         }
+        if ( paramHandlers.size() > 0 )
+            route.addAll(0, paramHandlers);
     }
 
     public void doFilter(ServletRequest req, ServletResponse res) throws IOException, ServletException {

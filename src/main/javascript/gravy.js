@@ -44,21 +44,32 @@ global.DELETE = 'delete'
  * define global scope
  */
 
-global.addEnterpriseService = function(gravyModule, method, args) {
-    if ( args.length < 2 ) throw new Error('ERROR: Invalid arguments: ' + method)
-    var uriPattern = args[0]
+global.addEnterpriseService = function() {
+    var args = Array.prototype.slice.call(arguments, 0)
+
+    if ( args.length < 4 ) throw new Error('ERROR: Invalid arguments: ' + method)
+    var gravyModule = args[0]
+    var method = args[1]
+    var uriPattern = args[2]
     if (typeof(uriPattern) !== 'string' && !(uriPattern instanceof String))
         throw new Error('ERROR: ' + method + ': first parameter must be string')
-    var handlers = args.slice(1,args.length)
-    for ( var i = 0; i < args; i++ ) {
-        if (typeof(handlers[i]) !== 'function' && !(uriPattern instanceof Function))
-            throw new Error('ERROR: ' + method + ': arguments 2-N must be Function')
+    var handlers = args.slice(3,args.length)
+    var middleware = new ArrayList()
+    var middlewareSlice = handlers.slice(0,(handlers.length-1))
+    for ( var j = 0; j < middlewareSlice.length; j++ ) {
+        middleware.add(middlewareSlice[j])
     }
 
-    return gravyModule.addEnterpriseService(uriPattern, method, handlers.slice(0,(handlers.length-1),handlers[handlers.length-1])
+    return gravyModule.addEnterpriseService(uriPattern,method,middleware,handlers[handlers.length-1])
 }
 
-global.addParameterPrecondition = function(gravyModule, paramName, callback) {
+global.addParameterPrecondition = function() {
+    var args = Array.prototype.slice.call(arguments, 0)
+    if ( args.length < 3 ) throw new Error('ERROR: Invalid arguments: ' + method)
+    var gravyModule = args[0]
+    var paramName = args[1]
+    var callback = args[2]
+
     return gravyModule.addParameterPrecondition(paramName, callback)
 }
 
@@ -85,6 +96,7 @@ global.newJSRequest = function(servletFacade) {
     req.initialize = function(servletFacade) {
         this.facade = servletFacade  // TODO i can probably due w/o this
         this.__noSuchMethod__ = function (name, args) {
+console.log("req: nosuchmethod: " + name + " - " + args)
             return this.facade.nativeReq[name].apply(this.facade.nativeReq, args)
         }
         this.next = function() {
@@ -256,8 +268,8 @@ global.GravyModule = function(j_module, j_config, j_logger) {
      * 		res.render '/greeting.html', {name: @name}
      * , [REQUEST]
      */
-    this.get = function(uriPattern, callBacks) {
-        var args = arguments
+    this.get = function() {
+        var args = Array.prototype.slice.call(arguments, 0)
         args.unshift(GET)
         args.unshift(this.gravyModule)
         addEnterpriseService.apply(null, args)
@@ -275,8 +287,8 @@ global.GravyModule = function(j_module, j_config, j_logger) {
      * 		res.render '/greeting.html', {name: @name}
      * , [REQUEST]
      */
-    this.post = function(uriPattern, callBack) {
-        var args = arguments
+    this.post = function() {
+        var args = Array.prototype.slice.call(arguments, 0)
         args.unshift(POST)
         args.unshift(this.gravyModule)
         addEnterpriseService.apply(null, args)
@@ -292,8 +304,8 @@ global.GravyModule = function(j_module, j_config, j_logger) {
      * del '/hello/:name', (req, res) ->
      * 		res.render '/greeting.html', {name: @name}
      */
-    this.del = function(uriPattern, callBack) {
-        var args = arguments
+    this.del = function() {
+        var args = Array.prototype.slice.call(arguments, 0)
         args.unshift(DELETE)
         args.unshift(this.gravyModule)
         addEnterpriseService.apply(null, args)
@@ -310,8 +322,8 @@ global.GravyModule = function(j_module, j_config, j_logger) {
      * 		res.render '/greeting.html', {name: this.name}
      * , [REQUEST]
      */
-    this.put = function(uriPattern, callBack) {
-        var args = arguments
+    this.put = function() {
+        var args = Array.prototype.slice.call(arguments, 0)
         args.unshift(PUT)
         args.unshift(this.gravyModule)
         addEnterpriseService.apply(null, args)
@@ -328,8 +340,8 @@ global.GravyModule = function(j_module, j_config, j_logger) {
      * 		res.render '/greeting.html', {name: this.name}
      * , [REQUEST]
      */
-    this.route = function(uriPattern, callBack) {
-        var args = arguments
+    this.route = function() {
+        var args = Array.prototype.slice.call(arguments, 0)
         args.unshift('default')
         args.unshift(this.gravyModule)
         addEnterpriseService.apply(null, args)
@@ -346,18 +358,17 @@ global.GravyModule = function(j_module, j_config, j_logger) {
      * 		res.render '/greeting.html', {name: this.name}
      * , [REQUEST]
      */
-    this.param = function(paramName, callBack) {
-        var args = arguments
-        args.unshift('default')
+    this.param = function() {
+        var args = Array.prototype.slice.call(arguments, 0)
         args.unshift(this.gravyModule)
-        addEnterpriseService.apply(null, args)
+        addParameterPrecondition.apply(null, args)
     }
 
     /*
      * alias for 'route' - a la expressjs.
      */
-    this.use = function(uriPattern, callBack) {
-        var args = arguments
+    this.use = function() {
+        var args = Array.prototype.slice.call(arguments, 0)
         args.unshift('default')
         args.unshift(this.gravyModule)
         addEnterpriseService.apply(null, args)

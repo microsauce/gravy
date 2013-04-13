@@ -89,7 +89,7 @@ class Context {
         List<Handler> handlers = [] as List
         for (EnterpriseService service in enterpriseServices) {
             if ( uri ==~ service.uriPattern ) {
-                Handler serviceEndPoint = service.handlers[method.toLowerCase()] ?: service.handlers[EnterpriseService.DEFAULT]
+                Handler serviceEndPoint = service.handlers[method.toLowerCase()] ?: service.handlers[EnterpriseService.MIDDLEWARE]
                 if ( serviceEndPoint ) {
                     if (service.middleware) {
                         service.middleware.each { Handler middlewareHandler ->

@@ -9,7 +9,8 @@ class EnterpriseService extends Service {
     public static String PUT = 'put'
     public static String OPTIONS = 'options'
     public static String DELETE = 'delete'
-    public static String DEFAULT = 'default'
+//    public static String DEFAULT = 'default'
+    public static String MIDDLEWARE = 'default'
 
     List<Handler> middleware = []
 

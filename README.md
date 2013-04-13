@@ -2,11 +2,13 @@
 Gravy 0.1
 ===
 
-Gravy is a simple, intuitive framework for rapid development of web applications on the Java
-Enterprise (the meat-and-potatoes).  Script applications in Groovy, JavaScript, CoffeeScript,
-and/or Ruby and benefit from the productivity and features that each language provides.
+Gravy is an intuitive, expressjs inspired framework for rapid development of web applications
+on the Java Enterprise (the meat-and-potatoes).  Gravy applications can be written in Groovy,
+JavaScript, CoffeeScript, and/or Ruby.
 
-Gravy is influenced by Sinatra and express.js style routing.  Here is a taste:
+The general philosophy behind Gravy is that
+
+Here is a taste:
 
 Hello Groovy:
 ```groovy
@@ -17,7 +19,6 @@ get '/hello/:name', {
 Hello JavaScript:
 ```js
 get('hello/:name', function(req, res) {
-
     res.print("Hello " + this.name + "!")
 })
 ```
@@ -34,10 +35,10 @@ end
 ```
 
 ## Features
-- Sinatra / Express.js style routing
+- Sinatra / express style routing
 - Scheduled tasks
 - Polyglot (Groovy, Ruby, JavaScript/CoffeeScript)
-- 'Web-fragement' modules
+- Modules
 - Single-file environment based configuration
 - Hot reload
 
@@ -47,8 +48,8 @@ Gravy is currently Alpha software.  The focus of the current milestone (0.1) is 
 define and implement the core feature set (routing, scheduled tasks, middleware,
 servlet request/response/session decorators, modules, resource resolver, single file
 configuration, dev tools, etc).  0.2 will include significant refactoring and performance
-enhancements and enhanced routing and req/res/sess decorators.  0.3 will add Python and
-finish out the tooling api (package/dependency management, etc), with a 1.0 beta to follow.
+and routing enhancements.  0.3 will finish out the tooling api (package/dependency
+management, etc), with a 1.0 beta to follow.
 
 ## Getting Started
 
@@ -66,63 +67,62 @@ finish out the tooling api (package/dependency management, etc), with a 1.0 beta
 	$ export GRAVY_HOME=$PWD
 	$ PATH=$PATH:$GRAVY_HOME/bin
 
-### Your First Application
+### 'hello gravy'
 
-A Gravy application can be as simple as a single script (application.groovy|js|coffee|rb), but most Gravy 
-applications will also employ modules, views (templates), static content (images, css, js), Java and 
-Groovy sources, and custom configuration. To create a sample application which demonstrates each of 
-these additional components run the following command:
+Create your first app:
 
-	$ gravy create [app-name] sample
+1. Create your application file:
 
-This command generates a sample application in a folder named [app-name].  The application folder layout 
-is as follows:
+    $ mkdir myGravyApp ; cd myGravyApp ; echo "" > application.groovy
 
-	[app-name]                                - root application folder
-	    |- application.(groovy|js|coffee|rb)  - main application script
-	    |_ src                                - java and groovy sources
-	    |   |_ main
-	    |   |   |- java
-	    |   |   |- groovy
-	    |   |   |_ resources                  - static resources to add to the application
-	    |   |                                   classpath
-	    |   |_ test 
-	    |       |_ groovy                     - groovy test scripts
-	    |       |_ javascript                 - javascript/coffeescript test scripts
-	    |       |_ ruby                       - ruby test scripts
-	    |- view                               - view templates
-	    |- conf                               - configuration (config.groovy)
-	    |- webroot                            - static resources (html, css, js, images, etc)
-	    |   |_ WEB-INF         
-	    |       |_ web.xml                    - the application deployment descriptor, for most
-	    |
-	    |- modules                            - modules (application fragments)
-	    |_ lib                                - jar files, JS/Ruby libraries
+2. Add a route to your file, for example:
+```groovy
+get '/hello/:name', {
+    res.print "Hello $name!"
+}
+```
+3. Start the gravy dev server:
 
-To run your new Gravy app execute the gravy commands:
+    $ gravy
 
-	$ cd <app-name>
-	$ gravy
+4. Point your browser at:
 
-Point your browser at:
-
-	http://localhost:8080
+	http://localhost:8080/hello/You
 
 ### Rapid Development
 
-Gravy is a rapid development environment.  All source files are automatically re-compiled and re-deployed upon 
+Gravy is a rapid development environment.  All source files are automatically re-deployed upon
 modification.  Make a change, refresh your browser, and benefit from the instant feedback.
 
-## The Big Picture
+## routes
 
-### Modules
+In gravy, a route is a service chain that is built to service a particular HTTP request URI and method.
+```rb
+use '/arithmetic/*' do
+  log.info "we're about to do some arithmetic: #{req.request_uri}"
+  req.next
+end
+
+use '/arithmetic/add/:addend1/:addend2' do
+  res.content_type = 'text/html'
+  res.print "the sum: #{addend1} + #{addend2} = <b>#{addend1.to_i+addend2.to_i+counter}</b>"
+end
+```
+
+To define a route
+ chain HTTP request, service end-point, and everything in between (more on that below in the 'middleware' section)
+
+## servlet API
+
+## middleware
+
+## configuration
+
+### modules (app fragments)
 
 A Gravy application is composed of one or more modules.  Modules define a set of web services (similar in concept 
-to a Servlet 3.0 'web fragment') and/or they export functionality to the 'app' module.  Module exports are bound to 
-the app script by module-name.
+to a Servlet 3.0 'web fragment').
 
-## The Finer Points
+## errors
 
-
-
-## More to come . . .
+## the gravy command
