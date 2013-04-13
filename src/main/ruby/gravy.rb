@@ -278,7 +278,7 @@ puts "get: call_backs: #{call_backs}"
       @out = servlet_facade.out
     end
     def method_missing(name, *args, &block)
-       return @j_response.send(name, *args, &block)   # or java_send
+      return @j_response.send(name, *args, &block)
     end
 
     def print(str)

@@ -6,8 +6,6 @@ Gravy is an intuitive, expressjs inspired framework for rapid development of web
 on the Java Enterprise (the meat-and-potatoes).  Gravy applications can be written in Groovy,
 JavaScript, CoffeeScript, and/or Ruby.
 
-The general philosophy behind Gravy is that
-
 Here is a taste:
 
 Hello Groovy:
@@ -96,21 +94,17 @@ modification.  Make a change, refresh your browser, and benefit from the instant
 
 ## routes
 
-In gravy, a route is a service chain that is built to service a particular HTTP request URI and method.
+In gravy, a route is a software chain that is built to service a particular HTTP request URI pattern and method. For example:
 ```rb
 use '/arithmetic/*' do
-  log.info "we're about to do some arithmetic: #{req.request_uri}"
-  req.next
+    log.info "we're about to do some arithmetic: #{req.request_uri}"
+    req.next
 end
 
-use '/arithmetic/add/:addend1/:addend2' do
-  res.content_type = 'text/html'
-  res.print "the sum: #{addend1} + #{addend2} = <b>#{addend1.to_i+addend2.to_i+counter}</b>"
+get '/arithmetic/add/:addend1/:addend2' do
+    res.print "the sum: #{addend1} + #{addend2} = <b>#{addend1.to_i+addend2.to_i+counter}</b>"
 end
 ```
-
-To define a route
- chain HTTP request, service end-point, and everything in between (more on that below in the 'middleware' section)
 
 ## servlet API
 
