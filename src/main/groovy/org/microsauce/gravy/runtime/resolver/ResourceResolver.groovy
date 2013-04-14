@@ -62,6 +62,7 @@ class ResourceResolver {
             resolvedUris[uri] = realUri
             log.debug "$uri resolved to real uri $realUri"
         }
+
         realUri
     }
 

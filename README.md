@@ -73,12 +73,13 @@ Create your first app:
 
     $ mkdir myGravyApp ; cd myGravyApp ; echo "" > application.groovy
 
-2. Add a route to your file, for example:
+2. Define a service, for example:
 ```groovy
 get '/hello/:name', {
     res.print "Hello $name!"
 }
 ```
+
 3. Start the gravy dev server:
 
     $ gravy
@@ -94,7 +95,8 @@ modification.  Make a change, refresh your browser, and benefit from the instant
 
 ## routes
 
-In gravy, a route is a software chain that is built to service a particular HTTP request URI pattern and method. For example:
+In gravy, a route is a software chain that is assembled to service a particular HTTP request URI pattern and method. For
+example, given the following :
 ```rb
 use '/arithmetic/*' do
     log.info "we're about to do some arithmetic: #{req.request_uri}"
@@ -102,7 +104,7 @@ use '/arithmetic/*' do
 end
 
 get '/arithmetic/add/:addend1/:addend2' do
-    res.print "the sum: #{addend1} + #{addend2} = <b>#{addend1.to_i+addend2.to_i+counter}</b>"
+    res.print "the sum: #{addend1} + #{addend2} = <b>#{addend1.to_i+addend2.to_i}</b>"
 end
 ```
 
@@ -112,7 +114,7 @@ end
 
 ## configuration
 
-### modules (app fragments)
+## modules (app fragments)
 
 A Gravy application is composed of one or more modules.  Modules define a set of web services (similar in concept 
 to a Servlet 3.0 'web fragment').

@@ -19,6 +19,7 @@ import org.mozilla.javascript.*
 import javax.servlet.FilterChain
 import javax.servlet.RequestDispatcher
 import javax.servlet.ServletException
+import javax.servlet.http.HttpSession
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
@@ -34,6 +35,7 @@ class ServletFacade {
     HttpServletRequest nativeReq
     HttpServletResponse nativeRes
     FilterChain nativeChain
+    HttpSession session
 
     Pattern uriPattern
     String requestUri
@@ -54,6 +56,7 @@ class ServletFacade {
     @CompileStatic
     ServletFacade(HttpServletRequest req, HttpServletResponse res, FilterChain chain, Pattern uriPattern, List<String> uriParamNames) {
         init(req, res, chain, uriPattern, uriParamNames)
+        session = req.session
         out =  res.getOutputStream()
         printer = new PrintWriter(new OutputStreamWriter(this.out, 'UTF-8'))  // TODO make char encoding configurable ???
         adaptors = new HashMap<GravyType,ContextAdaptor>()
@@ -63,6 +66,7 @@ class ServletFacade {
 
         this.nativeReq = req
         this.nativeRes = res
+        nativeRes.contentType = 'text/html'   // default to html
         this.nativeChain = chain
 
         this.requestUri = req.requestURI
@@ -152,6 +156,15 @@ class ServletFacade {
 
     @CompileStatic Object getAttr(String name) {
         CommonObject value = (CommonObject)nativeReq.getAttribute(name)
+        value ? value.value(currentContext) : null
+    }
+
+    @CompileStatic Object setSessionAttr(String name, Object value) {
+        session.setAttribute(name, new CommonObject(value, currentContext))
+    }
+
+    @CompileStatic Object getSessionAttr(String name) {
+        CommonObject value = (CommonObject)session.getAttribute(name)
         value ? value.value(currentContext) : null
     }
 

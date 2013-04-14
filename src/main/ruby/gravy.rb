@@ -204,22 +204,31 @@ puts "get: call_backs: #{call_backs}"
   end
 
   class RubySession
-    @@session_methods = HttpSession.public_instance_methods.to_set
-    def initialize(j_session)
-      @j_session = j_session
+    @@session_methods = nil
+    def initialize(servlet_facade)
+      @servlet_facade = servlet_facade
+      @j_session = servlet_facade.session
+      @sess_methods = get_sess_methods(@j_session)
     end
     def method_missing(name, *args, &block)
-       if @@session_methods.member? name
+       if @sess_methods.member? name
          @j_session.send(name, *args, &block)   # or java_send
        else
-           attr_name = name
-           if name.end_with?('=')  # this is a write
-             attr_name = name[0,name.size-1]
-             return @j_session.set_attribute attr_name, *args
-           else # this is a read
-             return @j_session.get_attribute attr_name
-           end
+         attr_name = name
+         if name.to_s.end_with?('=')  # this is a write
+           attr_name = name[0,name.size-1]
+           return @servlet_facade.set_session_attr attr_name, *args
+         else # this is a read
+           return @servlet_facade.get_session_attr attr_name
+         end
        end
+    end
+    private
+    def get_sess_methods(sess)
+      if @@session_methods.nil?
+        @@session_methods = sess.class.public_instance_methods
+      end
+      return @@session_methods
     end
   end
   class RubyRequest
@@ -231,7 +240,7 @@ puts "get: call_backs: #{call_backs}"
       @j_request = servlet_facade.native_req
       @req_methods = get_req_methods(@j_request)
       @input = servlet_facade.input # TODO
-      @session = self.get_session
+      @session = get_ruby_session
       @json = servlet_facade.get_json
     end
     def method_missing(name, *args, &block)
@@ -254,11 +263,11 @@ puts "get: call_backs: #{call_backs}"
       @servlet_facade.forward uri
     end
     private
-    def get_session
+    def get_ruby_session
       j_session = @j_request.session
       ruby_session = j_session.get_attribute '_ruby_session'
       if ruby_session.nil?
-        ruby_session = RubySession.new j_session
+        ruby_session = RubySession.new @servlet_facade
         j_session.set_attribute '_ruby_session', ruby_session
       end
       return ruby_session

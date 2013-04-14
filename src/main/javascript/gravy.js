@@ -96,7 +96,6 @@ global.newJSRequest = function(servletFacade) {
     req.initialize = function(servletFacade) {
         this.facade = servletFacade  // TODO i can probably due w/o this
         this.__noSuchMethod__ = function (name, args) {
-console.log("req: nosuchmethod: " + name + " - " + args)
             return this.facade.nativeReq[name].apply(this.facade.nativeReq, args)
         }
         this.next = function() {
