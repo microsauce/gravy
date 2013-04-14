@@ -34,13 +34,13 @@ end
 
 ## Features
 - Sinatra / express style routing
-- Scheduled tasks
 - Polyglot (Groovy, Ruby, JavaScript/CoffeeScript)
-- Modules
+- Modules (application fragments)
 - Single-file environment based configuration
+- Scheduled tasks
 - Hot reload
 
-## Roadmap
+## Status & Roadmap
 
 Gravy is currently Alpha software.  The focus of the current milestone (0.1) is to
 define and implement the core feature set (routing, scheduled tasks, middleware,
@@ -95,30 +95,93 @@ modification.  Make a change, refresh your browser, and benefit from the instant
 
 ## routes
 
-In gravy, a route is a software chain that is assembled to service a particular HTTP request URI pattern and method. For
-example, given the following :
+A route is a chain of callbacks that is assembled to service a HTTP request URI and method.  Most routes* consist
+of an end-point (the final callback in a chain) and middleware (any number of intermediate callbacks defined to decorate or
+validate the request/response or handle any other cross-cutting concern).  Let's start with a simple route, one consisting of a
+single callback.  To define this route we must specify one of the four recognized HTTP methods (get, post, put, and delete)**,
+a uri pattern, and a callback.  For example:
 ```rb
-use '/arithmetic/*' do
-    log.info "we're about to do some arithmetic: #{req.request_uri}"
-    req.next
-end
-
-get '/arithmetic/add/:addend1/:addend2' do
-    res.print "the sum: #{addend1} + #{addend2} = <b>#{addend1.to_i+addend2.to_i}</b>"
+get '/sandwhich/:meat/:cheese/:customer' do
+  res.print "Order Up!  One #{meat} & #{cheese} sandwhich for #{customer}."
 end
 ```
+In this example we have defined a callback that responds to HTTP 'get' requests for uri pattern: '/sandwhich/:meat/:cheese/:customer'
+(more on uri patterns below).  For example, this callback will service any of the following urls:
+```
+http://localhost:8080/sandwhich/ham/swiss/Sarah
+http://localhost:8080/sandwhich/italian-beef/provolone/John
+http://localhost:8080/sandwhich/turkey/muenster/Steve
+```
+Let's add another link to this chain.  Suppose, for example, we have a very picky regular at our shop and we want to
+ensure we always get his order right.  We could do this will middleware.  There are several ways to define/apply middleware,
+we'll start with the 'use' function:
+```groovy
+use '/sandwhich/*' {
+    req.next()
+    if ( customer == 'Steve' )
+        res.print "<br/><b>Hold the sprouts!!!</b>"
+}
+```
+This middleware callback tags additional instructions to the order when the customer is 'Steve'.
+
+### end points
+
+get, post, put, delete, static content
+
+### middleware
+
+use, param, additional end point callbacks
+
+### uri patterns
+
+parameters, wildcards, splat, callback parameters, regular expressions
+
+### route assembly
+
+Route chains are assembled according to a predictable set of rules:
+
+1.  'param' middleware is added first in the order each parameter appears in the matching uri pattern*** (note: uri params are determined by the chain end-point pattern, only one end-point per chain)
+2.  'use' middleware is added to the chain next in the order it was defined in the application script(s) *** (note: modules are loaded first).
+3.  End-point specific middleware (additional callbacks passed to get, post, put, delete functions) are next and are added in the order they are passed to the function.
+4.  Naturally, the end-point comes last.
+
+Two final notes on route assembly.  A route chain does not require an end-point.  A end-point can be any static resource, for example:
+```js
+use('/images/*', function(req,res) {
+   log.info('image uri: ' + req.getRequestURI());
+   req.next();
+});
+```
+
 
 ## servlet API
 
-## middleware
+Every callback is given (passed/injected with) a reference to a request object (req) and a response object (res).  These
+objects decorate the underlying HttpServletRequest and HttpServletResponse with useful methods and dare I say delicious
+syntactic ~~sugar~~ gravy.
+
+
+## io
+
+## view
+
+res.render
 
 ## configuration
+
+conf.groovy
 
 ## modules (app fragments)
 
 A Gravy application is composed of one or more modules.  Modules define a set of web services (similar in concept 
 to a Servlet 3.0 'web fragment').
 
-## errors
+### configuration
+
+## error handling
+
+## cron tasks
+
+## project structure
 
 ## the gravy command

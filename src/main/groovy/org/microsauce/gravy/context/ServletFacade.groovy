@@ -40,7 +40,7 @@ class ServletFacade {
     Pattern uriPattern
     String requestUri
 
-    Map<String, String> uriParamMap = [:]      // uri named parameter map
+    Map<String, String> uriParamMap = [:] as LinkedHashMap      // uri named parameter map
     List<String> uriParamValues = []             // complete uri parameter value list
     List<String> splat = []                 // wild card 'splat' list
     CommonObject json                       // a json payload
