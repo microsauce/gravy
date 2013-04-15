@@ -116,7 +116,7 @@ Let's add another link to this chain.  Suppose, for example, we have a very pick
 ensure we always get his order right.  We could do this will middleware.  There are several ways to define/apply middleware,
 we'll start with the 'use' function:
 ```groovy
-use '/sandwhich/*' {
+use '/sandwhich/*', {
     req.next()
     if ( customer == 'Steve' )
         res.print "<br/><b>Hold the sprouts!!!</b>"
@@ -153,15 +153,36 @@ use('/images/*', function(req,res) {
 });
 ```
 
-
 ## servlet API
 
 Every callback is given (passed/injected with) a reference to a request object (req) and a response object (res).  These
 objects decorate the underlying HttpServletRequest and HttpServletResponse with useful methods and dare I say delicious
 syntactic ~~sugar~~ gravy.
 
+### req
+forward(forwardUri) - forward the request to the given uri
+next() - execute the next callback in the route chain
+input - the request input stream
+
+
+### res
+render(viewUri, model)
+renderJson(model)
+redirect(redirectURL)
+print(str)
+write(binaryData)
+out - the response output stream
+
+## request/session attributes
+
+Request and session attributes
+
+Attributes can be shared between
+
 
 ## io
+The response stream is flushed by the gravy runtime following every callback and is closed by the servlet runtime at the
+completion of the request.
 
 ## view
 
