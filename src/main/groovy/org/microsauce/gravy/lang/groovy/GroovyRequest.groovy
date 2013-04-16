@@ -39,7 +39,7 @@ public class GroovyRequest {
         else return attr
     }
     @CompileStatic Object propertyMissing(String name, Object value) {
-        facade.nativeReq.setAttribute(name, new CommonObject(value, GravyType.GROOVY));
+        facade.nativeReq.setAttribute(name, new CommonObject(value, GravyType.GROOVY, facade.polyglotRoute));
     }
 
     @CompileStatic void next() {
@@ -52,7 +52,7 @@ public class GroovyRequest {
     @CompileStatic GroovySession getSession() {
         GroovySession groovySession = (GroovySession)req.getAttribute('_groovy_session')
         if ( !groovySession ) {
-            groovySession = new GroovySession(req.session)
+            groovySession = new GroovySession(facade)
             req.setAttribute '_groovy_session', groovySession
         }
         groovySession

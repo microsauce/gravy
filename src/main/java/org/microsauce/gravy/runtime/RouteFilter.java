@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 import org.microsauce.gravy.context.Context;
 import org.microsauce.gravy.context.EnterpriseService;
 import org.microsauce.gravy.context.Handler;
+import org.microsauce.gravy.context.RouteCallbacks;
 
 class RouteFilter implements Filter {
 
@@ -56,11 +57,11 @@ class RouteFilter implements Filter {
     private FilterChain buildChain(FilterChain chain, ServletRequest req, ServletResponse res) {
 
         HttpServletRequest _req = (HttpServletRequest) req;
-        List<Handler> routeHandlers = context.makeRoute(
+        RouteCallbacks routeHandlers = context.makeRoute(
                 getUri((HttpServletRequest) req), _req.getMethod());
         FilterChain routeChain = null;
         if (routeHandlers.size() > 0)
-            routeChain = new RouteChain(req, res, chain, routeHandlers, context.getParamServices());
+            routeChain = new RouteChain(req, res, chain, routeHandlers, context.getParamServices(), context.isPolyglot());
 
         return routeChain;
     }

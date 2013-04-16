@@ -1,6 +1,7 @@
 package org.microsauce.gravy.lang.groovy
 
 import groovy.transform.CompileStatic
+import org.microsauce.gravy.context.ServletFacade
 import org.microsauce.gravy.lang.object.CommonObject
 import org.microsauce.gravy.lang.object.GravyType
 
@@ -16,9 +17,11 @@ import javax.servlet.http.HttpSession
 class GroovySession {
 
     HttpSession session
+    ServletFacade facade
 
-    GroovySession(HttpSession session) {
-        this.session = session
+    @CompileStatic GroovySession(ServletFacade facade) {
+        this.facade = facade
+        this.session = facade.nativeReq.session
     }
 
     Object methodMissing(String name, Object ... args) {
@@ -30,7 +33,7 @@ class GroovySession {
         else return attr
     }
     @CompileStatic Object propertyMissing(String name, Object value) {
-        session.setAttribute(name, new CommonObject(value, GravyType.GROOVY));
+        session.setAttribute(name, new CommonObject(value, GravyType.GROOVY, facade.polyglotApp));
     }
 
 

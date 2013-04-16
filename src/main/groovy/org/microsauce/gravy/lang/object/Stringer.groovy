@@ -13,7 +13,7 @@ class Stringer {
     // TODO for now the implementation will be a singleton
     private static Stringer instance
 
-    public static getInstance() {
+    public static Stringer getInstance() {
         if (!instance) instance = new Stringer()
         return instance
     }

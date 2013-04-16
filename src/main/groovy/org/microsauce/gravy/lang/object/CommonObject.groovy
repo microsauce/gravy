@@ -17,13 +17,19 @@ class CommonObject {
     Map<String, Object> nativeRepresentations
     String serializedRepresentation
 
+    boolean polyglot
+
     Stringer stringer
 
-    CommonObject(Object nativeValue, GravyType nativeType) {
+    @CompileStatic CommonObject(Object nativeValue, GravyType nativeType, boolean polyglot) {
         this.nativeType = nativeType
         nativeRepresentations = new HashMap<String, Object>();
         nativeRepresentations.put(nativeType.name, nativeValue);
         this.stringer = Stringer.getInstance();
+
+        // capture attribute state immediately in polyglot context
+        this.polyglot = polyglot
+        if ( polyglot && nativeValue ) toString()
     }
 
     @CompileStatic

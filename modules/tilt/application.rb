@@ -32,9 +32,9 @@ load_template = proc { |template_path|
 get render_uri do
   model = req.get '_model'
   view_uri = req.get_attribute '_view'  # not serialized
-  _module = req.get_attribute '_module' # not serialized
+  module_doc_root = req.get_attribute '_document_root'
 
-  template = load_template.call document_root+'/'+_module.name+'/'+view_uri
+  template = load_template.call document_root+'/'+module_doc_root+'/'+view_uri
 
   # TODO RE-TEST THIS - we will hit the else block now
   if model.is_a? Hash

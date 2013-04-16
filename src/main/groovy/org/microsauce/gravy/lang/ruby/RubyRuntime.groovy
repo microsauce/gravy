@@ -18,7 +18,6 @@ class RubyRuntime {
     private org.jruby.RubyModule rubyModule;
 
     @CompileStatic RubyRuntime(List<String> roots) {
-        // SINGLETHREADED - supports multiple ruby instances
         container = new ScriptingContainer(LocalContextScope.SINGLETHREAD, LocalVariableBehavior.PERSISTENT);
         if ( roots ) container.loadPaths.addAll(roots)
 

@@ -1,6 +1,8 @@
 package org.microsauce.gravy.lang.javascript
 
-import org.codehaus.groovy.runtime.InvokerHelper;
+import groovy.transform.CompileStatic
+import org.codehaus.groovy.runtime.InvokerHelper
+import org.microsauce.gravy.context.ServletFacade;
 import org.microsauce.gravy.lang.object.CommonObject;
 import org.microsauce.gravy.lang.object.GravyType;
 
@@ -21,9 +23,11 @@ public class JSReqObject extends HashMap {
     def static FACADE_PROPERTIES = ['session', 'json', 'input', 'facade', 'forward', 'params', 'form', 'query', 'splat']
 
     private HttpServletRequest req;
+    private ServletFacade facade;
 
-    public JSReqObject(HttpServletRequest req) {
-        this.req = req;
+    @CompileStatic public JSReqObject(ServletFacade facade) {
+        this.req = facade.nativeReq;
+        this.facade = facade;
     }
 
     Object get(Object key) {
@@ -43,7 +47,7 @@ public class JSReqObject extends HashMap {
             return value
         }
         else {
-            req.setAttribute((String) key, new CommonObject(value, GravyType.JAVASCRIPT));
+            req.setAttribute((String) key, new CommonObject(value, GravyType.JAVASCRIPT, facade.polyglotRoute));
             return value;
         }
     }

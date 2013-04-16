@@ -83,7 +83,7 @@ global.getJSSession = function(servletFacade) {
     var nativeSess = servletFacade.nativeReq.session;
     var sess = nativeSess.getAttribute('_js_session');
     if (!sess) {
-        sess = new ScriptableMap(new JSSessObject(nativeSess));
+        sess = new ScriptableMap(new JSSessObject(servletFacade));
         nativeSess.setAttribute('_js_session', sess);
         sess.__noSuchMethod__ = function(name, args) {
             nativeSess[name].apply(nativeSess, args);
@@ -92,7 +92,7 @@ global.getJSSession = function(servletFacade) {
     return sess;
 }
 global.newJSRequest = function(servletFacade) {
-    var req = new ScriptableMap(new JSReqObject(servletFacade.nativeReq))
+    var req = new ScriptableMap(new JSReqObject(servletFacade))
     req.initialize = function(servletFacade) {
         this.facade = servletFacade  // TODO i can probably due w/o this
         this.__noSuchMethod__ = function (name, args) {
@@ -193,57 +193,6 @@ global.NativeJSHandler = function(handler) {
 
 		jsFacade.res.out.flush()
 	}
-}
-
-/**
- * undocumented export functions
- */
-
-global.commonObj = function(nativeObj) {
-	if (nativeObj != null) {
-		return new CommonObject(nativeObj, GravyType.JAVASCRIPT)
-	}
-	return null
-}
-
-/*
- * called by the 'app' module
- */
-global.Imports = function(importMap) {
-	var exportIterator = importMap.entrySet().iterator();
-	while (exportIterator.hasNext()) {
-		var keyValue = exportIterator.next();
-		var exp = keyValue.getKey();
-		(function(expName, imp, handler) {
-			imp[expName] = function(parm1, parm2, parm3, parm4, parm5, parm6, parm7) {
-				return handler.call(commonObj(parm1), commonObj(parm2),
-					commonObj(parm3), commonObj(parm4), commonObj(parm5),
-					commonObj(parm6), commonObj(parm7));
-			}
-		})(exp, this, keyValue.getValue());
-	}
-
-}
-
-global.prepareImports = function(allImports, scope) {
-	var moduleIterator = allImports.entrySet().iterator()
-	while (moduleIterator.hasNext()) {
-		var thisModuleExports = moduleIterator.next()
-		var moduleName = thisModuleExports.getKey()
-		var moduleImports = thisModuleExports.getValue()
-		scope[moduleName] = new Imports(moduleImports)
-	}
-}
-
-global.prepareExports = function(exports) { // service exports
-	var preparedExports = new HashMap()
-	for (exp in exports) {
-		if (Object.prototype.toString.call(exports[exp]) == '[object Function]') {
-			var handler = new JSHandler(exports[exp], this)
-			preparedExports.put(exp, handler)
-		}
-	}
-	return preparedExports
 }
 
 //

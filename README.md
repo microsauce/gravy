@@ -122,7 +122,7 @@ use '/sandwhich/*', {
         res.print "<br/><b>Hold the sprouts!!!</b>"
 }
 ```
-This middleware callback tags additional instructions to the order when the customer is 'Steve'.
+This middleware tags additional instructions to the order when the customer is 'Steve'.
 
 ### end points
 
@@ -156,7 +156,7 @@ use('/images/*', function(req,res) {
 ## servlet API
 
 Every callback is given (passed/injected with) a reference to a request object (req) and a response object (res).  These
-objects decorate the underlying HttpServletRequest and HttpServletResponse with useful methods and dare I say delicious
+objects decorate the underlying HttpServletRequest and HttpServletResponse with useful methods and, dare I say,
 syntactic ~~sugar~~ gravy.
 
 ### req
@@ -166,25 +166,20 @@ input - the request input stream
 
 
 ### res
-render(viewUri, model)
-renderJson(model)
-redirect(redirectURL)
-print(str)
-write(binaryData)
+render(viewUri, model) - render a view for the given view uri and model
+renderJson(model) - serialize the given object (model) as JSON in the response
+redirect(redirectURL) - redirect the client to the given url
+print(str) - print a string to the response output stream
+write(data) - write data to the response output stream
 out - the response output stream
 
 ## request/session attributes
-
-Request and session attributes
-
-Attributes can be shared between
-
 
 ## io
 The response stream is flushed by the gravy runtime following every callback and is closed by the servlet runtime at the
 completion of the request.
 
-## view
+## views
 
 res.render
 
