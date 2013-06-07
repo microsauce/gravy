@@ -76,8 +76,16 @@ class GroovyAPI {
         module.addEnterpriseService(uriPattern, MIDDLEWARE, middleware, endPoint)
     }
 
+    static void route(Closure ... handlers) {
+        route('/*', handlers)
+    }
+
     static void use(String uriPattern, Closure ... handlers) {
         route(uriPattern, handlers)
+    }
+
+    static void use(Closure ... handlers) {
+        route('/*', handlers)
     }
 
     static void param(String param, Closure handler) {

@@ -382,7 +382,7 @@ puts "get: call_backs: #{call_backs}"
       params = []
       splat_iterator = servlet_facade.splat.iterator
       while splat_iterator.has_next
-        params << splat.next
+        params << splat_iterator.next
       end
 
       # call the handler

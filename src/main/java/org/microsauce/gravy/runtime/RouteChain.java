@@ -30,6 +30,7 @@ class RouteChain implements FilterChain {
         this.serverChain = serverChain;
         this.route = route;
 
+        // TODO build a uri parameter map for each handler - how?
         EnterpriseService endPoint = endPoint();
         if ( endPoint != null )
             servletFacade = new ServletFacade((HttpServletRequest) req, (HttpServletResponse) res, this, endPoint.getUriPattern(), endPoint.getUriParamNames());

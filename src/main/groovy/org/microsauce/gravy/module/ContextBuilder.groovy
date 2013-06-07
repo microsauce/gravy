@@ -81,7 +81,7 @@ class ContextBuilder {
                     file.name.equals('application.js') ||
                     file.name.equals('application.rb')
             ))
-                application << file
+            application << file
         }
 
         if (application.size() == 0)

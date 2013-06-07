@@ -41,15 +41,15 @@ class RegExUtils {
     @CompileStatic
     static Map<String, Object> parseRoute(String uriExpression) {
         uriExpression = escapedUriPattern uriExpression
-        String optionalNamedParamPattern = '(.\\?:([a-zA-Z0-9]+)\\?)'
-        String optionalReplacementPattern = '.{0,1}(.*)'
+//        String optionalNamedParamPattern = '(.\\?:([a-zA-Z0-9]+)\\?)'
+//        String optionalReplacementPattern = '.{0,1}(.*)'
         String namedParmPattern = ':([a-zA-Z0-9]+)'
         String wildCardPattern = '(\\*)'
         String replacementPattern = '(.+)'
 
         List<String> params = parametersInOrder(uriExpression)
         String uriPattern = routePattern(uriExpression, wildCardPattern, replacementPattern)
-        uriPattern = routePattern(uriPattern, optionalNamedParamPattern, optionalReplacementPattern)
+//        uriPattern = routePattern(uriPattern, optionalNamedParamPattern, optionalReplacementPattern)
         uriPattern = routePattern(uriPattern, namedParmPattern, replacementPattern)
 
         Pattern compiledPattern = ~uriPattern

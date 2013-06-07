@@ -309,8 +309,11 @@ global.GravyModule = function(j_module, j_config, j_logger) {
      */
     this.route = function() {
         var args = Array.prototype.slice.call(arguments, 0)
+        if ( args.length < 2 && typeof(args[0]) !== 'string' && !(args[0] instanceof String) )
+            args.unshift('/*')
         args.unshift('default')
         args.unshift(this.gravyModule)
+
         addEnterpriseService.apply(null, args)
     }
 
@@ -336,8 +339,11 @@ global.GravyModule = function(j_module, j_config, j_logger) {
      */
     this.use = function() {
         var args = Array.prototype.slice.call(arguments, 0)
+        if ( args.length < 2 && args.length > 0 && typeof(args[0]) !== 'string' && !(args[0] instanceof String) )
+            args.unshift('/*')
         args.unshift('default')
         args.unshift(this.gravyModule)
+
         addEnterpriseService.apply(null, args)
     }
 

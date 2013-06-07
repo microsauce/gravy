@@ -87,19 +87,43 @@ modification.  Make a change, refresh your browser, and benefit from the instant
 ## routes
 
 In Gravy, a route is a chain of callbacks that is assembled to service an HTTP request URI and method.  A route consist
-of an end-point and any number of intermediate callbacks (middleware).
+of an end-point (the ultimate destination of the route) and any number of intermediate callbacks (middleware).
 
 ### end-points
 
-End-points are defined via get, post, put, or delete methods.  These names correspond to the http methods of the same name.
+There are two types of end-points: callbacks and static content (files).  End-point callbacks are defined via the 'get', 'post',
+'put', 'delete' ('del' in JavaScript), and 'all' methods.  These names correspond to the http methods of the same name.  The
+method call is of the form:
+```
+get|post|put|delete|all(uriPattern [,middlewareCallback...], endPointCallback)
+```
 
-get|post|put|delete|all(uriPattern, [middlewareCallback...], endPointCallback)
+When no end-point callback matches the given URI and method Gravy presumes the request URI refers to a static resource.
+
+Examples:
+
+Given the following callback definitions:
+```groovy
+    use '/sandwich/order/*' {
+        req.next()
+        res.print " and a bag of chips"
+    }
+
+    get '/sandwich/order/:name', {
+        res.print "here is your $name sandwich"
+    }
+
+```
+Request header: "GET /sandwich/order/ham-and-cheese" will result in the following response:
+```
+    here is your ham-and-cheese sandwhich and a bag of chips
+```
 
 #### uri patterns
 Gravy currently supports uri patterns consisting of named parameters (in the form :paramName) and wildcards (*).
 
 optional parameters
-uri params are determined by the end-point pattern
+uri params are determined by the end-point pattern (what about static end-points?)
 
 ### middleware api
 
@@ -145,14 +169,14 @@ underlying HttpServletRequest and HttpServletResponse with useful methods, prope
 ~~sugar~~ gravy.
 
 ### req
-params - a hash of request parameters
-form -
-query -
-json -
-sess - the session object
-forward(forwardUri) - forward the request to the given uri
-next() - execute the next callback in the route chain
-input - the request input stream
+* params - a hash of request parameters
+* form -
+* query -
+* json -
+* sess - the session object
+* forward(forwardUri) - forward the request to the given uri
+* next() - execute the next callback in the route chain
+* input - the request input stream
 
 For additional information regarding 'req' see:
 

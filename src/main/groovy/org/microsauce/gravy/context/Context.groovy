@@ -63,7 +63,7 @@ class Context {
         services.removeAll(clearList)
     }
 
-    @CompileStatic clearAppParamMiddleware() {   // TODO this causes ConcurrentModificationException
+    @CompileStatic clearAppParamMiddleware() {
         Iterator iterator = paramServices.entrySet().iterator()
         while (iterator.hasNext()) {
             Map.Entry thisEntry = iterator.next()
@@ -89,7 +89,8 @@ class Context {
         List<Handler> handlers = [] as List
         for (EnterpriseService service in enterpriseServices) {
             if ( uri ==~ service.uriPattern ) {
-                Handler serviceEndPoint = service.handlers[method.toLowerCase()] ?: service.handlers[EnterpriseService.MIDDLEWARE]
+                Handler serviceEndPoint = service.handlers[method.toLowerCase()] ?:
+                    service.handlers[EnterpriseService.MIDDLEWARE]
                 if ( serviceEndPoint ) {
                     if (service.middleware) {
                         service.middleware.each { Handler middlewareHandler ->
