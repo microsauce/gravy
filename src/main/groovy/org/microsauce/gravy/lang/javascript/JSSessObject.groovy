@@ -41,7 +41,7 @@ public class JSSessObject extends HashMap {
             return value
         }
         else {
-            sess.setAttribute((String) key, new CommonObject(value, GravyType.JAVASCRIPT, facade.polyglotRoute));
+            sess.setAttribute((String) key, new CommonObject(value, GravyType.JAVASCRIPT));
             return value;
         }
     }

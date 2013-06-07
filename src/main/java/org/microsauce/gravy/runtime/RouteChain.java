@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.microsauce.gravy.context.EnterpriseService;
-import org.microsauce.gravy.context.RouteCallbacks;
 import org.microsauce.gravy.context.ServletFacade;
 import org.microsauce.gravy.context.Handler;
 
@@ -27,7 +26,7 @@ class RouteChain implements FilterChain {
     FilterChain serverChain;
     ServletFacade servletFacade;
 
-    RouteChain(ServletRequest req, ServletResponse res, FilterChain serverChain, RouteCallbacks route, Map<String, EnterpriseService> paramPreconditions, boolean polyglotApp) {
+    RouteChain(ServletRequest req, ServletResponse res, FilterChain serverChain, List<Handler> route, Map<String, EnterpriseService> paramPreconditions) {
         this.serverChain = serverChain;
         this.route = route;
 
@@ -36,9 +35,6 @@ class RouteChain implements FilterChain {
             servletFacade = new ServletFacade((HttpServletRequest) req, (HttpServletResponse) res, this, endPoint.getUriPattern(), endPoint.getUriParamNames());
         else
             servletFacade = new ServletFacade((HttpServletRequest) req, (HttpServletResponse) res, this, null, null);
-
-        servletFacade.setPolyglotRoute(route.getPolyglot());
-        servletFacade.setPolyglotApp(polyglotApp);
 
         List<Handler> paramHandlers= new ArrayList<Handler>();
         for( String uriParam : servletFacade.getUriParamMap().keySet() ) {

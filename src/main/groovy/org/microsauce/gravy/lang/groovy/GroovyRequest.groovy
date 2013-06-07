@@ -39,7 +39,7 @@ public class GroovyRequest {
         else return attr
     }
     @CompileStatic Object propertyMissing(String name, Object value) {
-        facade.nativeReq.setAttribute(name, new CommonObject(value, GravyType.GROOVY, facade.polyglotRoute));
+        facade.nativeReq.setAttribute(name, new CommonObject(value, GravyType.GROOVY));
     }
 
     @CompileStatic void next() {

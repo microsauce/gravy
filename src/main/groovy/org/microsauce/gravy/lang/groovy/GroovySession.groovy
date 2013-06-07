@@ -33,7 +33,7 @@ class GroovySession {
         else return attr
     }
     @CompileStatic Object propertyMissing(String name, Object value) {
-        session.setAttribute(name, new CommonObject(value, GravyType.GROOVY, facade.polyglotApp));
+        session.setAttribute(name, new CommonObject(value, GravyType.GROOVY));
     }
 
 

@@ -33,8 +33,6 @@ class ContextBuilder {
         Module.moduleLoadOrder(modules.keySet(), app.config.moduleOrder).each { String moduleName ->
                 log.info "\tloading module ${moduleName}"
             modules[moduleName].load()
-            if ( !context.polyglot )
-                context.polyglot = !app.type.name.equals(modules[moduleName].type.name)
         }
 
         app.load()

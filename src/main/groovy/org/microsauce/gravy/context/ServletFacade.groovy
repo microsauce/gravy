@@ -53,9 +53,6 @@ class ServletFacade {
     GravyType currentContext;
     Map<GravyType,ContextAdaptor> adaptors;
 
-    boolean polyglotRoute
-    boolean polyglotApp
-
     @CompileStatic
     ServletFacade(HttpServletRequest req, HttpServletResponse res, FilterChain chain, Pattern uriPattern, List<String> uriParamNames) {
         init(req, res, chain, uriPattern, uriParamNames)
@@ -120,7 +117,7 @@ class ServletFacade {
         String payload = readJsonPayload(req)
         CommonObject json = null
         if ( payload ) {
-            json = new CommonObject(null, currentContext, false)
+            json = new CommonObject(null, currentContext)
             json.serializedRepresentation = payload
         }
         json
@@ -154,7 +151,7 @@ class ServletFacade {
     //
 
     @CompileStatic Object setAttr(String name, Object value) {
-        nativeReq.setAttribute(name, new CommonObject(value, currentContext, polyglotRoute))
+        nativeReq.setAttribute(name, new CommonObject(value, currentContext))
     }
 
     @CompileStatic Object getAttr(String name) {
@@ -163,7 +160,7 @@ class ServletFacade {
     }
 
     @CompileStatic Object setSessionAttr(String name, Object value) {
-        session.setAttribute(name, new CommonObject(value, currentContext, polyglotApp))
+        session.setAttribute(name, new CommonObject(value, currentContext))
     }
 
     @CompileStatic Object getSessionAttr(String name) {
@@ -186,7 +183,7 @@ class ServletFacade {
 
     @CompileStatic void renderJson(Object model) {
         nativeRes.contentType = 'application/json'
-        printer << new CommonObject(model, currentContext,false).toString()
+        printer << new CommonObject(model, currentContext).toString()
         printer.flush()
     }
 
@@ -202,7 +199,7 @@ class ServletFacade {
     @CompileStatic void render(String viewUri, Object model) {
         Module module = nativeReq.getAttribute('_module') as Module
         nativeReq.setAttribute('_view', viewUri)
-        nativeReq.setAttribute('_model', new CommonObject(model, module.type, polyglotRoute))
+        nativeReq.setAttribute('_model', new CommonObject(model, module.type))
         nativeReq.setAttribute('_document_root', module.name)
         RequestDispatcher dispatcher = nativeReq.getRequestDispatcher(module.renderUri)
         nativeRes.contentType = 'text/html'

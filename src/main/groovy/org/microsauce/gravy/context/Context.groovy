@@ -22,8 +22,6 @@ class Context {
 
     Scheduler cronScheduler
 
-    boolean polyglot = false
-
     List<EnterpriseService> enterpriseServices = []
     Map<String, EnterpriseService> paramServices = new HashMap()
     List<CronService> cronServices = []
@@ -87,8 +85,8 @@ class Context {
         matchingServices
     }
 
-    @CompileStatic RouteCallbacks makeRoute(String uri, String method) {
-        List<Handler> handlers = new RouteCallbacks() //[] as List
+    @CompileStatic List<Handler> makeRoute(String uri, String method) {
+        List<Handler> handlers = [] as List
         for (EnterpriseService service in enterpriseServices) {
             if ( uri ==~ service.uriPattern ) {
                 Handler serviceEndPoint = service.handlers[method.toLowerCase()] ?: service.handlers[EnterpriseService.MIDDLEWARE]

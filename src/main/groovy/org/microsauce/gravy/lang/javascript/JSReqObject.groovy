@@ -47,7 +47,7 @@ public class JSReqObject extends HashMap {
             return value
         }
         else {
-            req.setAttribute((String) key, new CommonObject(value, GravyType.JAVASCRIPT, facade.polyglotRoute));
+            req.setAttribute((String) key, new CommonObject(value, GravyType.JAVASCRIPT));
             return value;
         }
     }
