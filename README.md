@@ -6,8 +6,6 @@ Gravy is an intuitive, expressjs inspired framework for rapid development of web
 on the Java Enterprise (the meat-and-potatoes).  Gravy applications can be written in Groovy,
 JavaScript, CoffeeScript, and/or Ruby.
 
-Here is a taste:
-
 Hello Groovy:
 ```groovy
 get '/hello/:name', {
@@ -33,7 +31,7 @@ end
 ```
 
 ## Features
-- Sinatra / express style routing
+- Express style routing
 - Polyglot (Groovy, Ruby, JavaScript/CoffeeScript)
 - Modules (application fragments)
 - Single-file environment based configuration
@@ -61,7 +59,7 @@ management, etc), with a 1.0 beta to follow.
 
 	$ git clone https://github.com/microsauce/gravy.git
 	$ cd gravy
-	$ ant
+	$ ant OR $ gradle
 	$ export GRAVY_HOME=$PWD
 	$ PATH=$PATH:$GRAVY_HOME/bin
 
@@ -71,20 +69,13 @@ Create your first app:
 
 1. Create your application file:
 
-    $ mkdir myGravyApp ; cd myGravyApp ; echo "" > application.groovy
+    $ mkdir myGravyApp ; cd myGravyApp ; echo -e "get '/hello/:name', { res.print \042Hello \$name! \042 }" > application.groovy
 
-2. Define a service, for example:
-```groovy
-get '/hello/:name', {
-    res.print "Hello $name!"
-}
-```
-
-3. Start the gravy dev server:
+2. Start the gravy dev server:
 
     $ gravy
 
-4. Point your browser at:
+3. Point your browser at:
 
 	http://localhost:8080/hello/You
 
@@ -95,39 +86,32 @@ modification.  Make a change, refresh your browser, and benefit from the instant
 
 ## routes
 
-A route is a chain of callbacks that is assembled to service a HTTP request URI and method.  Most routes* consist
-of an end-point (the final callback in a chain) and middleware (any number of intermediate callbacks defined to decorate or
-validate the request/response or handle any other cross-cutting concern).  Let's start with a simple route, one consisting of a
-single callback.  To define this route we must specify one of the four recognized HTTP methods (get, post, put, and delete)**,
-a uri pattern, and a callback.  For example:
+In Gravy, a route is a chain of callbacks that is assembled to service an HTTP request URI and method.  A route consist
+of an end-point and any number of intermediate callbacks (middleware).
+
+### end-points
+
+End-points are defined via get, post, put, or delete methods.  These names correspond to the http methods of the same name.
+
+get|post|put|delete|all(uriPattern, [middlewareCallback...], endPointCallback)
+
+#### uri patterns
+Gravy currently supports uri patterns consisting of named parameters (in the form :paramName) and wildcards (*).
+
+optional parameters
+uri params are determined by the end-point pattern
+
+### middleware api
+
+use([uriPattern,] callback)
+
+param(uriParamName, callback)
+
 ```rb
 get '/sandwhich/:meat/:cheese/:customer' do
   res.print "Order Up!  One #{meat} & #{cheese} sandwhich for #{customer}."
 end
 ```
-In this example we have defined a callback that responds to HTTP 'get' requests for uri pattern: '/sandwhich/:meat/:cheese/:customer'
-(more on uri patterns below).  For example, this callback will service any of the following urls:
-```
-http://localhost:8080/sandwhich/ham/swiss/Sarah
-http://localhost:8080/sandwhich/italian-beef/provolone/John
-http://localhost:8080/sandwhich/turkey/muenster/Steve
-```
-Let's add another link to this chain.  Suppose, for example, we have a very picky regular at our shop and we want to
-ensure we always get his order right.  We could do this will middleware.  There are several ways to define/apply middleware,
-we'll start with the 'use' function:
-```groovy
-use '/sandwhich/*', {
-    req.next()
-    if ( customer == 'Steve' )
-        res.print "<br/><b>Hold the sprouts!!!</b>"
-}
-```
-This middleware tags additional instructions to the order when the customer is 'Steve'.
-
-### end points
-
-get, post, put, delete, static content
-
 ### middleware
 
 use, param, additional end point callbacks
@@ -138,14 +122,15 @@ parameters, wildcards, splat, callback parameters, regular expressions
 
 ### route assembly
 
-Route chains are assembled according to a predictable set of rules:
+Route chains are assembled in the following order:
 
-1.  'param' middleware is added first in the order each parameter appears in the matching uri pattern*** (note: uri params are determined by the chain end-point pattern, only one end-point per chain)
-2.  'use' middleware is added to the chain next in the order it was defined in the application script(s) *** (note: modules are loaded first).
-3.  End-point specific middleware (additional callbacks passed to get, post, put, delete functions) are next and are added in the order they are passed to the function.
+1.  'param' middleware in the order each parameter appears in the matching uri pattern
+2.  'use' middleware in the order it was defined in the application script(s)
+3.  Middleware callbacks passed directly to the get, post, put, delete methods
 4.  Naturally, the end-point comes last.
 
-Two final notes on route assembly.  A route chain does not require an end-point.  A end-point can be any static resource, for example:
+One final note on route assembly.  A route chain does not require an end-point (when an end-point callback is not defined
+gravy will attempt to load the given uri as a static resource (a file)). For example:
 ```js
 use('/images/*', function(req,res) {
    log.info('image uri: ' + req.getRequestURI());
@@ -155,25 +140,53 @@ use('/images/*', function(req,res) {
 
 ## servlet API
 
-Every callback is given (passed/injected with) a reference to a request object (req) and a response object (res).  These
-objects decorate the underlying HttpServletRequest and HttpServletResponse with useful methods and, dare I say,
-syntactic ~~sugar~~ gravy.
+Every callback has a reference to a request object (req) and a response object (res).  These objects decorate the
+underlying HttpServletRequest and HttpServletResponse with useful methods, properties and, dare I say, syntactic
+~~sugar~~ gravy.
 
 ### req
+params - a hash of request parameters
+form -
+query -
+json -
+sess - the session object
 forward(forwardUri) - forward the request to the given uri
 next() - execute the next callback in the route chain
 input - the request input stream
 
+For additional information regarding 'req' see:
+
+### sess
+
+See:
 
 ### res
 render(viewUri, model) - render a view for the given view uri and model
-renderJson(model) - serialize the given object (model) as JSON in the response
+renderJson(model) - serialize the given object (model) send response as application/json
 redirect(redirectURL) - redirect the client to the given url
 print(str) - print a string to the response output stream
 write(data) - write data to the response output stream
 out - the response output stream
 
+For additional information regarding 'res' see:
+
 ## request/session attributes
+
+Request and session attributes are accessible by name via the dot operator:
+```
+req.firstName
+```
+hash notation:
+```
+sess['firstName']
+```
+or the getAttribute method:
+```js
+req.getAttribute('firstName');
+```
+```ruby
+req.get_attribute('firstName')
+```
 
 ## io
 The response stream is flushed by the gravy runtime following every callback and is closed by the servlet runtime at the
@@ -183,16 +196,18 @@ completion of the request.
 
 res.render
 
-## configuration
-
-conf.groovy
-
 ## modules (app fragments)
 
 A Gravy application is composed of one or more modules.  Modules define a set of web services (similar in concept 
 to a Servlet 3.0 'web fragment').
 
 ### configuration
+
+Gravy uses the groovy ConfigSlurper to load configuration files (conf.groovy).  conf.groovy should be defined in the
+root of your application/module folder.  The app module configuration can set properties
+
+For more information see #
+
 
 ## error handling
 

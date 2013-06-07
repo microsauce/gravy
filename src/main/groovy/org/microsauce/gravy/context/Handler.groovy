@@ -33,40 +33,6 @@ abstract class Handler {
         this.module = module;
     }
 
-    @CompileStatic
-    public Object call(
-            CommonObject parm1,
-            CommonObject parm2,
-            CommonObject parm3,
-            CommonObject parm4,
-            CommonObject parm5,
-            CommonObject parm6,
-            CommonObject parm7) {
-
-        List parms = new ArrayList()
-        Object np7 = nativeObj(parm7)
-        if (np7) parms.add(0, np7)
-        Object np6 = nativeObj(parm6)
-        if (np6) parms.add(0, np6)
-        Object np5 = nativeObj(parm5)
-        if (np5) parms.add(0, np5)
-        Object np4 = nativeObj(parm4)
-        if (np4) parms.add(0, np4)
-        Object np3 = nativeObj(parm3)
-        if (np3) parms.add(0, np3)
-        Object np2 = nativeObj(parm2)
-        if (np2) parms.add(0, np2)
-        Object np1 = nativeObj(parm1)
-        if (np1) parms.add(0, np1)
-        Object result = doExecute(parms)
-
-        new CommonObject(result, module.type).toNative()
-    }
-
-    @CompileStatic private Object nativeObj(CommonObject obj) {
-        obj ? obj.value(module.type) : null
-    }
-
     @CompileStatic Object execute(ServletFacade servletFacade) {
         try {
             servletFacade.currentContext = module.type

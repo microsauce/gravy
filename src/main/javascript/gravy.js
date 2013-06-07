@@ -278,6 +278,25 @@ global.GravyModule = function(j_module, j_config, j_logger) {
     }
 
     /*
+     * define 'get', 'post', 'del', and 'put' request handlers
+     *
+     * Example:
+     * all '/hello/:name', (req, res) ->
+     * 		res.render '/greeting.html', {name: this.name}
+     *
+     * all '/hello/:name', (req, res) ->
+     * 		res.render '/greeting.html', {name: this.name}
+     * , [REQUEST]
+     */
+    this.all = function() {
+        var args = Array.prototype.slice.call(arguments, 0)
+        this.get(args)
+        this.post(args)
+        this.put(args)
+        this.del(args)
+    }
+
+    /*
      * define a catch-all request handler
      *
      * Example:

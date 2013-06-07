@@ -151,6 +151,13 @@ puts "get: call_backs: #{call_backs}"
     add_service uri_pattern, 'delete', call_backs, block
   end
 
+  def all(uri_pattern, *call_backs, &block)
+    add_service uri_pattern, 'get', call_backs, block
+    add_service uri_pattern, 'post', call_backs, block
+    add_service uri_pattern, 'put', call_backs, block
+    add_service uri_pattern, 'delete', call_backs, block
+  end
+
   def route(uri_pattern, *call_backs, &block)
     add_service uri_pattern, 'default', call_backs, block
   end

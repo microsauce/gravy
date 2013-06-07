@@ -1,2 +1,50 @@
 
-ant.importBuild 'build.xml'
+apply plugin: 'groovy'
+
+defaultTasks 'clean', 'assemble'
+
+sourceSets.main.java.srcDirs = []
+sourceSets.main.groovy.srcDir 'src/main/java'
+
+repositories {
+    mavenCentral()
+    maven {
+        url "https://github.com/microsauce/mvn-repo/raw/master"
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'lib', includes: ['**/*.jar'])
+    compile group: 'org.microsauce', name: 'incognito', version: '0.1-SNAPSHOT'
+}
+
+classes << {
+    copy {
+        from 'src/main/javascript'
+        into 'build/classes/main'
+    }
+    copy {
+        from 'src/main/ruby'
+        into 'build/classes/main'
+    }
+}
+
+assemble << {
+    copy {
+        from configurations.runtime
+        into 'build/libs'
+        include 'incognito*.jar'
+    }
+    copy {
+        from 'build/libs'
+        into 'lib'
+        include '*.jar'
+    }
+}
+
+clean << {
+    project.delete(file('lib/gravy.jar'))
+    ant.delete {
+        fileset(dir: file('lib'), includes: 'incognito*.jar')
+    }
+}

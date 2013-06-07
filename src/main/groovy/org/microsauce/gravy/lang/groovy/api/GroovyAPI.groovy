@@ -60,6 +60,13 @@ class GroovyAPI {
         module.addEnterpriseService(uriPattern, DELETE, middleware, endPoint)
     }
 
+    static void all(String uriPattern, Closure ... handlers) {
+        get(uriPattern, handlers)
+        post(uriPattern, handlers)
+        put(uriPattern, handlers)
+        delete(uriPattern, handlers)
+    }
+
     static void route(String uriPattern, Closure ... handlers) {
         def handlerList = handlers as List
         def middleware = []
