@@ -3,6 +3,9 @@ apply plugin: 'groovy'
 
 defaultTasks 'clean', 'assemble'
 
+//
+// enable joint compilation with separate 'java' source tree
+//
 sourceSets.main.java.srcDirs = []
 sourceSets.main.groovy.srcDir 'src/main/java'
 

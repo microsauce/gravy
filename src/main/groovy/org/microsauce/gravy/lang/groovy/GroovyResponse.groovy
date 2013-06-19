@@ -2,8 +2,6 @@ package org.microsauce.gravy.lang.groovy
 
 import groovy.transform.CompileStatic
 import org.microsauce.gravy.context.ServletFacade
-import org.microsauce.gravy.lang.object.CommonObject
-import org.microsauce.gravy.lang.object.GravyType
 
 import javax.servlet.http.HttpServletResponse
 

@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 import org.microsauce.gravy.context.Context;
 import org.microsauce.gravy.context.EnterpriseService;
 import org.microsauce.gravy.context.Handler;
+import org.microsauce.incognito.Incognito;
 
 class RouteFilter implements Filter {
 
@@ -22,9 +23,11 @@ class RouteFilter implements Filter {
 
     Context context;
     String errorUri;
+    Incognito incognito;
 
-    RouteFilter(Context context, String errorUri) {
+    RouteFilter(Context context, Incognito incognito, String errorUri) {
         this.context = context;
+        this.incognito = incognito;
         this.errorUri = errorUri;
     }
 
@@ -60,7 +63,7 @@ class RouteFilter implements Filter {
                 getUri((HttpServletRequest) req), _req.getMethod());
         FilterChain routeChain = null;
         if (routeHandlers.size() > 0)
-            routeChain = new RouteChain(req, res, chain, routeHandlers, context.getParamServices());
+            routeChain = new RouteChain(req, res, chain, incognito, routeHandlers, context.getParamServices());
 
         return routeChain;
     }

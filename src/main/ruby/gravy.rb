@@ -18,7 +18,7 @@ require 'set'
 java_import javax.servlet.http.HttpServletRequest
 java_import javax.servlet.http.HttpServletResponse
 java_import javax.servlet.http.HttpSession
-java_import org.microsauce.gravy.lang.object.CommonObject
+java_import org.microsauce.gravy.lang.object.SharedObject
 java_import java.util.ArrayList
 java_import java.util.HashMap
 java_import java.lang.String

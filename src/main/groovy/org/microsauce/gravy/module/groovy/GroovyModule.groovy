@@ -6,8 +6,6 @@ import org.microsauce.gravy.lang.groovy.api.GroovyAPI
 import org.microsauce.gravy.lang.groovy.script.Script
 import org.microsauce.gravy.lang.groovy.script.ScriptDecorator
 import org.microsauce.gravy.lang.groovy.script.ScriptUtils
-import org.microsauce.gravy.lang.object.CommonObject
-import org.microsauce.gravy.lang.object.GravyType
 import org.microsauce.gravy.module.Module
 
 

@@ -4,12 +4,7 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j
 import it.sauronsoftware.cron4j.Scheduler
 
-import javax.servlet.DispatcherType
-import javax.servlet.Filter
-import javax.servlet.http.HttpServlet
-
-import org.microsauce.gravy.runtime.FilterWrapper
-import org.microsauce.gravy.runtime.ServletWrapper
+import org.microsauce.gravy.module.Module
 
 
 /**
@@ -25,6 +20,8 @@ class Context {
     List<EnterpriseService> enterpriseServices = []
     Map<String, EnterpriseService> paramServices = new HashMap()
     List<CronService> cronServices = []
+	List<Module> modules = []
+	Module app
 
     @CompileStatic
     void addEnterpriseService(EnterpriseService service) {

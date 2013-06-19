@@ -1,12 +1,10 @@
 package org.microsauce.gravy.lang.javascript
 
 import org.microsauce.gravy.context.ServletFacade
-import org.microsauce.gravy.lang.object.CommonObject
-import org.microsauce.gravy.lang.object.GravyType;
+import org.microsauce.gravy.lang.object.GravyType
+import org.microsauce.gravy.lang.object.SerializableObject
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import java.util.HashMap;
+import javax.servlet.http.HttpSession
 
 /**
  * TODO rethink this
@@ -31,8 +29,9 @@ public class JSSessObject extends HashMap {
     Object get(Object key) {
         if (getProperties().contains(key)) return sess."$key"
 
-        CommonObject value = (CommonObject)sess.getAttribute((String)key);
-        return value == null ? null : value.value(GravyType.JAVASCRIPT);
+		facade.getSessionAttr(key)
+//        SerializableObject value = (SerializableObject)sess.getAttribute((String)key);
+//        return value == null ? null : value.value(GravyType.JAVASCRIPT);
     }
 
     Object put(Object key, Object value) {
@@ -41,8 +40,9 @@ public class JSSessObject extends HashMap {
             return value
         }
         else {
-            sess.setAttribute((String) key, new CommonObject(value, GravyType.JAVASCRIPT));
-            return value;
+			facade.setSessionAttr(key, value)
+//            sess.setAttribute((String) key, new SerializableObject(value, GravyType.JAVASCRIPT));
+//            return value;
         }
     }
 

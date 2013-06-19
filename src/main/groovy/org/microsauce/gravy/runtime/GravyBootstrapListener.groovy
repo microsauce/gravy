@@ -3,7 +3,6 @@ package org.microsauce.gravy.runtime
 import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j
 import it.sauronsoftware.cron4j.Scheduler
-import org.microsauce.gravy.module.config.ConfigLoader
 
 import javax.servlet.*
 
@@ -18,8 +17,10 @@ import org.microsauce.gravy.dev.observer.JNotifySourceModObserver
 import org.microsauce.gravy.dev.observer.RedeploySourceModHandler
 import org.microsauce.gravy.module.ContextBuilder
 import org.microsauce.gravy.module.Module
-import org.microsauce.gravy.module.ModuleFactory
+import org.microsauce.gravy.module.config.ConfigLoader
 import org.microsauce.gravy.server.runtime.*
+import org.microsauce.incognito.Incognito
+import org.microsauce.incognito.Runtime
 
 
 @Log4j
@@ -63,35 +64,54 @@ class GravyBootstrapListener implements ServletContextListener {
         //
         File moduleRootFolder = new File(moduleRoot)
         List<String> resourceRoots = []
-        Collection<String> availableModules = ContextBuilder.listAllModules(moduleRootFolder).collect { File modFolder -> modFolder.name }
+        Collection<String> availableModules = 
+			ContextBuilder.listAllModules(moduleRootFolder).collect { File modFolder -> modFolder.name }
         Module.moduleLoadOrder(availableModules,config.moduleOrder).each { String moduleName ->
             log.info "adding folder ${moduleName} to the resource path"
             String moduleResoursesFolder = "${appRoot}/${moduleName}".toString()
             if (new File(moduleResoursesFolder).exists())
                 resourceRoots << moduleResoursesFolder
         }
-        if ( new File( "${appRoot}/app" ).exists() ) resourceRoots.add(0, "${appRoot}/app".toString())
+        if ( new File( "${appRoot}/app" ).exists() ) 
+			resourceRoots.add(0, "${appRoot}/app".toString())
+			
         //
         // instantiate and build the Application Context
         //
-        ContextBuilder contextBuilder = new ContextBuilder(new File(appRoot), environment)
-        contextBuilder.build()
-        Context context = contextBuilder.context
+			
+        ContextBuilder contextBuilder = 
+			new ContextBuilder(new File(appRoot), environment)
+        Context context = contextBuilder.build()
         this.context = context
-        Module app = contextBuilder.application
-
+		
+		//
+		// initiatize Incognito
+		//
+		Incognito incognito = initIncognito(context.modules)
+		
         //
         // start source file observer (dev mode only)
         //
         if (System.getProperty('gravy.devMode')) {
-            startSourceObserver app
+            startSourceObserver context.app
         }
 
-        initEnterpriseRuntime context, resourceRoots, appRoot, sce, config.gravy.view.errorUri
+        initEnterpriseRuntime context, resourceRoots, appRoot, incognito, sce, config.gravy.view.errorUri
         initCronRuntime context
 
     }
 
+	@CompileStatic
+	private Incognito initIncognito(List modules) {
+		Incognito incognito = new Incognito()
+		Set rtSet = [] as Set
+		rtSet.addAll(modules.collect {Module mod -> mod.scriptContext})
+		for ( rawRt in rtSet ) {
+			incognito.registerRuntime(org.microsauce.incognito.Runtime.getRuntime(rawRt))
+		}
+		incognito
+	}
+	
     @CompileStatic
     private void initCronRuntime(Context context) {
         if (context.cronServices) {
@@ -118,15 +138,15 @@ class GravyBootstrapListener implements ServletContextListener {
         sourceObserver.addCompiledSourceHandler(new RedeploySourceModHandler(app))
 
         sourceObserver.start()
-
     }
 
-
-    private void initEnterpriseRuntime(Context context, List<String> resourceRoots, String deployPath, ServletContextEvent sce, String errorUri) {
+    private void initEnterpriseRuntime(Context context, List<String> resourceRoots, 
+		String deployPath, Incognito incognito, ServletContextEvent sce, String errorUri) {
+		
         ServletContext servletContext = sce.servletContext
 
         addFilter('RouteFilter', new FilterWrapper([
-                filter: new RouteFilter(context, errorUri),
+                filter: new RouteFilter(context, incognito, errorUri),
                 mapping: '/*',
                 dispatch: EnumSet.copyOf([DispatcherType.REQUEST, DispatcherType.FORWARD])]), servletContext)
         addFilter('GravyResourceFilter', new FilterWrapper([

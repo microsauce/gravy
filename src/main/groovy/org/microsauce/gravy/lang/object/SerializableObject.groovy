@@ -2,16 +2,21 @@ package org.microsauce.gravy.lang.object
 
 import groovy.transform.CompileStatic
 import org.microsauce.gravy.module.Module
+import org.microsauce.incognito.Incognito
+import org.microsauce.incognito.Runtime
+import org.microsauce.gravy.lang.object.GravyType
+import static org.microsauce.gravy.lang.object.GravyType.*
 
 
 /**
  *
- * This class encapsulates an object utilized by any or all supported
- * language environments (Groovy and JavaScript currently).  
+ * This class encapsulates an object defined by one of the Stringer
+ * supported language runtimes (Rhino, Groovy, and JRuby currently) and provides
+ * methods for JSON serialization / deserialization.
  *
  * @author microsauce
  */
-class CommonObject {
+class SerializableObject implements SharedObject {
 
     GravyType nativeType
     Map<String, Object> nativeRepresentations
@@ -19,7 +24,7 @@ class CommonObject {
 
     Stringer stringer
 
-    CommonObject(Object nativeValue, GravyType nativeType) {
+    SerializableObject(Object nativeValue, GravyType nativeType) {
         this.nativeType = nativeType
         nativeRepresentations = new HashMap<String, Object>();
         nativeRepresentations.put(nativeType.name, nativeValue);

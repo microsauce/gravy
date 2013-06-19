@@ -2,10 +2,8 @@ package org.microsauce.gravy.context
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j
-import org.microsauce.gravy.lang.object.CommonObject
 import org.microsauce.gravy.module.Module
 
-import javax.servlet.DispatcherType
 import javax.servlet.RequestDispatcher
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse

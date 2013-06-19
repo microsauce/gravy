@@ -8,44 +8,44 @@ import java.util.regex.Pattern
 
 import org.microsauce.gravy.context.Context
 
+
 class ContextBuilder {
 
     Logger log = Logger.getLogger(ContextBuilder.class)
     private static final Pattern SCRIPT_NAME = ~/application\.([a-zA-Z0-9]+)/
 
-    Module application
-    Context context
     File appRoot
     String env = env
 
     ContextBuilder(File appRoot, String env) {
-        context = new Context()
         this.appRoot = appRoot
         this.env = env
     }
 
-    @CompileStatic
-    Context build() {
-        Module app = instantiateApplication()
-        application = app
-        Map<String,Module> modules = instantiateModules()
-
+    @CompileStatic Context build() {
+		Context context = new Context()
+		Module app = instantiateApplication(context)
+        context.app = app
+        Map<String,Module> modules = instantiateModules(context, app)
+		context.modules << context.app
+		context.modules.addAll(modules.values())
+		
         Module.moduleLoadOrder(modules.keySet(), app.config.moduleOrder).each { String moduleName ->
                 log.info "\tloading module ${moduleName}"
             modules[moduleName].load()
         }
 
         app.load()
-        app.context
+        context
     }
 
 
     @CompileStatic
-    private Map<String, Module> instantiateModules() {
+    private Map<String, Module> instantiateModules(Context context, Module app) {
         Map<String, Module> modules = [:]
 
         for (modFolder in ContextBuilder.listModules()) {
-            Module module = instantiateModule(context, modFolder, false)
+            Module module = instantiateModule(context, modFolder, app)
             if (module) modules[module.name] = module
         }
 
@@ -53,20 +53,20 @@ class ContextBuilder {
     }
 
     @CompileStatic
-    private Module instantiateModule(Context context, File modFolder, Boolean isApp) {
+    private Module instantiateModule(Context context, File modFolder, Module app) {
         String modName = modFolder.name
         log.info "instantiating module $modName"
         File applicationScript = applicationScript(modFolder)
         Matcher matcher = applicationScript.name =~ SCRIPT_NAME
         matcher.find()
 
-        String fileExtension = matcher.group(1)// [0][1]
+        String fileExtension = matcher.group(1)
         ModuleFactory moduleFactory = ModuleFactory.getInstance fileExtension
         if (moduleFactory == null)
             throw new Exception("unable to find module loader for file name ${fileExtension}.")
 
-        Module thisModule = moduleFactory.createModule(context, modFolder, applicationScript, isApp)
-        thisModule.app = application
+        Module thisModule = moduleFactory.createModule(context, modFolder, applicationScript, app ? false : true)
+        thisModule.app = app
         thisModule
     }
 
@@ -113,9 +113,9 @@ class ContextBuilder {
         folders
     }
 
-    private Module instantiateApplication() {
+    private Module instantiateApplication(Context context) {
         File appFolder = new File(new File(System.getProperty('gravy.moduleRoot')), 'app') // TODO refactor as moduleRoot File property
-        instantiateModule(context, appFolder, true)
+        instantiateModule(context, appFolder, null)
     }
 
 }

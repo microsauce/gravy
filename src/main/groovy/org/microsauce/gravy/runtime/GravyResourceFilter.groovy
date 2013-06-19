@@ -14,6 +14,18 @@ import org.microsauce.gravy.util.MimeTable
 
 import org.microsauce.gravy.runtime.resolver.ResourceResolver
 
+
+/**
+ *
+ * This class implements a static file service.
+ * 
+ * M2:
+ * 	- implement caching as SEPARATE service
+ *  - caching rules based on callbacks (which may be defined in conf.groovy or the app script via 'cache' method)
+ *
+ * @author microsauce
+ *
+ */
 class GravyResourceFilter implements Filter {
 
     ResourceResolver resolver
@@ -32,7 +44,7 @@ class GravyResourceFilter implements Filter {
         String uri = req.requestURI
 
         byte[] fileBytes = resolver.retrieve(uri)
-        res.contentType = mimeTable.mimeType(extension(uri)) ?: 'application/octet-stream'  // TODO - what should the default be ???
+        res.contentType = mimeTable.mimeType(extension(uri)) ?: 'application/octet-stream' 
         res.outputStream.write fileBytes
         res.outputStream.flush()
     }

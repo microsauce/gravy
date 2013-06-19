@@ -17,6 +17,7 @@ Script bindings:
 
 importPackage(javax.servlet.http)
 importPackage(javax.servlet)
+importPackage(java.lang)
 importPackage(java.util)
 importPackage(java.io)
 importPackage(org.microsauce.gravy.context.javascript)
@@ -125,15 +126,15 @@ global.newJSResponse = function(servletFacade) {
             this.facade.write(bytes);
         }
         this.redirect = function(url) {
-            this.facade.redirect(url)
+            this.facade.redirect(url);
         }
         this.renderJson = function(model) {
-            this.facade.renderJson(model)
+            this.facade.renderJson(model);
         }
         this.render = function(viewUri, model) {
-            this.facade.render(viewUri,model)
+            this.facade.render(viewUri,model);
         }
-        this.out = servletFacade.getOut()
+        this.out = servletFacade.getOut();
         return this;
     }
     return res.initialize(servletFacade);
@@ -171,7 +172,7 @@ global.NativeJSHandler = function(handler) {
             req.splat = splat
 
             // set the form/query properties
-            var method = req.getMethod()
+            var method = req.method //req.getMethod()
             var parameters = new ScriptableMap(servletFacade.requestParams)
             if (method == 'GET' || method == 'DELETE') {
                 req.query = parameters

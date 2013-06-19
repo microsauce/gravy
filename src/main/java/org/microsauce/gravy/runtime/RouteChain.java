@@ -13,8 +13,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.microsauce.gravy.context.EnterpriseService;
-import org.microsauce.gravy.context.ServletFacade;
 import org.microsauce.gravy.context.Handler;
+import org.microsauce.gravy.context.ServletFacade;
+import org.microsauce.incognito.Incognito;
 
 /**
  *
@@ -25,17 +26,20 @@ class RouteChain implements FilterChain {
     Integer currentPosition = 0;
     FilterChain serverChain;
     ServletFacade servletFacade;
+    Incognito incognito;
 
-    RouteChain(ServletRequest req, ServletResponse res, FilterChain serverChain, List<Handler> route, Map<String, EnterpriseService> paramPreconditions) {
+    RouteChain(ServletRequest req, ServletResponse res, FilterChain serverChain, 
+    		Incognito incognito, List<Handler> route, Map<String, EnterpriseService> paramPreconditions) {
         this.serverChain = serverChain;
         this.route = route;
+        this.incognito = incognito;
 
-        // TODO build a uri parameter map for each handler - how?
+        // TODO build a uri parameter map for each handler
         EnterpriseService endPoint = endPoint();
         if ( endPoint != null )
-            servletFacade = new ServletFacade((HttpServletRequest) req, (HttpServletResponse) res, this, endPoint.getUriPattern(), endPoint.getUriParamNames());
+            servletFacade = new ServletFacade((HttpServletRequest) req, (HttpServletResponse) res, this, incognito, endPoint.getUriPattern(), endPoint.getUriParamNames());
         else
-            servletFacade = new ServletFacade((HttpServletRequest) req, (HttpServletResponse) res, this, null, null);
+            servletFacade = new ServletFacade((HttpServletRequest) req, (HttpServletResponse) res, this, incognito, null, null);
 
         List<Handler> paramHandlers= new ArrayList<Handler>();
         for( String uriParam : servletFacade.getUriParamMap().keySet() ) {

@@ -18,7 +18,8 @@ class RubyRuntime {
     private org.jruby.RubyModule rubyModule;
 
     @CompileStatic RubyRuntime(List<String> roots) {
-        container = new ScriptingContainer(LocalContextScope.SINGLETHREAD, LocalVariableBehavior.PERSISTENT);
+        container = new ScriptingContainer(
+			LocalContextScope.SINGLETHREAD, LocalVariableBehavior.PERSISTENT);
         if ( roots ) container.loadPaths.addAll(roots)
 
         InputStream scriptStream = this.getClass().getResourceAsStream("/gravy.rb");

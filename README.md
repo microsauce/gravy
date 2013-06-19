@@ -86,7 +86,7 @@ modification.  Make a change, refresh your browser, and benefit from the instant
 
 ## routes
 
-In Gravy, a route is a chain of callbacks that is assembled to service an HTTP request URI and method.  A route consist
+In Gravy, a route is a chain of callbacks that is assembled to service a HTTP request URI and method.  A route consist
 of an end-point (the ultimate destination of the route) and any number of intermediate callbacks (middleware).
 
 ### end-points
@@ -104,7 +104,7 @@ Examples:
 
 Given the following callback definitions:
 ```groovy
-    use '/sandwich/order/*' {
+    use '/sandwich/order/*', {
         req.next()
         res.print " and a bag of chips"
     }
@@ -122,7 +122,8 @@ Request header: "GET /sandwich/order/ham-and-cheese" will result in the followin
 #### uri patterns
 Gravy currently supports uri patterns consisting of named parameters (in the form :paramName) and wildcards (*).
 
-optional parameters
+TODO
+optional parameters - delay to M2
 uri params are determined by the end-point pattern (what about static end-points?)
 
 ### middleware api

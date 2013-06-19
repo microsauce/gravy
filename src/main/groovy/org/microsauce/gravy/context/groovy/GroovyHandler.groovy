@@ -42,8 +42,10 @@ class GroovyHandler extends Handler {
             binding.chain = facade.nativeChain
             binding.json = facade.getJson()
 
-            if (nativeReq.method == 'GET' || nativeReq.method == 'DELETE') binding.query = facade.requestParams
-            else if (nativeReq.method == 'POST' || nativeReq.method == 'PUT') binding.form = facade.requestParams // TODO verify: not exactly sure what uriParamNames refers to (most likely servlet request params)
+            if (nativeReq.method == 'GET' || nativeReq.method == 'DELETE') 
+				binding.query = facade.requestParams
+            else if (nativeReq.method == 'POST' || nativeReq.method == 'PUT') 
+				binding.form = facade.requestParams 
 
             // add uri parameters
             facade.uriParamMap.each { String key, String value ->
