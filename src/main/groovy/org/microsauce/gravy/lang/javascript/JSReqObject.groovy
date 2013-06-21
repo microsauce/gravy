@@ -2,8 +2,6 @@ package org.microsauce.gravy.lang.javascript
 
 import groovy.transform.CompileStatic
 import org.microsauce.gravy.context.ServletFacade
-import org.microsauce.gravy.lang.object.GravyType
-import org.microsauce.gravy.lang.object.SerializableObject;
 
 import javax.servlet.http.HttpServletRequest
 

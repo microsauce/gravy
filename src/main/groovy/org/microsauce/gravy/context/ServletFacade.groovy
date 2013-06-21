@@ -207,7 +207,7 @@ class ServletFacade {
     @CompileStatic void render(String viewUri, Object model) {
         Module module = nativeReq.getAttribute('_module') as Module
         nativeReq.setAttribute('_view', viewUri)
-        nativeReq.setAttribute('_model', new SerializableObject(model, module.type))
+        nativeReq.setAttribute('_model', new ProxyObject(currentContext, model, incognito))
         nativeReq.setAttribute('_document_root', module.name)
         RequestDispatcher dispatcher = nativeReq.getRequestDispatcher(module.renderUri)
         nativeRes.contentType = 'text/html'

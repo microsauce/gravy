@@ -37,12 +37,18 @@ class RouteChain implements FilterChain {
         // TODO build a uri parameter map for each handler
         EnterpriseService endPoint = endPoint();
         if ( endPoint != null )
-            servletFacade = new ServletFacade((HttpServletRequest) req, (HttpServletResponse) res, this, incognito, endPoint.getUriPattern(), endPoint.getUriParamNames());
+            servletFacade = new ServletFacade(
+                    (HttpServletRequest) req, (HttpServletResponse) res,
+                    this, incognito, endPoint.getUriPattern(),
+                    endPoint.getUriParamNames());
         else
-            servletFacade = new ServletFacade((HttpServletRequest) req, (HttpServletResponse) res, this, incognito, null, null);
+            servletFacade = new ServletFacade(
+                    (HttpServletRequest) req, (HttpServletResponse) res,
+                    this, incognito, null, null);
 
         List<Handler> paramHandlers= new ArrayList<Handler>();
-        for( String uriParam : servletFacade.getUriParamMap().keySet() ) {
+        // TODO for each handler
+        for( String uriParam : servletFacade.getUriParamMap().keySet() ) { // TODO for each handler.service.uriParamNames
             EnterpriseService paramService = paramPreconditions.get(uriParam);
             if ( paramService != null ) {
                 paramHandlers.add(paramService.getHandlers().get(EnterpriseService.MIDDLEWARE));

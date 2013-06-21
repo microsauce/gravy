@@ -8,9 +8,9 @@ import java.util.concurrent.ConcurrentHashMap
 @Log4j
 class ResourceResolver {
 
-    Map<String, RealPath> resolvedPaths = new ConcurrentHashMap()    // uri - real path
+    Map<String, RealPath> resolvedPaths = new ConcurrentHashMap()     // uri - real path
     Map<String, String> resolvedUris = new ConcurrentHashMap()        // uri - real path
-    Map<String, byte[]> cachedFiles = new ConcurrentHashMap()         // real path - file content // TODO
+    Map<String, byte[]> cachedFiles = new ConcurrentHashMap()         // real path - file content
     List<String> roots = []
     List<CacheConstraints> constraints = []
     String basedir
@@ -67,7 +67,7 @@ class ResourceResolver {
     }
 
     @CompileStatic
-    byte[] retrieve(String uri) throws FileNotFoundException { // TODO return an output stream
+    byte[] retrieve(String uri) throws FileNotFoundException { // TODO return an input stream
         byte[] bytes = null
         RealPath realPath = resolveUri(uri)
         if (realPath.cached == null)
@@ -80,7 +80,7 @@ class ResourceResolver {
             }
         } else bytes = new File(realPath.path).readBytes()
 
-        bytes // TODO byte array output stream ???
+        bytes // TODO byte array input stream ???
     }
 
     @CompileStatic
