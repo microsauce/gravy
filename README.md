@@ -2,7 +2,7 @@
 Gravy 0.1
 ===
 
-Gravy is simple, expressjs inspired framework for developing MVC web applications
+Gravy is a simple, expressjs inspired framework for developing MVC web applications
 on the Java Enterprise (the meat-and-potatoes).  API's are available for Groovy,
 JavaScript, CoffeeScript, and/or Ruby.
 
