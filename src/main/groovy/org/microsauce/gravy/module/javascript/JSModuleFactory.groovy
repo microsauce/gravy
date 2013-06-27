@@ -15,13 +15,13 @@ class JSModuleFactory extends ModuleFactory {
     JSModuleFactory() {
         super()
         // TODO this will clutter the load path when app is not a JS module
-        File appFolder = new File(new File(System.getProperty('gravy.moduleRoot')), 'app')
-        File appLibFolder =  new File(appFolder, 'lib')
-        List<File> libs = [appFolder]
-        if (appLibFolder.exists()) libs.add(appLibFolder)
-        runtime = new GravyJSRuntime(libs)
-        // register the JS runtime with the ServletWrapper
-        ServletFacade.jsContext = runtime.global
+//        File appFolder = new File(new File(System.getProperty('gravy.moduleRoot')), 'app')
+//        File appLibFolder =  new File(appFolder, 'lib')
+//        List<File> libs = [appFolder]
+//        if (appLibFolder.exists()) libs.add(appLibFolder)
+//        runtime = new GravyJSRuntime(libs)
+//        // register the JS runtime with the ServletWrapper
+//        ServletFacade.jsContext = runtime.global
     }
 
     @Override
@@ -43,6 +43,16 @@ class JSModuleFactory extends ModuleFactory {
     }
 
     @CompileStatic void initializeRuntime(Module module) {
+	if ( !runtime ) {
+     	  File appFolder = new File(new File(System.getProperty('gravy.moduleRoot')), 'app')
+    	  File appLibFolder =  new File(appFolder, 'lib')
+    	  List<File> libs = [appFolder]
+    	  if (appLibFolder.exists()) libs.add(appLibFolder)
+    	  runtime = new GravyJSRuntime(libs)
+	}
+	// register the JS runtime with the ServletWrapper
+	ServletFacade.jsContext = runtime.global
+
         JSModule jsModule = module as JSModule
         jsModule.jsRuntime = runtime
     }

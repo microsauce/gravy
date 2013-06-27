@@ -387,7 +387,7 @@ puts "get: call_backs: #{call_backs}"
 
       # call the handler
       ruby_facade.instance_exec *params, &@call_back
-      servlet_facade.out.flush
+#      servlet_facade.out.flush
 
     end
 

@@ -2,8 +2,11 @@ package org.microsauce.gravy.runtime;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -22,6 +25,9 @@ import org.microsauce.incognito.Incognito;
  */
 class RouteChain implements FilterChain {
 
+    private static int PARAMS = 0;
+    private static int SPLAT = 1;
+    
     List<Handler> route;
     Integer currentPosition = 0;
     FilterChain serverChain;
@@ -35,6 +41,11 @@ class RouteChain implements FilterChain {
         this.incognito = incognito;
 
         // TODO build a uri parameter map for each handler
+        
+        // TODO 
+        // 1. refactor uri parsing code out of ServletFacade and into RouteChain
+        // 2. 
+        
         EnterpriseService endPoint = endPoint();
         if ( endPoint != null )
             servletFacade = new ServletFacade(
@@ -57,6 +68,14 @@ class RouteChain implements FilterChain {
         if ( paramHandlers.size() > 0 )
             route.addAll(0, paramHandlers);
     }
+    
+    public void closeOutputStream() {
+	servletFacade.close();
+    }
+    
+    public void flushAll() {
+	servletFacade.flushAll();
+    }
 
     public void doFilter(ServletRequest req, ServletResponse res) throws IOException, ServletException {
         if (currentPosition >= route.size())
@@ -75,10 +94,11 @@ class RouteChain implements FilterChain {
                     handler.execute(servletFacade);
                 } catch (Throwable t) {
                     t.printStackTrace();
-                } finally {
-                    if (!res.isCommitted())
-                        res.getOutputStream().flush();  // TODO review the flush here - this will preclude any other service on the chain from writing response headers
-                }
+                } 
+//                finally {
+//                    if (!res.isCommitted())
+//                        res.getOutputStream().flush();  // TODO review the flush here - this will preclude any other service on the chain from writing response headers
+//                }
             }
         }
     }
@@ -89,5 +109,45 @@ class RouteChain implements FilterChain {
         if ( endPoint != null && endPoint.isEndPoint() ) return endPoint;
         else return null;
     }
+    
+    private List applyPattern(HttpServletRequest req, Pattern uriPattern, List<String> uriParamNames) {
+	List tuple = new ArrayList();
+        String requestUri = req.getRequestURI();
+        List<String> splat = new ArrayList<String>();
+        List<String> uriParamValues = new ArrayList<String>();
+        Map<String,String> uriParamMap = new HashMap<String,String>();
+        tuple.add(uriParamMap);
+        tuple.add(splat);
+
+        if ( uriPattern != null ) {
+            Matcher matches = uriPattern.matcher(requestUri); //requestUri =~ uriPattern
+            Integer ndx = 1;
+            if (uriParamNames != null && uriParamNames.size() > 0) {
+                while (matches.find()) {
+                    Integer groupCount = matches.groupCount();
+                    for (; ndx <= groupCount; ndx++) {
+                        String thisParamName = uriParamNames.get(ndx - 1);
+                        String paramValue = matches.group(ndx);
+                        uriParamValues.add(paramValue);
+                        if (thisParamName.equals('*'))
+                            splat.add(paramValue);
+                        else {
+                            uriParamMap.put(thisParamName, paramValue);
+                        }
+                    }
+                }
+            } else if (matches.groupCount() > 0) {
+                Integer groupCount = matches.groupCount();
+                while (matches.find()) {
+                    for (; ndx <= groupCount; ndx++) {
+                        splat.add(matches.group(ndx));
+                    }
+                }
+            }
+        }
+        
+        return tuple;
+    }
+    
 
 }

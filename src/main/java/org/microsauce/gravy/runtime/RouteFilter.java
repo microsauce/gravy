@@ -34,7 +34,7 @@ class RouteFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse res, FilterChain chain)
             throws ServletException, IOException {
         HttpServletRequest req = (HttpServletRequest) request;
-        FilterChain routeChain = buildChain(chain, req, res);
+        RouteChain routeChain = buildChain(chain, req, res);
 
         if (routeChain == null) {
             log.debug("no routes defined for uri " + req.getRequestURI());
@@ -48,6 +48,10 @@ class RouteFilter implements Filter {
                 req.setAttribute("error", error);
                 RequestDispatcher dispatcher = req.getRequestDispatcher(errorUri);
                 dispatcher.forward(request, res);
+            } finally {
+                if (!res.isCommitted())
+                    routeChain.flushAll();
+                    //res.getOutputStream().flush();  
             }
         }
     }
@@ -56,12 +60,12 @@ class RouteFilter implements Filter {
 
     public void init(javax.servlet.FilterConfig config) {}
 
-    private FilterChain buildChain(FilterChain chain, ServletRequest req, ServletResponse res) {
+    private RouteChain buildChain(FilterChain chain, ServletRequest req, ServletResponse res) {
 
         HttpServletRequest _req = (HttpServletRequest) req;
         List<Handler> routeHandlers = context.makeRoute(
                 getUri((HttpServletRequest) req), _req.getMethod());
-        FilterChain routeChain = null;
+        RouteChain routeChain = null;
         if (routeHandlers.size() > 0)
             routeChain = new RouteChain(req, res, chain, incognito, routeHandlers, context.getParamServices());
 

@@ -40,7 +40,7 @@ class ServletFacade {
     FilterChain nativeChain
     HttpSession session
 	
-	Incognito incognito
+    Incognito incognito
 
     Pattern uriPattern
     String requestUri
@@ -64,9 +64,8 @@ class ServletFacade {
         session = req.session
         out =  res.getOutputStream()
         printer = new PrintWriter(new OutputStreamWriter(this.out, 'UTF-8'))  // TODO make char encoding configurable ???
-        adaptors = new HashMap<GravyType,ContextAdaptor>()
-		this.incognito = incognito
-		
+        adaptors = new LinkedHashMap<GravyType,ContextAdaptor>()
+	this.incognito = incognito	
     }
 
     @CompileStatic void init(HttpServletRequest req, HttpServletResponse res, 
@@ -132,7 +131,7 @@ class ServletFacade {
     }
 
     @CompileStatic private Map requestParameters(HttpServletRequest req) {
-        // TODO look into httpservletrequest.getPart/Parts
+        // TODO look into httpservletrequest.getPart/Parts 
         RequestForm requestParameters = new RequestForm(this)
         if ((req.method == 'POST' || req.method == 'PUT') && ServletFileUpload.isMultipartContent(req)) {
             try {
@@ -203,6 +202,22 @@ class ServletFacade {
     @CompileStatic void write(Object binaryData) {
         getAdaptor().write(binaryData)
     }
+    
+    @CompileStatic void close() {
+	getAdaptor().close()
+    }
+    
+    @CompileStatic void flush() {
+	getAdaptor().flush()
+    }
+    
+    @CompileStatic void flushAll() {
+	if ( adaptors ) {
+	    for (ContextAdaptor adaptor in adaptors.values()) {
+	    	adaptor.flush()
+	    }
+	}
+    }
 
     @CompileStatic void render(String viewUri, Object model) {
         Module module = nativeReq.getAttribute('_module') as Module
@@ -255,6 +270,8 @@ class ServletFacade {
         Object getOut()
         Object getContextualizedInput(InputStream input)
         void write(Object data)
+	void close()
+	void flush()
     }
 
     private class JSAdaptor implements ContextAdaptor {
@@ -277,6 +294,12 @@ class ServletFacade {
         @CompileStatic Object getContextualizedInput(InputStream is) {
             new Stream(jsContext, is, null)
         }
+	@CompileStatic void close() {
+	    if ( out ) ((Stream)out).close()
+	}
+	@CompileStatic void flush() {
+	    if ( out ) ((Stream)out).flush()
+	}
     }
     private class RubyAdaptor implements ContextAdaptor {
         private Object input
@@ -295,6 +318,12 @@ class ServletFacade {
         @CompileStatic void write(Object data) {
             ((RubyIO)getOut()).write(rubyContext.getProvider().getRuntime().getCurrentContext(), (IRubyObject)data)
         }
+	@CompileStatic void close() {
+	    if ( out ) ((RubyIO)out).close()
+	}
+	@CompileStatic void flush() {
+	    if ( out ) ((RubyIO)out).flush()
+	}
         @CompileStatic Object getContextualizedInput(InputStream is) {
             new RubyIO(rubyContext.getProvider().getRuntime(), is)
         }
@@ -309,9 +338,15 @@ class ServletFacade {
         @CompileStatic void write(Object data) {
             ((OutputStream)getOut()).write((byte[])data)
         }
+	@CompileStatic void close() {
+	    if ( out ) ((OutputStream)out).close()
+	}
+	@CompileStatic void flush() {
+	    if ( out ) ((OutputStream)out).flush()
+	}
         @CompileStatic Object getContextualizedInput(InputStream input) {
             input
         }
     }
-
+    
 }

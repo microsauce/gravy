@@ -145,54 +145,57 @@ global.NativeJSHandler = function(handler) {
 	this.handler = handler
 
 	this.invokeHandler = function(servletFacade) {
-        var jsFacade = servletFacade.nativeReq.getAttribute('_js_facade')
+        var jsFacade = servletFacade.nativeReq.getAttribute('_js_facade');
         if ( !jsFacade ) {
-
-            var req = newJSRequest(servletFacade)
-            var res = newJSResponse(servletFacade)
+            var req = newJSRequest(servletFacade);
+            var res = newJSResponse(servletFacade);
 
             // add uri parameters to 'this'
-            var params = {}
+            var params = {};
             if (servletFacade.uriParamMap != null) {
-                var iterator = servletFacade.uriParamMap.keySet().iterator()
+                var iterator = servletFacade.uriParamMap.keySet().iterator();
                 while (iterator.hasNext()) {
-                    var key = iterator.next()
-                    var value = servletFacade.uriParamMap.get(key)
-                    params[key] = value
-                    this[key] = value
+                    var key = iterator.next();
+                    var value = servletFacade.uriParamMap.get(key);
+                    params[key] = value;
+                    this[key] = value;
                 }
             }
-            req.params = params
+            req.params = params;
 
             // create the splat array
-            var splat
+            var splat;
             if (servletFacade.splat != null) {
-                splat = new ScriptableList(servletFacade.splat)
+                splat = new ScriptableList(servletFacade.splat);
             }
-            req.splat = splat
+            req.splat = splat;
 
             // set the form/query properties
-            var method = req.method //req.getMethod()
-            var parameters = new ScriptableMap(servletFacade.requestParams)
+            var method = req.method; 
+            var parameters = new ScriptableMap(servletFacade.requestParams);
             if (method == 'GET' || method == 'DELETE') {
-                req.query = parameters
-                this.query = parameters
+                req.query = parameters;
+                this.query = parameters;
             } else if (method == 'POST' || method == 'PUT') {
-                req.form = parameters
-                this.form = parameters
+                req.form = parameters;
+                this.form = parameters;
             }
 
-            jsFacade = {req: req, res: res, binding: this}
-            servletFacade.nativeReq.setAttribute('_js_facade', jsFacade)
+            jsFacade = {req: req, res: res, binding: this};
+            servletFacade.nativeReq.setAttribute('_js_facade', jsFacade);
         }
         // build the parameter array
-        var params = new Array()
-        params.push(jsFacade.req)
-        params.push(jsFacade.res)
-        params.concat(jsFacade.req.splat)
-		this.handler.apply(jsFacade.binding, params)
+        var callbackParams = new Array();
+        callbackParams.push(jsFacade.req);
+        callbackParams.push(jsFacade.res);
+        var splatLen = jsFacade.req.splat.length;
+        for ( var i = 0; i < splatLen; i++ ) {
+        	callbackParams.push(jsFacade.req.splat[i]);
+        }
+        	
+		this.handler.apply(jsFacade.binding, callbackParams);
 
-		jsFacade.res.out.flush()
+//		jsFacade.res.out.flush();
 	}
 }
 

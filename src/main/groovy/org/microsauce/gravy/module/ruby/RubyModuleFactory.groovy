@@ -17,8 +17,6 @@ class RubyModuleFactory extends ModuleFactory {
 
     @CompileStatic RubyModuleFactory() {
         super()
-        runtime = new RubyRuntime(rubyLoadPaths(System.getProperty('gravy.moduleRoot')))
-        ServletFacade.rubyContext = runtime.container
     }
 
     @Override
@@ -40,6 +38,10 @@ class RubyModuleFactory extends ModuleFactory {
     }
 
     @CompileStatic void initializeRuntime(Module module) {
+	if ( !runtime ) {
+	    runtime = new RubyRuntime(rubyLoadPaths(System.getProperty('gravy.moduleRoot')))
+	    ServletFacade.rubyContext = runtime.container
+	}
         RubyModule rubyModule = module as RubyModule
         rubyModule.runtime = runtime
     }
